@@ -85,6 +85,8 @@ LCD::LCD(GPIOPort& gpio)
 {
     for(auto pin : outputs)
         gpio.setMode(pin, PIN_OUTPUT);
+
+    init();
 }
 
 
