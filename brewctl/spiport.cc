@@ -155,6 +155,12 @@ bool SPIPort::transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data, const
     if(!len)
         return true;        // Zero-length transfers always succeed
 
+    if((tx_data == NULL) && (rx_data == NULL))
+    {
+        errno_ = EINVAL;
+        return false;
+    }
+
     if(!ready())
     {
         errno_ = EAGAIN;
