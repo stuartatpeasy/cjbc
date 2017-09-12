@@ -19,8 +19,8 @@ public:
                     Thermistor(const double beta, const double R0, const double T0);
     virtual         ~Thermistor();
 
-    Temperature     T(const double R);
-    double          R(const Temperature& T);
+    Temperature     T(const double R) const;
+    double          R(const Temperature& T) const;
 
 protected:
     const double    beta_;

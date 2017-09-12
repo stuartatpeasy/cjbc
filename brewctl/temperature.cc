@@ -40,19 +40,19 @@ Temperature::~Temperature()
 }
 
 
-double Temperature::C()
+double Temperature::C() const
 {
     return (valKelvin_ - zeroCelsiusInKelvin) / kelvinPerDegreeCelsius;
 }
 
 
-double Temperature::F()
+double Temperature::F() const
 {
     return (valKelvin_ - zeroFahrenheitInKelvin) / kelvinPerDegreeFahrenheit;
 }
 
 
-double Temperature::K()
+double Temperature::K() const
 {
     return valKelvin_;
 }

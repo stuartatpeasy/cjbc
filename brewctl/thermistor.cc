@@ -26,15 +26,16 @@ Thermistor::~Thermistor()
 
 // T() - return the temperature corresponding to the resistance R, given in ohms.
 //
-Temperature Thermistor::T(const double R)
+Temperature Thermistor::T(const double R) const
 {
-    return Temperature(0.0, TEMP_UNIT_KELVIN);
+    return Temperature(beta_ / (log(R / Rinf_)), TEMP_UNIT_KELVIN);
 }
 
 
 // R() - return the resistance corresponding to the temperature T.
 //
-double Thermistor::R(const Temperature& T)
+double Thermistor::R(const Temperature& T) const
 {
-    return 0.0;
+    return Rinf_ * exp(beta_ / T.K());
 }
+

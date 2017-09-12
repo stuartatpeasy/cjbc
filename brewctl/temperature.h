@@ -24,9 +24,9 @@ public:
                     Temperature(const double value, const TemperatureUnit_t unit);
     virtual         ~Temperature();
 
-    double          C();
-    double          F();
-    double          K();
+    double          C() const;
+    double          F() const;
+    double          K() const;
 
 protected:
     double          valKelvin_;
