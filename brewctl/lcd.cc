@@ -112,11 +112,11 @@ void LCD::init()
 
 void LCD::toggleEClock()
 {
-    gpio_.write(GPIO_LCD_E, 1);
-    ::usleep(LCD_E_CLK_STATE_TIME_US);
-
-    gpio_.write(GPIO_LCD_E, 0);
-    ::usleep(LCD_E_CLK_STATE_TIME_US);
+    for(auto i: {1, 0})
+    {
+        gpio_.write(GPIO_LCD_E, i);
+        ::usleep(LCD_E_CLK_STATE_TIME_US);
+    }
 }
 
 
@@ -149,6 +149,7 @@ void LCD::writeData(uint8_t data)
 void LCD::clear()
 {
     writeCommand(LCD_CMD_CLEAR);
+    errno_ = 0;
 }
 
 
@@ -189,6 +190,7 @@ int LCD::printAt(const int x, const int y, const char * const format, ...)
     for(auto i = 0; i < ret; ++i)
         writeData(buffer[i]);
 
+    errno_ = 0;
     return ret;
 }
 

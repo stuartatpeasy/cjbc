@@ -105,10 +105,10 @@ void GPIOPort::write(const int pin, const bool val)
 }
 
 
-void GPIOPort::setMode(const int pin, const GPIOPinMode_t mode)
+bool GPIOPort::setMode(const int pin, const GPIOPinMode_t mode)
 {
     if(!preValidate(pin))
-        return;
+        return false;
 
     switch(mode)
     {
@@ -124,9 +124,30 @@ void GPIOPort::setMode(const int pin, const GPIOPinMode_t mode)
         case PIN_ALT4:              ::pinModeAlt(pin, 0b011);           break;
         case PIN_ALT5:              ::pinModeAlt(pin, 0b010);           break;
 
-        default:                    errno_ = EINVAL;                    return;
+        default:                    errno_ = EINVAL;                    return false;
     }
 
     errno_ = 0;
+    return true;
 }
+
+
+bool GPIOPort::setPullupMode(const int pin, const GPIOPinPullupMode_t mode)
+{
+    if(!preValidate(pin))
+        return false;
+
+    switch(mode)
+    {
+        case PPM_UP:                ::pullUpDnControl(pin, PUD_UP);     break;
+        case PPM_DOWN:              ::pullUpDnControl(pin, PUD_DOWN);   break;
+        case PPM_NONE:              ::pullUpDnControl(pin, PUD_OFF);    break;
+
+        default:                    errno_ = EINVAL;                    return false;
+    }
+
+    errno_ = 0;
+    return true;
+}
+
 

@@ -55,7 +55,8 @@ SPIPort::SPIPort(GPIOPort& gpio, const char * const device)
     const auto old_errno = errno;
 
     for(auto pin : {GPIO_MOSI, GPIO_MISO, GPIO_SCLK})
-        gpio_.setMode(pin, PIN_ALT0);
+        if(!gpio_.setMode(pin, PIN_ALT0))
+            return;
 
     errno = 0;
     fd_ = ::open(device, O_RDWR);

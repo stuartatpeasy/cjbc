@@ -32,6 +32,17 @@ typedef enum GPIOPinMode
 } GPIOPinMode_t;
 
 
+//
+// Pull-up/pull-down modes for GPIO pins
+//
+typedef enum GPIOPinPullupMode
+{
+    PPM_UP,
+    PPM_DOWN,
+    PPM_NONE
+} GPIOPinPullupMode_t;
+
+
 // The highest-numbered (according to wiringPi's scheme) GPIO pin
 #define GPIO_PIN_MAX            (29)
 
@@ -44,7 +55,8 @@ public:
 
     bool                read(const int pin);
     void                write(const int pin, const bool val);
-    void                setMode(const int pin, const GPIOPinMode_t mode);
+    bool                setMode(const int pin, const GPIOPinMode_t mode);
+    bool                setPullupMode(const int pin, const GPIOPinPullupMode_t mode);
 
 protected:
     bool                preValidate(const int pin);

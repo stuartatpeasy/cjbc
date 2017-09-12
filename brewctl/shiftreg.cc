@@ -31,7 +31,9 @@ ShiftReg::ShiftReg(GPIOPort& gpio, SPIPort& spi)
 {
     // Force the register-clock signal to be an output, and de-assert it
     gpio_.write(GPIO_SR_RCLK, 0);
-    gpio_.setMode(GPIO_SR_RCLK, PIN_OUTPUT);
+
+    if(!gpio_.setMode(GPIO_SR_RCLK, PIN_OUTPUT))
+        return;
 
     // Force all shift-register outputs to zero.
     if(spi_.transmitByte(0))

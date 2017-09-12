@@ -32,7 +32,9 @@ ADC::ADC(GPIOPort& gpio, SPIPort& spi, const double& vref)
 {
     // Set ADC_nCS as an output, and de-assert it
     gpio_.write(GPIO_ADC_nCS, 1);
-    gpio_.setMode(GPIO_ADC_nCS, PIN_OUTPUT);
+    
+    if(!gpio_.setMode(GPIO_ADC_nCS, PIN_OUTPUT))
+        return;
 
     if(vref_ > 0.0)
         ready_ = true;
