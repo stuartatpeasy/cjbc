@@ -3,6 +3,9 @@
 #include "lcd.h"
 #include "adc.h"
 #include "shiftreg.h"
+#include "temperature.h"
+#include "thermistor.h"
+#include "tempsensor.h"
 #include <cstdio>
 
 
@@ -45,9 +48,17 @@ int main(void)
 
     spiPort.setMode(SPI_MODE_0);        // TODO remove
     spiPort.setBitsPerWord(8);          // TODO remove
-    spiPort.setMaxSpeed(500000);      // TODO remove
+    spiPort.setMaxSpeed(500000);        // TODO remove
 
     ADC adc(gpioPort, spiPort, 5.0);
+
+    Thermistor thermistor(3980, 4700, Temperature(25.0, TEMP_UNIT_CELSIUS));
+    TempSensor sensor(thermistor, adc, 0, 0.0001);
+
+    Temperature T;
+
+    if(sensor.sense(T))
+        printf("Temperature on channel 0: %lfC\n", T.C());
 
     for(auto i = 0; i <= GPIO_PIN_MAX; ++i)
         printf("pin %d: %s\n", i, gpioPort.read(i) ? "high" : "low");

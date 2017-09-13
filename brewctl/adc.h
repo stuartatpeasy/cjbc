@@ -20,6 +20,7 @@ public:
     virtual         ~ADC();
 
     bool            read(const unsigned int channel, double& voltage);
+    double          vref() const { return vref_; };
 
 protected:
     GPIOPort&       gpio_;

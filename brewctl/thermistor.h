@@ -16,18 +16,18 @@
 class Thermistor
 {
 public:
-                    Thermistor(const double beta, const double R0, const double T0);
-    virtual         ~Thermistor();
+                        Thermistor(const double beta, const double R0, const Temperature& T0);
+    virtual             ~Thermistor();
 
-    Temperature     T(const double R) const;
-    double          R(const Temperature& T) const;
+    Temperature         T(const double R) const;
+    double              R(const Temperature& T) const;
 
 protected:
-    const double    beta_;
-    const double    R0_;
-    const double    T0_;
+    const double        beta_;
+    const double        R0_;
+    const Temperature   T0_;
 
-    double          Rinf_;
+    double              Rinf_;
 };
 
 #endif // THERMISTOR_H_INC

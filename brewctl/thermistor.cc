@@ -10,12 +10,12 @@
 #include "thermistor.h"
 
 
-Thermistor::Thermistor(const double beta, const double R0, const double T0)
+Thermistor::Thermistor(const double beta, const double R0, const Temperature& T0)
     : beta_(beta), R0_(R0), T0_(T0)
 {
     // TODO: ensure T0 != 0.0
 
-    Rinf_ = R0_ * exp(-beta_ / T0_);
+    Rinf_ = R0_ * exp(-beta_ / T0_.K());
 }
 
 

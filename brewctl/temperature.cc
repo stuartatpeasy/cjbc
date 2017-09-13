@@ -16,6 +16,12 @@ const double Temperature::kelvinPerDegreeCelsius = 1.0;
 const double Temperature::kelvinPerDegreeFahrenheit = 0.556;
 
 
+Temperature::Temperature()
+    : valKelvin_(0.0)
+{
+}
+
+
 Temperature::Temperature(const double value, const TemperatureUnit_t unit)
 {
     switch(unit)
