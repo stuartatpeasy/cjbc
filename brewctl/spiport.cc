@@ -1,5 +1,4 @@
 #include "spiport.h"
-#include <cstdio>       // FIXME remove
 #include <initializer_list>
 
 /*
