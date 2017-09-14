@@ -1,5 +1,5 @@
 /*
-    74xx595 shift-register SPI driver
+    shiftreg.cc: 74xx595 shift-register SPI driver
 
     Stuart Wallace <stuartw@atom.net>, September 2017.
 

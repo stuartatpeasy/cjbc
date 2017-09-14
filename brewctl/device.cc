@@ -1,5 +1,5 @@
 /*
-    device.h: ABC collecting various device-generic stuff
+    device.cc: ABC collecting various device-generic stuff
 
     Stuart Wallace <stuartw@atom.net>, September 2017.
 
@@ -10,7 +10,7 @@
 
 
 Device::Device()
-    : errno_(0)
+    : ErrNo()
 {
 }
 

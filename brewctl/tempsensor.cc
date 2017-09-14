@@ -1,5 +1,5 @@
 /*
-    tempsensor.h: models a temperature sensor based on a NTC thermistor driven by a constant-
+    tempsensor.cc: models a temperature sensor based on a NTC thermistor driven by a constant-
     current source, and an ADC channel.
 
     Stuart Wallace <stuartw@atom.net>, September 2017.

@@ -1,5 +1,5 @@
 /*
-    adc.h: MCP3008 8-channel ADC driver
+    adc.cc: MCP3008 8-channel ADC driver
 
     Stuart Wallace <stuartw@atom.net>, September 2017.
 

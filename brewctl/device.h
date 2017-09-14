@@ -8,19 +8,13 @@
     Part of brewctl
 */
 
+#include "errno.h"
 
-class Device
+class Device : public ErrNo
 {
 protected:
                         Device();
     virtual             ~Device();
-
-public:
-    int                 errNo() const { return errno_; };
-    void                resetErrNo() { errno_ = 0; };
-
-protected:
-    int                 errno_;
 };
 
 #endif // DEVICE_H_INC

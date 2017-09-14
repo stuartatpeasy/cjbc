@@ -1,6 +1,3 @@
-#include "spiport.h"
-#include <initializer_list>
-
 /*
     spiport.cc: spi port abstraction class.  wraps calls to the linux kernel spi driver; also
     uses libwiringpi functions to manage port pins.
@@ -22,6 +19,8 @@
     +------+----------+----------+-----------------------------------------------------------+
 */
 
+#include "spiport.h"
+#include <initializer_list>
 #include <cerrno>
 #include <cstring>
 

@@ -95,8 +95,50 @@ string Config::operator()(const char * const key)
 }
 
 
-string Config::get(const char * const key, const char * const defaultVal)
+string Config::get(const char * const key, const string defaultVal)
 {
-    return exists(key) ? data_[key] : string(defaultVal);
+    return exists(key) ? data_[key] : defaultVal;
+}
+
+
+int Config::get(const char * const key, const int defaultVal)
+{
+    return exists(key) ? std::stoi(data_[key]) : defaultVal;
+}
+
+
+long Config::get(const char * const key, const long defaultVal)
+{
+    return exists(key) ? std::stol(data_[key]) : defaultVal;
+}
+
+
+long long Config::get(const char * const key, const long long defaultVal)
+{
+    return exists(key) ? std::stoll(data_[key]) : defaultVal;
+}
+
+
+unsigned long Config::get(const char * const key, const unsigned long defaultVal)
+{
+    return exists(key) ? std::stoul(data_[key]) : defaultVal;
+}
+
+
+unsigned long long Config::get(const char * const key, const unsigned long long defaultVal)
+{
+    return exists(key) ? std::stoull(data_[key]) : defaultVal;
+}
+
+
+float Config::get(const char * const key, const float defaultVal)
+{
+    return exists(key) ? std::stof(data_[key]) : defaultVal;
+}
+
+
+double Config::get(const char * const key, const double defaultVal)
+{
+    return exists(key) ? std::stod(data_[key]) : defaultVal;
 }
 
