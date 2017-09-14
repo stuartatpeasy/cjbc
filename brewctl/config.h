@@ -23,10 +23,12 @@ protected:
     virtual                 ~Config();
 
 public:
-    static void             add(std::istream& is);
+    static void             add(std::istream& is, const char * const name = "<istream>");
+    static void             add(const char * const filename);
     static void             reset();
     static bool             exists(const char * const key);
     std::string             operator()(const char * const key);
+    std::string             get(const char * const key, const char * const defaultVal);
 
 protected:
     static ConfigData_t     data_;

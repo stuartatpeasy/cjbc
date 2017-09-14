@@ -8,6 +8,7 @@
 
 #include "config.h"
 #include <boost/algorithm/string.hpp>
+#include <fstream>
 
 extern "C"
 {
@@ -15,6 +16,7 @@ extern "C"
 }
 
 using std::istream;
+using std::ifstream;
 using std::map;
 using std::string;
 using boost::algorithm::trim;
@@ -33,7 +35,7 @@ Config::~Config()
 }
 
 
-void Config::add(istream& is)
+void Config::add(istream& is, const char * const name)
 {
     string line;
     int linenum;
@@ -51,8 +53,8 @@ void Config::add(istream& is)
             size_t delim = line.find('=');
             if((delim == string::npos) || !delim)
             {
-                ::syslog(LOG_NOTICE, "Ignoring config line %d - missing delimiter or no key name",
-                         linenum);
+                ::syslog(LOG_NOTICE, "config: %s+%d: ignoring line: missing delimiter or key name",
+                         name, linenum);
                 continue;       // Ignore malformed lines
             }
 
@@ -64,6 +66,14 @@ void Config::add(istream& is)
             data_[key] = val;
         }
     }
+}
+
+
+void Config::add(const char * const filename)
+{
+    ifstream file(filename);
+
+    add(file, filename);
 }
 
 
@@ -81,9 +91,12 @@ bool Config::exists(const char * const key)
 
 string Config::operator()(const char * const key)
 {
-    if(exists(key))
-        return data_[key];
+    return exists(key) ? data_[key] : string("");
+}
 
-    return string("");
+
+string Config::get(const char * const key, const char * const defaultVal)
+{
+    return exists(key) ? data_[key] : string(defaultVal);
 }
 
