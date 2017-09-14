@@ -15,36 +15,6 @@ extern "C"
 #include <wiringPi.h>
 };
 
-/*
-             GPIO pin mapping
-+--------+----+----+---+------------------+
-| Pin    |Phy |wPi |Dir| Function         |
-+--------+----+----+---+------------------+
-| MOSI   | 19 | 12 | O | ADC_SR_DIN       |
-| MISO   | 21 | 13 | I | ADC_DOUT         |
-| SCLK   | 23 | 14 | O | ADC_SR_CLK       |
-| GPIO0  | 11 |  0 | O | SR_RCLK          |
-| GPIO1  | 12 |  1 | O | ADC_nCS          |
-| GPIO2  |  2 |  2 | I | SW0              |
-| GPIO3  |  3 |  3 | I | SW1              |
-| GPIO4  |  4 |  4 | I | ROT_CW           |
-| GPIO5  | 18 |  5 | I | ROT_CCW          |
-| GPIO6  | 22 |  6 | I | ROT_BTN          |
-| GPIO7  |  7 |  7 | O | LCD_RS           |
-| GPIO21 | 29 | 21 | O | LCD_E            |
-| GPIO22 | 31 | 22 | O | LCD_D0           |
-| GPIO23 | 33 | 23 | O | LCD_D1           |
-| GPIO24 | 35 | 24 | O | LCD_D2           |
-| GPIO25 | 37 | 25 | O | LCD_D3           |
-| GPIO26 | 32 | 26 | O | LCD_D4           |
-| GPIO27 | 36 | 27 | O | LCD_D5           |
-| GPIO28 | 38 | 28 | O | LCD_D6           |
-| GPIO29 | 40 | 29 | O | LCD_D7           |
-|        |    |    |   |                  |
-| GND    |    |    |   | LCD_RW           |
-+--------+----+----+---+------------------+
-*/
-
 
 GPIOPort::GPIOPort()
     : Device(), ready_(false)

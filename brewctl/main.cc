@@ -8,39 +8,46 @@
 #include "tempsensor.h"
 #include <cstdio>
 
+extern "C"
+{
+#include <syslog.h>
+};
 
 /*
-                   GPIO pinout
-+----+--------+------+------+------+--------+----+
-|wPi | Pin    |      | Phy  |      |    Pin |wPi |
-+----+--------+------+------+------+--------+----+
-|    | 3V3    |      | 1  2 |      |     5V |    |
-|  8 | SDA1   |   IO | 3  4 |      |     5V |    |
-|  9 | SCL1   |   IO | 5  6 |      |    GND |    |
-|  7 | GPIO7  |   IO | 7  8 | ALT5 |    TXD | 15 |
-|    | GND    |      | 9  10| ALT5 |    RXD | 16 |
-|  0 | GPIO0  |   IO |11  12| IO   |  GPIO1 |  1 |
-|  2 | GPIO2  |   IO |13  14|      |    GND |    |
-|  3 | GPIO3  |   IO |15  16| IO   |  GPIO4 |  4 |
-|    | 3V3    |      |17  18| IO   |  GPIO5 |  5 |
-| 12 | MOSI   | ALT0 |19  20|      |    GND |    |
-| 13 | MISO   | ALT0 |21  22| IO   |  GPIO6 |  6 |
-| 14 | SCLK   | ALT0 |23  24| O    |    CE0 | 10 |
-|    | GND    |      |25  26| O    |    CE1 | 11 |
-| 30 | SDA0   |   IO |27  28| IO   |   SCL0 | 31 |
-| 21 | GPIO21 |   IO |29  30| IO   |    GND |    |
-| 22 | GPIO22 |   IO |31  32| IO   | GPIO26 | 26 |
-| 23 | GPIO23 |   IO |33  34|      |    GND |    |
-| 24 | GPIO24 |   IO |35  36| IO   | GPIO27 | 27 |
-| 25 | GPIO25 |   IO |37  38| IO   | GPIO28 | 28 |
-|    | GND    |      |39  40| IO   | GPIO29 | 29 |
-+----+--------+------+------+------+--------+----+
+                             GPIO pinout
++---------+----+--------+------+------+------+--------+----+---------+
+|         |wPi | Pin    |      | Phy  |      |    Pin |wPi |         |
++---------+----+--------+------+------+------+--------+----+---------+
+|         |    | 3V3    |      | 1  2 |      |     5V |    |         |
+|         |  8 | SDA1   |   IO | 3  4 |      |     5V |    |         |
+|         |  9 | SCL1   |   IO | 5  6 |      |    GND |    |         |
+|  LCD_RS |  7 | GPIO7  |   IO | 7  8 | ALT5 |    TXD | 15 |         |
+|         |    | GND    |      | 9  10| ALT5 |    RXD | 16 |         |
+| SR_RCLK |  0 | GPIO0  |   IO |11  12| IO   |  GPIO1 |  1 | ADC_nCS |
+|         |  2 | GPIO2  |   IO |13  14|      |    GND |    |         |
+|         |  3 | GPIO3  |   IO |15  16| IO   |  GPIO4 |  4 |         |
+|         |    | 3V3    |      |17  18| IO   |  GPIO5 |  5 |         |
+|    MOSI | 12 | MOSI   | ALT0 |19  20|      |    GND |    |         |
+|    MISO | 13 | MISO   | ALT0 |21  22| IO   |  GPIO6 |  6 |         |
+|    SCLK | 14 | SCLK   | ALT0 |23  24| O    |    CE0 | 10 |         |
+|         |    | GND    |      |25  26| O    |    CE1 | 11 |         |
+|         | 30 | SDA0   |   IO |27  28| IO   |   SCL0 | 31 |         |
+|   LCD_E | 21 | GPIO21 |   IO |29  30| IO   |    GND |    |         |
+|  LCD_D0 | 22 | GPIO22 |   IO |31  32| IO   | GPIO26 | 26 | LCD_D4  |
+|  LCD_D1 | 23 | GPIO23 |   IO |33  34|      |    GND |    |         |
+|  LCD_D2 | 24 | GPIO24 |   IO |35  36| IO   | GPIO27 | 27 | LCD_D5  |
+|  LCD_D3 | 25 | GPIO25 |   IO |37  38| IO   | GPIO28 | 28 | LCD_D6  |
+|         |    | GND    |      |39  40| IO   | GPIO29 | 29 | LCD_D7  |
++---------+----+--------+------+------+------+--------+----+---------+
 
 */
 
 
-int main(void)
+int main(int argc, char **argv)
 {
+    (void) argc;        // Suppress "unused arg" warning
+    ::openlog(argv[0], LOG_PID, LOG_DAEMON);
+
     GPIOPort gpioPort;
     SPIPort spiPort(gpioPort, "/dev/spidev0.0");
     LCD lcd(gpioPort);
@@ -53,7 +60,7 @@ int main(void)
     ADC adc(gpioPort, spiPort, 5.0);
 
     Thermistor thermistor(3980, 4700, Temperature(25.0, TEMP_UNIT_CELSIUS));
-    TempSensor sensor(thermistor, adc, 0, 0.0001);
+    TempSensor sensor(thermistor, adc, 0, 0.0004);
 
     Temperature T;
 

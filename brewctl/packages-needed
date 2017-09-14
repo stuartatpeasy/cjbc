@@ -1,4 +1,5 @@
 wiringpi
 sqlite3
 libsqlite3-dev
+libboost1.62-dev    # earlier versions are probably OK
 
