@@ -13,7 +13,7 @@
 extern "C"
 {
 #include <wiringPi.h>
-};
+}
 
 
 GPIOPort::GPIOPort()

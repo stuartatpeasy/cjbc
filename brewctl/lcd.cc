@@ -16,7 +16,7 @@
 extern "C"
 {
 #include <unistd.h>
-};
+}
 
 /*
   LCD module pinout

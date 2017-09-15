@@ -14,7 +14,7 @@ extern "C"
 {
 #include <syslog.h>
 #include <unistd.h>
-};
+}
 
 /*
                              GPIO pinout
@@ -73,6 +73,11 @@ int main(int argc, char **argv)
         lcd.printAt(0, i, "F%d", i + 1);
         lcd.printAt(0, i + 2, "C%d", i + 1);
     }
+
+    lcd.printAt(10, 0, "10d18h");
+    lcd.printAt(4, 1, "--.-\xdf");
+    lcd.printAt(4, 2, "--.-\xdf");
+    lcd.printAt(4, 3, "--.-\xdf");
 
     for(int i = 0;; ++i)
     {

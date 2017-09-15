@@ -30,7 +30,7 @@ extern "C"
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-};
+}
 
 #define SPI_DEFAULT_BPW     (8)             // Default SPI word length = 8 bits
 #define SPI_DEFAULT_CLOCK   (500000)        // Default SPI clock = 500kHz

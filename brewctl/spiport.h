@@ -17,7 +17,7 @@
 extern "C"
 {
 #include <linux/spi/spidev.h>
-};
+}
 
 class SPIPort : public Device
 {
