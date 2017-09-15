@@ -18,6 +18,27 @@ extern "C"
 #include <unistd.h>
 };
 
+/*
+  LCD module pinout
+    +----+------+
+    |  1 |  VSS |
+    |  2 |  VDD |
+    |  3 |  VEE |
+    |  4 |   RS |
+    |  5 |  R/W |
+    |  6 |    E |
+    |  7 |  DB0 |
+    |  8 |  DB1 |
+    |  9 |  DB2 |
+    | 10 |  DB3 |
+    | 11 |  DB4 |
+    | 12 |  DB5 |
+    | 13 |  DB6 |
+    | 14 |  DB7 |
+    | 15 | LEDA |
+    | 16 | LEDK |
+    +----+------+
+*/
 
 //
 // Mapping of GPIO pin names to wiringPi pin numbers for LCD pins
@@ -36,13 +57,6 @@ typedef enum LCDPin
     GPIO_LCD_D7 = 29    // LCD data bus bit 7
 } LCDPin_t;
 
-
-// These LCD pins are outputs
-static const LCDPin_t outputs[] =
-{
-    GPIO_LCD_RS, GPIO_LCD_E, GPIO_LCD_D0, GPIO_LCD_D1, GPIO_LCD_D2, GPIO_LCD_D3, GPIO_LCD_D4,
-    GPIO_LCD_D5, GPIO_LCD_D6, GPIO_LCD_D7
-};
 
 #define LCD_DISP_WIDTH          (20)        // Display width in characters
 #define LCD_DISP_HEIGHT         (4)         // Display height in characters
@@ -83,7 +97,8 @@ static const LCDPin_t outputs[] =
 LCD::LCD(GPIOPort& gpio)
     : Device(), gpio_(gpio)
 {
-    for(auto pin : outputs)
+    for(auto pin : {GPIO_LCD_RS, GPIO_LCD_E, GPIO_LCD_D0, GPIO_LCD_D1, GPIO_LCD_D2, GPIO_LCD_D3,
+                    GPIO_LCD_D4, GPIO_LCD_D5, GPIO_LCD_D6, GPIO_LCD_D7})
         gpio.setMode(pin, PIN_OUTPUT);
 
     init();
@@ -190,7 +205,11 @@ int LCD::printAt(const int x, const int y, const char * const format, ...)
     int ret = vsnprintf(buffer, (sizeof(buffer) / sizeof(buffer[0])) - x, format, ap);
 
     for(auto i = 0; i < ret; ++i)
-        writeData(buffer[i]);
+    {
+        writeData('X');
+//        writeData(buffer[i]);
+        ::usleep(1000);
+    }
 
     errno_ = 0;
     return ret;

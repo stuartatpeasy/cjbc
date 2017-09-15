@@ -21,13 +21,20 @@ public:
                             TempSensor(Thermistor& thermistor, ADC& adc, const int channel,
                                        const double Idrive);
     virtual                 ~TempSensor();
+
     bool                    sense(Temperature& T);
+    TempSensor&             setMovingAvgLen(const unsigned int len);
+    unsigned int            getMovingAvgLen() const { return nsamples_; };
 
 protected:
     Thermistor&             thermistor_;
     ADC&                    adc_;
     int                     channel_;
     double                  Idrive_;
+
+    unsigned int            nsamples_;      // Length of moving average of samples
+    double                  tempKelvin_;    // Current moving average val of temp in K
+    bool                    sampleTaken_;   // Set once one sample has been taken
 };
 
 

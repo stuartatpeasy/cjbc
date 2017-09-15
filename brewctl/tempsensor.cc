@@ -11,14 +11,23 @@
 
 
 TempSensor::TempSensor(Thermistor& thermistor, ADC& adc, const int channel, const double Idrive)
-    : Device(), thermistor_(thermistor), adc_(adc), channel_(channel), Idrive_(Idrive)
+    : Device(), thermistor_(thermistor), adc_(adc), channel_(channel), Idrive_(Idrive),
+      nsamples_(1000), tempKelvin_(0.0), sampleTaken_(false)
 {
-
 }
 
 
 TempSensor::~TempSensor()
 {
+}
+
+
+TempSensor& TempSensor::setMovingAvgLen(const unsigned int len)
+{
+    if(len)
+        nsamples_ = len;
+
+    return *this;
 }
 
 
@@ -29,8 +38,28 @@ bool TempSensor::sense(Temperature& T)
     if(!adc_.read(channel_, adcVoltage))
         return false;
 
-    T = thermistor_.T(adcVoltage / Idrive_);
+    const Temperature sample = thermistor_.T(adcVoltage / Idrive_);
+
+    // If this is the first sample, set the moving-average value to the sampled temperature in order
+    // to initialise it to an approximate value.  If this is not the first sample, use the data to
+    // adjust the moving average value.
+    if(sampleTaken_)
+    {
+        // At least one sample has already been taken
+        tempKelvin_ -= tempKelvin_ / nsamples_;
+        tempKelvin_ += sample.K() / nsamples_;
+    }
+    else
+    {
+        // This is the first sample
+        tempKelvin_ = sample.K();
+        sampleTaken_ = true;
+    }
+
+    T.set(tempKelvin_, TEMP_UNIT_KELVIN);
 
     return true;
 }
+
+
 

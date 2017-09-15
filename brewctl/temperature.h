@@ -25,6 +25,8 @@ public:
                     Temperature(const double value, const TemperatureUnit_t unit);
     virtual         ~Temperature();
 
+    Temperature&    set(const double value, const TemperatureUnit_t unit);
+
     double          C() const;
     double          F() const;
     double          K() const;

@@ -24,6 +24,17 @@ Temperature::Temperature()
 
 Temperature::Temperature(const double value, const TemperatureUnit_t unit)
 {
+    set(value, unit);
+}
+
+
+Temperature::~Temperature()
+{
+}
+
+
+Temperature& Temperature::set(const double value, const TemperatureUnit_t unit)
+{
     switch(unit)
     {
         case TEMP_UNIT_CELSIUS:
@@ -38,11 +49,8 @@ Temperature::Temperature(const double value, const TemperatureUnit_t unit)
             valKelvin_ = value;
             break;
     }
-}
 
-
-Temperature::~Temperature()
-{
+    return *this;
 }
 
 

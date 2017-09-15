@@ -68,27 +68,18 @@ int main(int argc, char **argv)
 
     Temperature T;
 
+    const int ret = lcd.printAt(0, 0, "Hello, world!");
+    printf("LCD write: ret=%d\n", ret);
 
     for(auto i = 0; i <= GPIO_PIN_MAX; ++i)
         printf("pin %d: %s\n", i, gpioPort.read(i) ? "high" : "low");
 
-    double avg;
-    int i, nsamples = 1000;
-
-    // initialise average
-    if(sensor.sense(T))
-        avg = T.K();
-
-    for(i = 0;; ++i)
+    for(int i = 0;; ++i)
     {
-        if(sensor.sense(T))
-        {
-            avg -= avg / nsamples;
-            avg += T.K() / nsamples;
-        }
+        sensor.sense(T);
 
         if(!(i % 100))
-            printf("Temperature on channel 0: %.2lfC\n", avg - 273.15);
+            printf("Temperature on channel 0: %.2lfC\n", T.C());
 
         ::usleep(500 + ::rand() % 1023);
 /*
