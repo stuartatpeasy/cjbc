@@ -19,8 +19,8 @@ public:
                             ShiftReg(GPIOPort& gpio, SPIPort& spi);
     virtual                 ~ShiftReg();
 
-    bool                    write(const uint8_t val);
-    uint8_t                 read() const { return currentVal_; };
+    bool                    write(uint16_t val);
+    uint16_t                read() const { return currentVal_; };
 
 protected:
     void                    strobeRegClk();
@@ -29,7 +29,7 @@ protected:
 
     GPIOPort&               gpio_;
     SPIPort&                spi_;
-    uint8_t                 currentVal_;
+    uint16_t               currentVal_;
 };
 
 #endif // SHIFTREG_H_INC

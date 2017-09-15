@@ -1,5 +1,5 @@
 /*
-    shiftreg.cc: 74xx595 shift-register SPI driver
+    shiftreg.cc: SPI driver for two 74xx595 shift registers, connected in series
 
     Stuart Wallace <stuartw@atom.net>, September 2017.
 
@@ -36,7 +36,7 @@ ShiftReg::ShiftReg(GPIOPort& gpio, SPIPort& spi)
         return;
 
     // Force all shift-register outputs to zero.
-    if(spi_.transmitByte(0))
+    if(spi_.transmitByte(0) && spi_.transmitByte(0))
     {
         strobeRegClk();
         ready_ = true;
@@ -60,7 +60,7 @@ void ShiftReg::strobeRegClk()
 }
 
 
-bool ShiftReg::write(const uint8_t val)
+bool ShiftReg::write(uint16_t val)
 {
     if(!ready_)
     {
@@ -71,21 +71,22 @@ bool ShiftReg::write(const uint8_t val)
     // Force the register clock low
     gpio_.write(GPIO_SR_RCLK, 0);
 
-    // Transmit the byte
-    if(!spi_.transmitByte(val))
+    // Transmit the bytes
+    for(size_t i = 0; i < sizeof(val); ++i, val >>= 8)
     {
-        errno_ = spi_.errNo();
-        spi_.resetErrNo();
+        if(!spi_.transmitByte(val))
+        {
+            errno_ = spi_.errNo();
+            spi_.resetErrNo();
 
-        return false;
+            return false;
+        }
     }
-    else
-    {
-        errno_ = 0;
-        currentVal_ = val;
-        strobeRegClk();
+        
+    errno_ = 0;
+    currentVal_ = val;
+    strobeRegClk();
 
-        return true;
-    }
+    return true;
 }
 

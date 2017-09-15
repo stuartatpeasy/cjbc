@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 
     spiPort.setMode(SPI_MODE_0);        // TODO remove
     spiPort.setBitsPerWord(8);          // TODO remove
-    spiPort.setMaxSpeed(100000);        // TODO remove
+    spiPort.setMaxSpeed(500000);        // TODO remove
 
     ADC adc(gpioPort, spiPort, 5.0);
 
@@ -68,30 +68,25 @@ int main(int argc, char **argv)
 
     Temperature T;
 
-    for(int i = 0; i < 4; ++i)
+    for(int i = 0; i < 2; ++i)
     {
-        const int ret = lcd.printAt(i, i, "Hello, world!");
-        printf("LCD write: ret=%d\n", ret);
+        lcd.printAt(0, i, "F%d", i + 1);
+        lcd.printAt(0, i + 2, "C%d", i + 1);
     }
-
-    for(auto i = 0; i <= GPIO_PIN_MAX; ++i)
-        printf("pin %d: %s\n", i, gpioPort.read(i) ? "high" : "low");
 
     for(int i = 0;; ++i)
     {
         sensor.sense(T);
 
         if(!(i % 100))
-            printf("Temperature on channel 0: %.2lfC\n", T.C());
-
-        ::usleep(500 + ::rand() % 1023);
-/*
-        if(!spiPort.transmitByte(0x55))
         {
-            printf("Error: %d\n", spiPort.errNo());
-            break;
+            lcd.printAt(4, 0, "%.1lf\xdf", T.C() + 0.05);
+            lcd.putAt(3, 0, LCD_CH_ARROW_2DOWN);
+
+            sr.write(i % 200 ? 0xffff : 0x0000);
         }
-*/
+
+        ::usleep(500 + (::rand() & 0x3ff));
     }
 
     return 0;
