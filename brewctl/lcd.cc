@@ -40,6 +40,73 @@ extern "C"
     +----+------+
 */
 
+// LCD custom characters
+static const uint8_t charData[] =
+{
+    0x00,   // .....
+    0x00,   // .....
+    0x00,   // .....
+    0x00,   // .....    Char 0: blank
+    0x00,   // .....
+    0x00,   // .....
+    0x00,   // .....
+    0x00,   // -----
+    
+    0x04,   // ..1..
+    0x04,   // ..1..
+    0x0e,   // .111.
+    0x0e,   // .111.    Char 1: Single up-arrow
+    0x1f,   // 11111
+    0x1f,   // 11111
+    0x00,   // .....
+    0x00,   // -----
+
+    0x00,   // .....
+    0x1f,   // 11111
+    0x1f,   // 11111
+    0x0e,   // .111.    Char 2: Single down-arrow
+    0x0e,   // .111.
+    0x04,   // ..1..
+    0x04,   // ..1..
+    0x00,   // -----
+
+    0x04,   // ..1..
+    0x0e,   // .111.
+    0x1f,   // 11111
+    0x00,   // .....    Char 3: Double up-arrow
+    0x04,   // ..1..
+    0x0e,   // .111.
+    0x1f,   // 11111
+    0x00,   // -----
+
+    0x1f,   // 11111
+    0x0e,   // .111.
+    0x04,   // ..1..
+    0x00,   // .....    Char 4: Double down-arrow
+    0x1f,   // 11111
+    0x0e,   // .111.
+    0x04,   // ..1..
+    0x00,   // -----
+
+    0x02,   // ...1.
+    0x06,   // ..11.
+    0x0e,   // .111.
+    0x1e,   // 1111.    Char 5: Left-arrow
+    0x0e,   // .111.
+    0x06,   // ..11.
+    0x02,   // ...1.
+    0x00,   // -----
+
+    0x08,   // .1...
+    0x0c,   // .11..
+    0x0e,   // .111.
+    0x0f,   // .1111    Char 6: Right-arrow
+    0x0e,   // .111.
+    0x0c,   // .11..
+    0x08,   // .1...
+    0x00    // -----
+};
+
 //
 // Mapping of GPIO pin names to wiringPi pin numbers for LCD pins
 //
@@ -134,6 +201,14 @@ void LCD::init()
 
     writeCommand(LCD_CMD_HOME);
     ::usleep(2000);
+
+    writeCommand(LCD_CMD_SET_CGRAM_ADDR);
+    ::usleep(1000);
+    for(size_t i = 0; i < (sizeof(charData) / sizeof(charData[0])); ++i)
+    {
+        writeData(charData[i]);
+        ::usleep(1000);
+    }
 }
 
 
@@ -207,7 +282,7 @@ bool LCD::setCursorPos(const int x, const int y)
 int LCD::printAt(const int x, const int y, const char * const format, ...)
 {
     va_list ap;
-    char buffer[LCD_DISP_WIDTH];
+    char buffer[LCD_DISP_WIDTH + 1];
 
     if(!setCursorPos(x, y))
         return -1;
@@ -224,5 +299,17 @@ int LCD::printAt(const int x, const int y, const char * const format, ...)
 
     errno_ = 0;
     return ret;
+}
+
+
+bool LCD::putAt(const int x, const int y, const char c)
+{
+    if(!setCursorPos(x, y))
+        return false;
+
+    writeData(c);
+    ::usleep(500);
+
+    return true;
 }
 

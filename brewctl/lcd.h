@@ -11,6 +11,14 @@
 #include "device.h"
 #include "gpioport.h"
 
+// Character codes for custom LCD symbols
+#define LCD_CH_ARROW_UP     (1)
+#define LCD_CH_ARROW_DOWN   (2)
+#define LCD_CH_ARROW_2UP    (3)
+#define LCD_CH_ARROW_2DOWN  (4)
+#define LCD_CH_ARROW_LEFT   (5)
+#define LCD_CH_ARROW_RIGHT  (6)
+
 
 class LCD : public Device
 {
@@ -20,6 +28,7 @@ public:
 
     void            clear();
     int             printAt(const int x, const int y, const char * const format, ...);
+    bool            putAt(const int x, const int y, const char c);
     bool            setCursorPos(const int x, const int y);
 
 protected:
