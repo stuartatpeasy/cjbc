@@ -68,8 +68,11 @@ int main(int argc, char **argv)
 
     Temperature T;
 
-    const int ret = lcd.printAt(0, 0, "Hello, world!");
-    printf("LCD write: ret=%d\n", ret);
+    for(int i = 0; i < 4; ++i)
+    {
+        const int ret = lcd.printAt(i, i, "Hello, world!");
+        printf("LCD write: ret=%d\n", ret);
+    }
 
     for(auto i = 0; i <= GPIO_PIN_MAX; ++i)
         printf("pin %d: %s\n", i, gpioPort.read(i) ? "high" : "low");

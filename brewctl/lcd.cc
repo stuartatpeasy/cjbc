@@ -99,7 +99,10 @@ LCD::LCD(GPIOPort& gpio)
 {
     for(auto pin : {GPIO_LCD_RS, GPIO_LCD_E, GPIO_LCD_D0, GPIO_LCD_D1, GPIO_LCD_D2, GPIO_LCD_D3,
                     GPIO_LCD_D4, GPIO_LCD_D5, GPIO_LCD_D6, GPIO_LCD_D7})
-        gpio.setMode(pin, PIN_OUTPUT);
+    {
+        gpio_.write(pin, 0);
+        gpio_.setMode(pin, PIN_OUTPUT);
+    }
 
     init();
 }
@@ -122,8 +125,15 @@ void LCD::init()
                     LCD_CMD_DISPLAY_CONTROL,
                     LCD_CMD_CLEAR,
                     LCD_CMD_ENTRY_MODE_SET | LCD_ARG_INCREMENT,
-                    LCD_CMD_SET_DDRAM_ADDR})
+                    LCD_CMD_SET_DDRAM_ADDR,
+                    LCD_CMD_DISPLAY_CONTROL | LCD_ARG_DISP_ENABLE})
+    {
         writeCommand(cmd);
+        ::usleep(1000);
+    }
+
+    writeCommand(LCD_CMD_HOME);
+    ::usleep(2000);
 }
 
 
@@ -202,13 +212,14 @@ int LCD::printAt(const int x, const int y, const char * const format, ...)
     if(!setCursorPos(x, y))
         return -1;
 
+    va_start(ap, format);
+
     int ret = vsnprintf(buffer, (sizeof(buffer) / sizeof(buffer[0])) - x, format, ap);
 
     for(auto i = 0; i < ret; ++i)
     {
-        writeData('X');
-//        writeData(buffer[i]);
-        ::usleep(1000);
+        writeData(buffer[i]);
+        ::usleep(500);
     }
 
     errno_ = 0;
