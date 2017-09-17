@@ -11,7 +11,7 @@
 
 extern "C"
 {
-#include <unistd.h>
+#include <unistd.h>     // usleep()
 }
 
 
@@ -27,6 +27,8 @@ typedef enum ShiftRegPin
 #define SR_LEN_BITS         (16)    // Length of the entire shift register in bits
 
 
+// ctor - configure GPIO port pins and set the shift register output value to 0.
+//
 ShiftReg::ShiftReg(GPIOPort& gpio, SPIPort& spi)
     : Device(), ready_(false), gpio_(gpio), spi_(spi), currentVal_(0)
 {
@@ -61,6 +63,9 @@ void ShiftReg::strobeRegClk()
 }
 
 
+// write() - write the value in <val> to the shift register.  Returns true on success; on failure,
+// returns false and updates errno_.
+//
 bool ShiftReg::write(const uint16_t val)
 {
     uint16_t valLocal = val;
@@ -94,6 +99,9 @@ bool ShiftReg::write(const uint16_t val)
 }
 
 
+// operator|=() - OR the current shift register value with the value in <rhs> and update the shift
+// register.  Returns true on success, false otherwise.
+//
 uint16_t ShiftReg::operator|=(const uint16_t rhs)
 {
     write(currentVal_ | rhs);
@@ -105,6 +113,9 @@ uint16_t ShiftReg::operator|=(const uint16_t rhs)
 }
 
 
+// operator&=() - AND the current shift register value with the value in <rhs> and update the shift
+// register.  Returns true on success, false otherwise.
+//
 uint16_t ShiftReg::operator&=(const uint16_t rhs)
 {
     write(currentVal_ & rhs);
@@ -116,6 +127,9 @@ uint16_t ShiftReg::operator&=(const uint16_t rhs)
 }
 
 
+// operator^=() - exclusive-OR the current shift register value with the value in <rhs> and update
+// the shift register.  Returns true on success, false otherwise.
+//
 uint16_t ShiftReg::operator^=(const uint16_t rhs)
 {
     write(currentVal_ ^ rhs);
@@ -127,6 +141,9 @@ uint16_t ShiftReg::operator^=(const uint16_t rhs)
 }
 
 
+// set() - set bit <bit>.  Returns true on success; false if the set operation failed, or if <bit>
+// is out of range.
+//
 bool ShiftReg::set(const unsigned int bit)
 {
     if(bit >= SR_LEN_BITS)
@@ -136,6 +153,9 @@ bool ShiftReg::set(const unsigned int bit)
 }
 
 
+// clear() - clear bit <bit>.  Returns true on success; false if the clear operation failed, or if
+// <bit> is out of range.
+//
 bool ShiftReg::clear(const unsigned int bit)
 {
     if(bit >= SR_LEN_BITS)
@@ -145,6 +165,9 @@ bool ShiftReg::clear(const unsigned int bit)
 }
 
 
+// toggle() - toggle the value of bit <bit>.  Returns true on success; false if the toggle operation
+// failed, or if <bit> is out of range.
+//
 bool ShiftReg::toggle(const unsigned int bit)
 {
     if(bit >= SR_LEN_BITS)
@@ -154,6 +177,9 @@ bool ShiftReg::toggle(const unsigned int bit)
 }
 
 
+// isSet() - return true if bit <bit> is set (1); false otherwise.  Returns false if <bit> is out of
+// range.
+//
 bool ShiftReg::isSet(const unsigned int bit)
 {
     if(bit >= SR_LEN_BITS)
