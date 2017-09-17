@@ -88,7 +88,7 @@ int main(int argc, char **argv)
             lcd.printAt(4, 0, "%.1lf\xdf", T.C() + 0.05);
             lcd.putAt(3, 0, LCD_CH_ARROW_2DOWN);
 
-            sr.write(i % 200 ? 0xffff : 0x0000);
+            sr.toggle(9);
         }
 
         ::usleep(500 + (::rand() & 0x3ff));

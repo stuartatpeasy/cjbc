@@ -24,6 +24,7 @@ typedef enum ShiftRegPin
 } ShiftRegPin_t;
 
 #define SR_CLOCK_MIN_US     (1)     // Minimum width of the register clock pulse, in microseconds
+#define SR_LEN_BITS         (16)    // Length of the entire shift register in bits
 
 
 ShiftReg::ShiftReg(GPIOPort& gpio, SPIPort& spi)
@@ -60,8 +61,10 @@ void ShiftReg::strobeRegClk()
 }
 
 
-bool ShiftReg::write(uint16_t val)
+bool ShiftReg::write(const uint16_t val)
 {
+    uint16_t valLocal = val;
+
     if(!ready_)
     {
         errno_ = EAGAIN;
@@ -72,9 +75,9 @@ bool ShiftReg::write(uint16_t val)
     gpio_.write(GPIO_SR_RCLK, 0);
 
     // Transmit the bytes
-    for(size_t i = 0; i < sizeof(val); ++i, val >>= 8)
+    for(size_t i = 0; i < sizeof(val); ++i, valLocal >>= 8)
     {
-        if(!spi_.transmitByte(val))
+        if(!spi_.transmitByte(valLocal))
         {
             errno_ = spi_.errNo();
             spi_.resetErrNo();
@@ -82,11 +85,80 @@ bool ShiftReg::write(uint16_t val)
             return false;
         }
     }
-        
+
     errno_ = 0;
     currentVal_ = val;
     strobeRegClk();
 
     return true;
+}
+
+
+uint16_t ShiftReg::operator|=(const uint16_t rhs)
+{
+    write(currentVal_ | rhs);
+
+    // If write() succeeds, currentVal_ will equal the new value (ie. or'ed with rhs), which is the
+    // correct return value for the success condition.  If it fails, currentVal_ will be unchanged,
+    // which is the appropriate return value for the failure condition.
+    return currentVal_;
+}
+
+
+uint16_t ShiftReg::operator&=(const uint16_t rhs)
+{
+    write(currentVal_ & rhs);
+
+    // If write() succeeds, currentVal_ will equal the new value (ie. or'ed with rhs), which is the
+    // correct return value for the success condition.  If it fails, currentVal_ will be unchanged,
+    // which is the appropriate return value for the failure condition.
+    return currentVal_;
+}
+
+
+uint16_t ShiftReg::operator^=(const uint16_t rhs)
+{
+    write(currentVal_ ^ rhs);
+
+    // If write() succeeds, currentVal_ will equal the new value (ie. or'ed with rhs), which is the
+    // correct return value for the success condition.  If it fails, currentVal_ will be unchanged,
+    // which is the appropriate return value for the failure condition.
+    return currentVal_;
+}
+
+
+bool ShiftReg::set(const unsigned int bit)
+{
+    if(bit >= SR_LEN_BITS)
+        return false;
+
+    return write(currentVal_ | (1 << bit));
+}
+
+
+bool ShiftReg::clear(const unsigned int bit)
+{
+    if(bit >= SR_LEN_BITS)
+        return false;
+
+    return write(currentVal_ & ~(1 << bit));
+}
+
+
+bool ShiftReg::toggle(const unsigned int bit)
+{
+    if(bit >= SR_LEN_BITS)
+        return false;
+
+    return write(currentVal_ ^ (1 << bit));
+}
+
+
+bool ShiftReg::isSet(const unsigned int bit)
+{
+    if(bit >= SR_LEN_BITS)
+        return false;           // Consider out-of-range bits to be cleared
+
+    return currentVal_ & (1 << bit);
 }
 

@@ -22,6 +22,16 @@ public:
     bool                    write(uint16_t val);
     uint16_t                read() const { return currentVal_; };
 
+    uint16_t                operator|=(const uint16_t rhs);
+    uint16_t                operator&=(const uint16_t rhs);
+    uint16_t                operator^=(const uint16_t rhs);
+                            operator uint16_t() const { return currentVal_; };
+
+    bool                    set(const unsigned int bit);
+    bool                    clear(const unsigned int bit);
+    bool                    toggle(const unsigned int bit);
+    bool                    isSet(const unsigned int bit);
+
 protected:
     void                    strobeRegClk();
 
@@ -29,7 +39,7 @@ protected:
 
     GPIOPort&               gpio_;
     SPIPort&                spi_;
-    uint16_t               currentVal_;
+    uint16_t                currentVal_;
 };
 
 #endif // SHIFTREG_H_INC
