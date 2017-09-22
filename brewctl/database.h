@@ -9,24 +9,28 @@
     Part of brewctl
 */
 
+#include "error.h"
+#include <string>
+#include <memory>
+
 extern "C"
 {
 #include <sqlite3.h>
-};
+}
 
 
 class Database
 {
-protected:
+private:
                             Database();
-    virtual                 ~Database();
-    bool                    init();
 
 public:
-    Database *              instance();
-
+    virtual                             ~Database();
+    static std::unique_ptr<Database>    create(const char * const path, Error& err);
 protected:
+
     sqlite3 *               db_;
+    std::string             path_;
 };
 
 

@@ -1,3 +1,4 @@
+#include "application.h"
 #include "config.h"
 #include "spiport.h"
 #include "gpioport.h"
@@ -51,11 +52,12 @@ int main(int argc, char **argv)
     (void) argc;        // Suppress "unused arg" warning
     ::openlog(argv[0], LOG_PID, LOG_DAEMON);
 
+    Application app(argc, argv);
+
     GPIOPort gpioPort;
     SPIPort spiPort(gpioPort, "/dev/spidev0.0");
     LCD lcd(gpioPort);
     ShiftReg sr(gpioPort, spiPort);
-    Config::add("/etc/brewctl.conf");
 
     spiPort.setMode(SPI_MODE_0);        // TODO remove
     spiPort.setBitsPerWord(8);          // TODO remove
@@ -64,7 +66,7 @@ int main(int argc, char **argv)
     ADC adc(gpioPort, spiPort, 5.0);
 
     Thermistor thermistor(3980, 4700, Temperature(25.0, TEMP_UNIT_CELSIUS));
-    TempSensor sensor(thermistor, adc, 0, 0.0004);
+    TempSensor sensor(thermistor, adc, 0, 0.000155);
 
     Temperature T;
 

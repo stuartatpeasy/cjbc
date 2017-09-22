@@ -14,30 +14,34 @@ typedef enum TemperatureUnit
 {
     TEMP_UNIT_CELSIUS,
     TEMP_UNIT_FAHRENHEIT,
-    TEMP_UNIT_KELVIN
+    TEMP_UNIT_KELVIN,
+    TEMP_UNIT_UNKNOWN
 } TemperatureUnit_t;
 
 
 class Temperature
 {
 public:
-                    Temperature();
-                    Temperature(const double value, const TemperatureUnit_t unit);
-    virtual         ~Temperature();
+                                Temperature();
+                                Temperature(const double value, const TemperatureUnit_t unit);
+    virtual                     ~Temperature();
 
-    Temperature&    set(const double value, const TemperatureUnit_t unit);
+    bool                        set(const double value, const TemperatureUnit_t unit);
 
-    double          C() const;
-    double          F() const;
-    double          K() const;
+    double                      C() const;
+    double                      F() const;
+    double                      K() const;
+
+    static bool                 fromString(const char * const s, Temperature& t);
+    static TemperatureUnit_t    unitFromChar(const char c);
 
 protected:
-    double          valKelvin_;
+    double                      valKelvin_;
 
-    static const double zeroCelsiusInKelvin;
-    static const double zeroFahrenheitInKelvin;
-    static const double kelvinPerDegreeCelsius;
-    static const double kelvinPerDegreeFahrenheit;
+    static const double         zeroCelsiusInKelvin;
+    static const double         zeroFahrenheitInKelvin;
+    static const double         kelvinPerDegreeCelsius;
+    static const double         kelvinPerDegreeFahrenheit;
 };
 
 #endif // TEMPERATURE_H_INC

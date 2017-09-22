@@ -15,14 +15,13 @@ extern "C"
 #include <syslog.h>
 }
 
+using std::endl;
 using std::istream;
 using std::ifstream;
 using std::map;
+using std::ostream;
 using std::string;
 using boost::algorithm::trim;
-
-
-ConfigData_t Config::data_;
 
 
 Config::Config()
@@ -35,12 +34,15 @@ Config::~Config()
 }
 
 
+// add() - read the supplied input stream <is> (whose "name", e.g. a filename) is given in <name>,
+// and add the key/value pairs found in the stream to the configuration store.
+//
 void Config::add(istream& is, const char * const name)
 {
     string line;
     int linenum;
 
-    for(linenum = 1; is.good() && ! is.eof(); ++linenum)
+    for(linenum = 1; is.good() && !is.eof(); ++linenum)
     {
         getline(is, line);
         trim(line);
@@ -69,6 +71,9 @@ void Config::add(istream& is, const char * const name)
 }
 
 
+// add() - open the file <filename>, and pass it as an input stream to another overload of the add()
+// method in order to add the contents of the file to the configuration store.
+//
 void Config::add(const char * const filename)
 {
     ifstream file(filename);
@@ -77,68 +82,122 @@ void Config::add(const char * const filename)
 }
 
 
+// add() - add a collection of values from a ConfigData_t object to the configuration store.
+//
+void Config::add(const ConfigData_t data)
+{
+    for(auto it = data.begin(); it != data.end(); ++it)
+        data_[it->first] = it->second;
+}
+
+
+// addItem() - add item named <key> with value <value> to the configuration store
+//
+void Config::addItem(const char * const key, const char * const value)
+{
+    data_[key] = value;
+}
+
+
+// reset() - erase all configuration values
+//
 void Config::reset()
 {
     data_.clear();
 }
 
 
+// exists() - return true if a key named <key> exists; false otherwise.
+//
 bool Config::exists(const char * const key)
 {
     return data_.find(key) != data_.end();
 }
 
 
+// operator() - return the value of the key identified by the argument; return an empty string if no
+// such key exists.
+//
 string Config::operator()(const char * const key)
 {
-    return exists(key) ? data_[key] : string("");
+    return get(key, "");
 }
 
 
+// get() - if key <key> exists, return its value as a string; otherwise return <defaultVal>.
+//
 string Config::get(const char * const key, const string defaultVal)
 {
     return exists(key) ? data_[key] : defaultVal;
 }
 
 
+// get() - if key <key> exists, return its value converted to an int; otherwise return <defaultVal>.
+//
 int Config::get(const char * const key, const int defaultVal)
 {
     return exists(key) ? std::stoi(data_[key]) : defaultVal;
 }
 
 
+// get() - if key <key> exists, return its value converted to a long; otherwise return <defaultVal>.
+//
 long Config::get(const char * const key, const long defaultVal)
 {
     return exists(key) ? std::stol(data_[key]) : defaultVal;
 }
 
 
+// get() - if key <key> exists, return its value converted to a long long; otherwise return
+// <defaultVal>.
+//
 long long Config::get(const char * const key, const long long defaultVal)
 {
     return exists(key) ? std::stoll(data_[key]) : defaultVal;
 }
 
 
+// get() - if key <key> exists, return its value converted to an unsigned long; otherwise return
+// <defaultVal>.
+//
 unsigned long Config::get(const char * const key, const unsigned long defaultVal)
 {
     return exists(key) ? std::stoul(data_[key]) : defaultVal;
 }
 
 
+// get() - if key <key> exists, return its value converted to an unsigned long long; otherwise
+// return <defaultVal>.
+//
 unsigned long long Config::get(const char * const key, const unsigned long long defaultVal)
 {
     return exists(key) ? std::stoull(data_[key]) : defaultVal;
 }
 
 
+// get() - if key <key> exists, return its value converted to a float; otherwise return
+// <defaultVal>.
+//
 float Config::get(const char * const key, const float defaultVal)
 {
     return exists(key) ? std::stof(data_[key]) : defaultVal;
 }
 
 
+// get() - if key <key> exists, return its value converted to a double; otherwise return
+// <defaultVal>.
+//
 double Config::get(const char * const key, const double defaultVal)
 {
     return exists(key) ? std::stod(data_[key]) : defaultVal;
+}
+
+
+// dump() - write all known configuration key/value pairs into the supplied ostream.
+//
+void Config::dump(ostream& oss) const
+{
+    for(auto it = data_.begin(); it != data_.end(); ++it)
+        oss << it->first << "=" << it->second << endl;
 }
 
