@@ -55,7 +55,14 @@ unique_ptr<Database> Database::create(const char * const path, Error& err)
         if(ret == SQLITE_OK)
             return db;
 
-        err.getSQLiteError();
+        err.format(ret, ::sqlite3_errstr(ret));
+        return NULL;
+    }
+
+    //
+    if(errno == ENOENT)
+    {
+        // A component of the path doesn't exist.  Attempt to create the file.
     }
     else
     {
