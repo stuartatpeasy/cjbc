@@ -29,16 +29,16 @@ Database::Database()
 
 Database::~Database()
 {
+    ::sqlite3_close(db_);
 }
 
 
-// create() - open, or create, the SQLite database at the specified path.  Returns a ptr to a
+// open() - open, or create and open, the SQLite database at the specified path.  Returns a ptr to a
 // Database object on success, or NULL on failure.
 //
-unique_ptr<Database> Database::create(const char * const path, Error& err)
+unique_ptr<Database> Database::open(const char * const path, Error& err)
 {
     struct stat st;
-    const int errno_old = errno;
 
     if(!::stat(path, &st))
     {
@@ -46,17 +46,17 @@ unique_ptr<Database> Database::create(const char * const path, Error& err)
         if(S_ISDIR(st.st_mode))
         {
             err.format(EISDIR, "Failed to open database file '%s': is a directory", path);
-            return NULL;
+            return nullptr;
         }
 
-        auto db = std::make_unique<Database>();
+        std::unique_ptr<Database> db(new Database());
 
-        int ret = ::sqlite3_open(path, &db.db_);
+        int ret = ::sqlite3_open(path, &(db->db_));
         if(ret == SQLITE_OK)
             return db;
 
         err.format(ret, ::sqlite3_errstr(ret));
-        return NULL;
+        return nullptr;
     }
 
     //
@@ -68,8 +68,6 @@ unique_ptr<Database> Database::create(const char * const path, Error& err)
     {
     }
 
-        return false;
-
-
+    return nullptr;
 }
 

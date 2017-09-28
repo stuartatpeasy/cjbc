@@ -42,10 +42,13 @@ Application::Application(int argc, char **argv)
 
     parseArgs(argc, argv);
 
-    Temperature t;
-    Temperature::fromString(config_("thermistor.ref_temp").c_str(), t);
+    Error err;
+    auto db = Database::open(config_("database").c_str(), err);
+    if(db == nullptr)
+    {
+        std::cout << "Error: " << err.message() << " (code " << err.code() << ")" << std::endl;
+    }
 
-//    database_.open(config_.get("database"));
 
     config_.dump(std::cout);
 }

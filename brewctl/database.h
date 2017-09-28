@@ -22,15 +22,15 @@ extern "C"
 class Database
 {
 private:
-                            Database();
+                                        Database();
 
 public:
     virtual                             ~Database();
-    static std::unique_ptr<Database>    create(const char * const path, Error& err);
-protected:
+    static std::unique_ptr<Database>    open(const char * const path, Error& err);
 
-    sqlite3 *               db_;
-    std::string             path_;
+protected:
+    sqlite3 *                           db_;
+    std::string                         path_;
 };
 
 
