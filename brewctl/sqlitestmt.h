@@ -9,6 +9,8 @@
 */
 
 #include <string>
+#include <memory>
+#include "sqlitecolumn.h"
 
 extern "C"
 {
@@ -19,29 +21,31 @@ extern "C"
 class SQLiteStmt
 {
 public:
-                        SQLiteStmt();
-    virtual             ~SQLiteStmt();
+                                    SQLiteStmt();
+                            virtual ~SQLiteStmt();
 
-    int                 bind(const int index, const double arg);
-    int                 bind(const int index, const int arg);
-    int                 bind(const int index, const long long arg);
-    int                 bind(const int index, const std::string& arg);
-    int                 bind(const int index, const char * const arg);
-    int                 bind(const int index, const int len, const void * const arg);
-    int                 bindNull(const int index);
+                                int bind(const int index, const double arg);
+                                int bind(const int index, const int arg);
+                                int bind(const int index, const long long arg);
+                                int bind(const int index, const std::string& arg);
+                                int bind(const int index, const char * const arg);
+                                int bind(const int index, const int len, const void * const arg);
+                                int bindNull(const int index);
 
-    int                 clearBindings();
+                                int clearBindings();
 
-    int                 step();
-    int                 reset();
+                                int numCols();
 
-                        operator sqlite3_stmt *() { return stmt_; };
-                        operator sqlite3_stmt **() { return &stmt_; };
+                                int step();
+                                int reset();
+      std::unique_ptr<SQLiteColumn> column(const int index);
+
+                                    operator sqlite3_stmt *() { return stmt_; };
+                                    operator sqlite3_stmt **() { return &stmt_; };
 
 private:
-    sqlite3_stmt *      stmt_;
+                     sqlite3_stmt * stmt_;
 };
-
 
 #endif // SQLITESTMT_H_INC
 

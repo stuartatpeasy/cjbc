@@ -66,9 +66,11 @@ int main(int argc, char **argv)
     ADC adc(gpioPort, spiPort, 5.0);
 
     Thermistor thermistor(3980, 4700, Temperature(25.0, TEMP_UNIT_CELSIUS));
-    TempSensor sensor(thermistor, adc, 0, 0.000155);
 
-    Temperature T;
+    TempSensor sensor1(thermistor, adc, 0, 0.000147),
+               sensor2(thermistor, adc, 1, 0.000147);
+
+    Temperature T1, T2;
 
     for(int i = 0; i < 2; ++i)
     {
@@ -77,20 +79,33 @@ int main(int argc, char **argv)
     }
 
     lcd.printAt(10, 0, "10d18h");
-    lcd.printAt(4, 1, "--.-\xdf");
-    lcd.printAt(4, 2, "--.-\xdf");
-    lcd.printAt(4, 3, "--.-\xdf");
+    lcd.printAt(4, 1, "--.-");
+    lcd.printAt(4, 2, "--.-");
+    lcd.printAt(4, 3, "--.-");
+
+    sr.set(0);
 
     for(int i = 0;; ++i)
     {
-        sensor.sense(T);
+        sensor1.sense(T1);
+        sensor2.sense(T2);
 
         if(!(i % 100))
         {
-            lcd.printAt(4, 0, "%.1lf\xdf", T.C() + 0.05);
+            if(T1.C() > -5.0)
+                lcd.printAt(4, 0, "%4.1lf\xdf", T1.C() + 0.05);
+            else
+                lcd.printAt(4, 0, "--.- ");
+
+            if(T2.C() > -5.0)
+                lcd.printAt(4, 1, "%4.1lf\xdf", T2.C() + 0.05);
+            else
+                lcd.printAt(4, 1, "--.- ");
+
             lcd.putAt(3, 0, LCD_CH_ARROW_2DOWN);
 
-            sr.toggle(9);
+            // XXX output switch 1 = bit 8 .... 8 = bit 15
+            sr.toggle(10);
         }
 
         ::usleep(500 + (::rand() & 0x3ff));

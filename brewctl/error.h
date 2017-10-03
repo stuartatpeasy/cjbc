@@ -15,16 +15,16 @@
 class Error
 {
 public:
-                    Error();
-    virtual         ~Error();
+                        Error();
+    virtual             ~Error();
 
-    Error&          format(const int code, const char * const format, ...);
-    const std::string&    message() const { return msg_; };
-    int             code() const { return code_; };
+    Error&              format(const int code, const char * const format, ...);
+    const std::string&  message() const { return msg_; };
+    int                 code() const { return code_; };
 
 protected:
-    std::string     msg_;
-    int             code_;
+    std::string         msg_;
+    int                 code_;
 };
 
 #endif // ERROR_H_INC

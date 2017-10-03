@@ -9,6 +9,7 @@
     Part of brewctl
 */
 
+#include "error.h"
 #include "sqlitestmt.h"
 #include <string>
 
@@ -22,17 +23,22 @@ extern "C"
 class SQLite
 {
 public:
-                            SQLite();
-    virtual                 ~SQLite();
+                    SQLite();
+    virtual         ~SQLite();
 
-    int                     open(const char * const filename, const int flags = 0);
-    int                     close();
-    bool                    isOpen() const { return db_ != nullptr; };
-    int                     prepare(const char * const sql, SQLiteStmt& stmt);
+    bool            open(const char * const filename,
+                         const int flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
+                         Error * const err = nullptr);
+    bool            close(Error * const err = nullptr);
+    bool            isOpen() const { return db_ != nullptr; };
+    bool            prepare(const char * const sql, SQLiteStmt& stmt, Error * const err = nullptr);
+    bool            prepareAndStep(const char * const sql, SQLiteStmt& stmt,
+                                   Error * const err = nullptr);
 
 private:
-    sqlite3 *               db_;
-    std::string             path_;
+    void            formatError(Error * const err, const int code);
+    sqlite3 *       db_;
+    std::string     path_;
 };
 
 #endif // SQLITE_H_INC

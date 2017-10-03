@@ -7,6 +7,7 @@
 */
 
 #include "application.h"
+#include "sqlite.h"         // FIXME remove
 #include <cstdarg>
 #include <cstdlib>
 #include <cstdio>
@@ -21,7 +22,7 @@ using std::queue;
 // Default values for configuration keys
 static ConfigData_t defaultConfig =
 {
-    {"database",                    "/var/lib/brewctl/brewctl.db"},
+    {"database",                    "brewery.db"},      // FIXME - should be under /var/lib/brewctl
     {"spi.dev",                     "/dev/spidev0.0"},
     {"spi.mode",                    "0"},
     {"spi.max_clock",               "500000"},
@@ -29,12 +30,15 @@ static ConfigData_t defaultConfig =
     {"thermistor.beta",             "3980"},
     {"thermistor.ref_temp",         "25C"},
     {"thermistor.ref_resistance",   "4700"},
-    {"thermistor.isource_ua",       "155"}
+    {"thermistor.isource_ua",       "147"}
 };
 
 #include <iostream>
 Application::Application(int argc, char **argv)
 {
+    using std::cout;
+    using std::endl;
+
     appName_ = argc ? argv[0] : "<NoAppName>";
 
     config_.add(defaultConfig);             // add default values to config
@@ -42,13 +46,40 @@ Application::Application(int argc, char **argv)
 
     parseArgs(argc, argv);
 
-    Error err;
-    auto db = Database::open(config_("database").c_str(), err);
-    if(db == nullptr)
-    {
-        std::cout << "Error: " << err.message() << " (code " << err.code() << ")" << std::endl;
-    }
+    SQLite db;
 
+    Error e;
+    bool ret = db.open(config_("database").c_str(), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, &e);
+    if(ret)
+    {
+        SQLiteStmt stmt;
+
+        ret = db.prepare("SELECT * FROM session", stmt, &e);
+        if(ret)
+        {
+            stmt.step();
+            cout << "Statement returned " << stmt.numCols() << " columns" << endl;
+            for(auto i = 0; i < stmt.numCols(); ++i)
+            {
+                std::cout << i << ": ";
+                auto col = stmt.column(i);
+
+                if(col == nullptr)
+                   std::cout << "(null)";
+                else
+                    std::cout << (const char *) *col;
+                std::cout << std::endl;
+            }
+        }
+        else
+        {
+            std::cout << "prepare() error: " << e.message() << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "open() error: " << e.message() << std::endl;
+    }
 
     config_.dump(std::cout);
 }

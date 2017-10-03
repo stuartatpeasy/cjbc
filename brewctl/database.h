@@ -10,6 +10,7 @@
 */
 
 #include "error.h"
+#include "sqlite.h"
 #include <string>
 #include <memory>
 
@@ -21,16 +22,13 @@ extern "C"
 
 class Database
 {
-private:
-                                        Database();
+                    Database();
+    virtual         ~Database();
 
-public:
-    virtual                             ~Database();
-    static std::unique_ptr<Database>    open(const char * const path, Error& err);
+    bool            open(const char * const path, Error& err);
 
 protected:
-    sqlite3 *                           db_;
-    std::string                         path_;
+    SQLite                              sqlite_;
 };
 
 
