@@ -8,17 +8,17 @@
     Part of brewctl
 */
 
-// FIXME review these #includes and move as many as possible into application.cc
+#include "adc.h"
 #include "config.h"
-#include "spiport.h"
 #include "gpioport.h"
 #include "lcd.h"
-#include "adc.h"
+#include "sessionmanager.h"
 #include "shiftreg.h"
+#include "spiport.h"
+#include "sqlite.h"
 #include "temperature.h"
-#include "thermistor.h"
 #include "tempsensor.h"
-#include "database.h"
+#include "thermistor.h"
 #include <string>
 #include <vector>
 
@@ -46,10 +46,12 @@ protected:
     std::string                 appName_;
 //    std::vector<std::string>    configLocations_;
 
-    GPIOPort *                  gpio_;
-    SPIPort *                   spi_;
     ADC *                       adc_;
+    GPIOPort *                  gpio_;
+    SessionManager *            sessionManager_;
     ShiftReg *                  sr_;
+    SPIPort *                   spi_;
+    SQLite                      db_;
 };
 
 #endif // APPLICATION_H_INC

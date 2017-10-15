@@ -14,18 +14,27 @@
 SQLiteColumn::SQLiteColumn(SQLiteStmt &stmt, const int index)
     : index_(index), data_(nullptr), len_(0)
 {
-    const int len = ::sqlite3_column_bytes((sqlite3_stmt *) stmt, index);
+    sqlite3_stmt * const stmtRaw = (sqlite3_stmt *) stmt;
 
-    data_ = new char[len + 1];
-    if(data_ != nullptr)
+    if(::sqlite3_column_type(stmtRaw, index) == SQLITE_NULL)
+        isNull_ = true;
+    else
     {
-        const void *p = ::sqlite3_column_blob((sqlite3_stmt *) stmt, index);
+        isNull_ = false;
 
-        if(p != NULL)
+        const int len = ::sqlite3_column_bytes(stmtRaw, index);
+
+        data_ = new char[len + 1];
+        if(data_ != nullptr)
         {
-            ::memcpy(data_, p, len);
-            data_[len] = '\0';
-            len_ = len;
+            const void *p = ::sqlite3_column_blob(stmtRaw, index);
+
+            if(p != NULL)
+            {
+                ::memcpy(data_, p, len);
+                data_[len] = '\0';
+                len_ = len;
+            }
         }
     }
 }

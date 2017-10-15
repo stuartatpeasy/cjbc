@@ -11,6 +11,7 @@
 #include <string>
 #include <memory>
 #include "sqlitecolumn.h"
+#include "error.h"
 
 extern "C"
 {
@@ -24,26 +25,52 @@ public:
                                     SQLiteStmt();
                             virtual ~SQLiteStmt();
 
-                                int bind(const int index, const double arg);
-                                int bind(const int index, const int arg);
-                                int bind(const int index, const long long arg);
-                                int bind(const int index, const std::string& arg);
-                                int bind(const int index, const char * const arg);
-                                int bind(const int index, const int len, const void * const arg);
-                                int bindNull(const int index);
+                                    // Indexed bind methods
+                               bool bind(const int index, const double arg,
+                                         Error * const err = nullptr);
+                               bool bind(const int index, const int arg,
+                                         Error * const err = nullptr);
+                               bool bind(const int index, const long long arg,
+                                         Error * const err = nullptr);
+                               bool bind(const int index, const std::string& arg,
+                                         Error * const err = nullptr);
+                               bool bind(const int index, const char * const arg,
+                                         Error * const err = nullptr);
+                               bool bind(const int index, const int len, const void * const arg,
+                                         Error * const err = nullptr);
+                               bool bindNull(const int index, Error * const err = nullptr);
 
-                                int clearBindings();
+                                    // Named-parameter bind methods
+                               bool bind(const char * const param, const double arg,
+                                         Error * const err = nullptr);
+                               bool bind(const char * const param, const int arg,
+                                         Error * const err = nullptr);
+                               bool bind(const char * const param, const long long arg,
+                                         Error * const err = nullptr);
+                               bool bind(const char * const param, const std::string& arg,
+                                         Error * const err = nullptr);
+                               bool bind(const char * const param, const char * const arg,
+                                         Error * const err = nullptr);
+                               bool bind(const char * const param, const int len,
+                                         const void * const arg, Error * const err = nullptr);
+                               bool bindNull(const char * const param, Error * const err = nullptr);
+
+                               bool clearBindings(Error * const err = nullptr);
 
                                 int numCols();
 
-                                int step();
-                                int reset();
+                               bool step(Error * const err = nullptr);
+                               bool reset(Error * const err = nullptr);
       std::unique_ptr<SQLiteColumn> column(const int index);
 
                                     operator sqlite3_stmt *() { return stmt_; };
                                     operator sqlite3_stmt **() { return &stmt_; };
 
 private:
+                               bool checkError(const int ret, Error * const err,
+                                               int successCode = SQLITE_OK);
+                               void formatError(Error * const err, const int code);
+
                      sqlite3_stmt * stmt_;
 };
 

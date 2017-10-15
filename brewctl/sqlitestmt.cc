@@ -27,70 +27,141 @@ SQLiteStmt::~SQLiteStmt()
         ::sqlite3_finalize(stmt_);
 }
 
+//
+// Indexed bind methods
+//
 
 // bind() - bind the double value <arg> to variable <index> in the current statement.
 //
-int SQLiteStmt::bind(const int index, const double arg)
+bool SQLiteStmt::bind(const int index, const double arg, Error * const err)
 {
-    return ::sqlite3_bind_double(stmt_, index, arg);
+    return checkError(::sqlite3_bind_double(stmt_, index, arg), err);
 }
 
 
 // bind() - bind the int value <arg> to variable <index> in the current statement.
 //
-int SQLiteStmt::bind(const int index, const int arg)
+bool SQLiteStmt::bind(const int index, const int arg, Error * const err)
 {
-    return ::sqlite3_bind_int(stmt_, index, arg);
+    return checkError(::sqlite3_bind_int(stmt_, index, arg), err);
 }
 
 
 // bind() - bind the long-long value <arg> to variable <index> in the current statement.
 //
-int SQLiteStmt::bind(const int index, const long long arg)
+bool SQLiteStmt::bind(const int index, const long long arg, Error * const err)
 {
-    return ::sqlite3_bind_int64(stmt_, index, arg);
+    return checkError(::sqlite3_bind_int64(stmt_, index, arg), err);
 }
 
 
 // bind() - bind the string value <arg> to variable <index> in the current statement.
 //
-int SQLiteStmt::bind(const int index, const string& arg)
+bool SQLiteStmt::bind(const int index, const string& arg, Error * const err)
 {
-    return ::sqlite3_bind_text(stmt_, index, arg.c_str(), arg.length(), SQLITE_TRANSIENT);
+    return checkError(::sqlite3_bind_text(stmt_, index, arg.c_str(), arg.length(),
+                                          SQLITE_TRANSIENT), err);
 }
 
 
 // bind() - bind the zero-terminated string value <arg> to variable <index> in the current
 // statement.
 //
-int SQLiteStmt::bind(const int index, const char * const arg)
+bool SQLiteStmt::bind(const int index, const char * const arg, Error * const err)
 {
-    return ::sqlite3_bind_text(stmt_, index, arg, -1, SQLITE_TRANSIENT);
+    return checkError(::sqlite3_bind_text(stmt_, index, arg, -1, SQLITE_TRANSIENT), err);
 }
 
 
 // bind() - bind a BLOB value at <arg>, with length <len>, to variable <index> in the current
 // statement.
 //
-int SQLiteStmt::bind(const int index, const int len, const void * const arg)
+bool SQLiteStmt::bind(const int index, const int len, const void * const arg, Error * const err)
 {
-    return ::sqlite3_bind_blob(stmt_, index, arg, len, SQLITE_TRANSIENT);
+    return checkError(::sqlite3_bind_blob(stmt_, index, arg, len, SQLITE_TRANSIENT), err);
 }
 
 
 // bindNull() - bind an SQL NULL value to variable <index> in the current statement.
 //
-int SQLiteStmt::bindNull(const int index)
+bool SQLiteStmt::bindNull(const int index, Error * const err)
 {
-    return ::sqlite3_bind_null(stmt_, index);
+    return checkError(::sqlite3_bind_null(stmt_, index), err);
+}
+
+//
+// Named-parameter bind methods
+//
+
+// bind() - bind the double value <arg> to the named parameter <param> in the current statement.
+//
+bool SQLiteStmt::bind(const char * const param, const double arg, Error * const err)
+{
+    // ::sqlite_bind_*() will return SQLITE_RANGE if <param> specifies an invalid param.
+    return bind(::sqlite3_bind_parameter_index(stmt_, param), arg, err);
+}
+
+// bind() - bind the double value <arg> to the named parameter <param> in the current statement.
+//
+bool SQLiteStmt::bind(const char * const param, const int arg, Error * const err)
+{
+    // ::sqlite_bind_*() will return SQLITE_RANGE if <param> specifies an invalid param.
+    return bind(::sqlite3_bind_parameter_index(stmt_, param), arg, err);
+}
+
+
+// bind() - bind the double value <arg> to the named parameter <param> in the current statement.
+//
+bool SQLiteStmt::bind(const char * const param, const long long arg, Error * const err)
+{
+    // ::sqlite_bind_*() will return SQLITE_RANGE if <param> specifies an invalid param.
+    return bind(::sqlite3_bind_parameter_index(stmt_, param), arg, err);
+}
+
+
+// bind() - bind the double value <arg> to the named parameter <param> in the current statement.
+//
+bool SQLiteStmt::bind(const char * const param, const std::string& arg, Error * const err)
+{
+    // ::sqlite_bind_*() will return SQLITE_RANGE if <param> specifies an invalid param.
+    return bind(::sqlite3_bind_parameter_index(stmt_, param), arg, err);
+}
+
+
+// bind() - bind the double value <arg> to the named parameter <param> in the current statement.
+//
+bool SQLiteStmt::bind(const char * const param, const char * const arg, Error * const err)
+{
+    // ::sqlite_bind_*() will return SQLITE_RANGE if <param> specifies an invalid param.
+    return bind(::sqlite3_bind_parameter_index(stmt_, param), arg, err);
+}
+
+
+// bind() - bind a BLOB value at <arg>, with length <len>,  to the named parameter <param> in the
+// current statement.
+//
+bool SQLiteStmt::bind(const char * const param, const int len, const void * const arg,
+                      Error * const err)
+{
+    // ::sqlite_bind_*() will return SQLITE_RANGE if <param> specifies an invalid param.
+    return bind(::sqlite3_bind_parameter_index(stmt_, param), len, arg, err);
+}
+
+
+// bindNull() - bind an SQL NULL value to the named parameter <param> in the current statement.
+//
+bool SQLiteStmt::bindNull(const char * const param, Error * const err)
+{
+    // ::sqlite_bind_*() will return SQLITE_RANGE if <param> specifies an invalid param.
+    return bindNull(::sqlite3_bind_parameter_index(stmt_, param), err);
 }
 
 
 // clearBindings() - remove all variable-to-column bindings from the current statement.
 //
-int SQLiteStmt::clearBindings()
+bool SQLiteStmt::clearBindings(Error * const err)
 {
-    return ::sqlite3_clear_bindings(stmt_);
+    return checkError(::sqlite3_clear_bindings(stmt_), err);
 }
 
 
@@ -105,18 +176,18 @@ int SQLiteStmt::numCols()
 
 // step() - advance the current prepared statement result-set to the next record, if any.
 //
-int SQLiteStmt::step()
+bool SQLiteStmt::step(Error * const err)
 {
-    return ::sqlite3_step(stmt_);
+    return checkError(::sqlite3_step(stmt_), err, SQLITE_ROW);
 }
 
 
 // reset() - reset the current statement to its initial state, preserving any existing variable-to-
 // column bindings.
 //
-int SQLiteStmt::reset()
+bool SQLiteStmt::reset(Error * const err)
 {
-    return ::sqlite3_reset(stmt_);
+    return checkError(::sqlite3_reset(stmt_), err);
 }
 
 
@@ -131,5 +202,30 @@ unique_ptr<SQLiteColumn> SQLiteStmt::column(const int index)
     unique_ptr<SQLiteColumn> col(new SQLiteColumn(*this, index));
 
     return col;
+}
+
+
+// checkError() - given the result of a call to an sqlite3_*() fn in <ret>, and a value indicating
+// that the call succeeded in <successCode>, return true if <ret> == <successCode> (i.e. the call
+// succeeded); otherwise, if <err> is non-null then populate it with an appropriate error code and
+// message, and return false.
+//
+bool SQLiteStmt::checkError(const int ret, Error * const err, int successCode)
+{
+    if(ret == successCode)
+        return true;
+
+    formatError(err, ret);
+    return false;
+}
+
+
+// formatError() - populate Error object err (if non-null) with the supplied error code and an
+// appropriate human-readable error message.
+//
+void SQLiteStmt::formatError(Error * const err, const int code)
+{
+    if(err != nullptr)
+        err->format(code, "SQLiteStmt error %d: %s", code, ::sqlite3_errstr(code));
 }
 

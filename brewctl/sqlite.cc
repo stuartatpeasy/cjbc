@@ -111,6 +111,6 @@ bool SQLite::prepareAndStep(const char * const sql, SQLiteStmt& stmt, Error * co
 void SQLite::formatError(Error * const err, const int code)
 {
     if(err != nullptr)
-        err->format(code, "Database driver error %d: %s", code, ::sqlite3_errstr(code));
+        err->format(code, "SQLite error %d: %s", code, ::sqlite3_errstr(code));
 }
 
