@@ -26,13 +26,13 @@ public:
                     SQLite();
     virtual         ~SQLite();
 
-    bool            open(const char * const filename,
+    bool            open(const std::string& filename,
                          const int flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
                          Error * const err = nullptr);
     bool            close(Error * const err = nullptr);
     bool            isOpen() const { return db_ != nullptr; };
-    bool            prepare(const char * const sql, SQLiteStmt& stmt, Error * const err = nullptr);
-    bool            prepareAndStep(const char * const sql, SQLiteStmt& stmt,
+    bool            prepare(const std::string& sql, SQLiteStmt& stmt, Error * const err = nullptr);
+    bool            prepareAndStep(const std::string& sql, SQLiteStmt& stmt,
                                    Error * const err = nullptr);
 
 private:

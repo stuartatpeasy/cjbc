@@ -4,6 +4,8 @@
     log.h: global logging functions
 */
 
+#include <string>
+
 
 typedef enum
 {
@@ -27,10 +29,10 @@ typedef enum
 #define logWarning(...)     doLog(__FILE__, __LINE__, LOG_LEVEL_WARNING, __VA_ARGS__)
 #define logError(...)       doLog(__FILE__, __LINE__, LOG_LEVEL_ERROR, __VA_ARGS__)
 
-bool logInit(const char * method);
+bool logInit(const std::string& method);
 void logClose();
 
-bool doLog(const char * const file, const int line, const LogLevel_t level, const char * const fmt,
+bool doLog(const char * const file, const int line, const LogLevel_t level, const std::string& fmt,
            ...);
 
 #endif // LOG_H_INC

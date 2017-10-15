@@ -7,27 +7,31 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <sstream>
 
 extern "C"
 {
 #include <syslog.h>
 }
 
+using std::string;
+using std::ostringstream;
+
 #define LOG_BUF_SIZE (16384)
 
 static FILE *logFp = NULL;
 static LogMethod_t logMethod = LOG_METHOD_NONE;
 
-static const char * logLevelStr(const LogLevel_t level);
-static bool logWrite(const LogLevel_t level, const char * const str);
+static string logLevelStr(const LogLevel_t level);
+static bool logWrite(const LogLevel_t level, const string& str);
 static int logLevelToSyslogLevel(const LogLevel_t level);
 
 
 // logInit() - initialise the logging system according to the method string in <method>
 //
-bool logInit(const char * method)
+bool logInit(const string& method)
 {
-    if(!::strcmp(method, "syslog"))
+    if(method == "syslog")
     {
         logClose();
         ::openlog(NULL, LOG_CONS | LOG_PID, LOG_DAEMON);
@@ -35,13 +39,11 @@ bool logInit(const char * method)
 
         return true;
     }
-    else if(!::strncmp(method, "file:", 5))
+    else if(method.substr(0, 5) == "file:")
     {
         FILE *fpNew;
 
-        method += 5;    // Advance <method> past the "file:" prefix
-
-        fpNew = ::fopen(method, "a");
+        fpNew = ::fopen(method.substr(5).c_str(), "a");
         if(fpNew == NULL)
             return false;
 
@@ -85,17 +87,16 @@ void logClose()
 
 // logWrite() - write the contents of <str> to the current log destination.
 //
-static bool logWrite(const LogLevel_t level, const char * const str)
+static bool logWrite(const LogLevel_t level, const string& str)
 {
-    const size_t len = ::strlen(str);
-
     switch(logMethod)
     {
         case LOG_METHOD_FILE:
-            return (logFp == NULL) ? false : (::fwrite(str, 1, len, logFp) == len);
+            return (logFp == NULL) ?
+                    false : (::fwrite(str.c_str(), 1, str.length(), logFp) == str.length());
 
         case LOG_METHOD_SYSLOG:
-            ::syslog(logLevelToSyslogLevel(level), str);
+            ::syslog(logLevelToSyslogLevel(level), str.c_str());
             return true;
 
         default:    // Fall through
@@ -107,7 +108,7 @@ static bool logWrite(const LogLevel_t level, const char * const str)
 
 // logLevelStr() - return a ptr to a string describing the log level specified in <level>.
 //
-static const char * logLevelStr(const LogLevel_t level)
+static string logLevelStr(const LogLevel_t level)
 {
     switch(level)
     {
@@ -140,25 +141,19 @@ static int logLevelToSyslogLevel(const LogLevel_t level)
 
 // doLog() - called by the log*() macros, this function does the actual logging.
 //
-bool doLog(const char * const file, const int line, const LogLevel_t level, const char * const fmt,
+bool doLog(const char * const file, const int line, const LogLevel_t level, const std::string& fmt,
            ...)
 {
     va_list ap;
     va_start(ap, fmt);
     char logBuf[LOG_BUF_SIZE];
-    int bytesRemaining = LOG_BUF_SIZE;
+    ostringstream msg;
 
-    const int prefixLen = ::snprintf(logBuf, bytesRemaining, "<%s +%d> [%s] ", file, line,
-                                     logLevelStr(level));
-    if((prefixLen < 0) || (prefixLen >= bytesRemaining))
+    if(::vsnprintf(logBuf, LOG_BUF_SIZE, fmt.c_str(), ap))
         return false;
 
-    bytesRemaining -= prefixLen;
+    msg << "<" << file << " +" << line << "> [" << logLevelStr(level) << "] " << logBuf;
 
-    const int ret = ::vsnprintf(logBuf + prefixLen, bytesRemaining, fmt, ap);
-    if((ret < 0) || (ret >= bytesRemaining))
-        return false;
-
-    return logWrite(level, logBuf);
+    return logWrite(level, msg.str());
 }
 

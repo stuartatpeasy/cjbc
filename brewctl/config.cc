@@ -7,6 +7,7 @@
 */
 
 #include "config.h"
+#include "log.h"
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 
@@ -37,7 +38,7 @@ Config::~Config()
 // add() - read the supplied input stream <is> (whose "name", e.g. a filename) is given in <name>,
 // and add the key/value pairs found in the stream to the configuration store.
 //
-void Config::add(istream& is, const char * const name)
+void Config::add(istream& is, const string& name)
 {
     string line;
     int linenum;
@@ -55,8 +56,8 @@ void Config::add(istream& is, const char * const name)
             size_t delim = line.find('=');
             if((delim == string::npos) || !delim)
             {
-                ::syslog(LOG_NOTICE, "config: %s+%d: ignoring line: missing delimiter or key name",
-                         name, linenum);
+                logNotice("config: %s+%d: ignoring line: missing delimiter or key name",
+                         name.c_str(), linenum);
                 continue;       // Ignore malformed lines
             }
 
@@ -74,7 +75,7 @@ void Config::add(istream& is, const char * const name)
 // add() - open the file <filename>, and pass it as an input stream to another overload of the add()
 // method in order to add the contents of the file to the configuration store.
 //
-void Config::add(const char * const filename)
+void Config::add(const string& filename)
 {
     ifstream file(filename);
 
@@ -93,7 +94,7 @@ void Config::add(const ConfigData_t data)
 
 // addItem() - add item named <key> with value <value> to the configuration store
 //
-void Config::addItem(const char * const key, const char * const value)
+void Config::add(const string& key, const string& value)
 {
     data_[key] = value;
 }
@@ -109,7 +110,7 @@ void Config::reset()
 
 // exists() - return true if a key named <key> exists; false otherwise.
 //
-bool Config::exists(const char * const key)
+bool Config::exists(const std::string& key) const
 {
     return data_.find(key) != data_.end();
 }
@@ -118,15 +119,15 @@ bool Config::exists(const char * const key)
 // operator() - return the value of the key identified by the argument; return an empty string if no
 // such key exists.
 //
-string Config::operator()(const char * const key)
+string Config::operator()(const string& key)
 {
-    return get(key, "");
+    return get(key.c_str(), "");
 }
 
 
 // get() - if key <key> exists, return its value as a string; otherwise return <defaultVal>.
 //
-string Config::get(const char * const key, const string defaultVal)
+string Config::get(const string& key, const string& defaultVal)
 {
     return exists(key) ? data_[key] : defaultVal;
 }
@@ -134,7 +135,7 @@ string Config::get(const char * const key, const string defaultVal)
 
 // get() - if key <key> exists, return its value converted to an int; otherwise return <defaultVal>.
 //
-int Config::get(const char * const key, const int defaultVal)
+int Config::get(const string& key, const int defaultVal)
 {
     return exists(key) ? std::stoi(data_[key]) : defaultVal;
 }
@@ -142,7 +143,7 @@ int Config::get(const char * const key, const int defaultVal)
 
 // get() - if key <key> exists, return its value converted to a long; otherwise return <defaultVal>.
 //
-long Config::get(const char * const key, const long defaultVal)
+long Config::get(const string& key, const long defaultVal)
 {
     return exists(key) ? std::stol(data_[key]) : defaultVal;
 }
@@ -151,7 +152,7 @@ long Config::get(const char * const key, const long defaultVal)
 // get() - if key <key> exists, return its value converted to a long long; otherwise return
 // <defaultVal>.
 //
-long long Config::get(const char * const key, const long long defaultVal)
+long long Config::get(const string& key, const long long defaultVal)
 {
     return exists(key) ? std::stoll(data_[key]) : defaultVal;
 }
@@ -160,7 +161,7 @@ long long Config::get(const char * const key, const long long defaultVal)
 // get() - if key <key> exists, return its value converted to an unsigned long; otherwise return
 // <defaultVal>.
 //
-unsigned long Config::get(const char * const key, const unsigned long defaultVal)
+unsigned long Config::get(const string& key, const unsigned long defaultVal)
 {
     return exists(key) ? std::stoul(data_[key]) : defaultVal;
 }
@@ -169,7 +170,7 @@ unsigned long Config::get(const char * const key, const unsigned long defaultVal
 // get() - if key <key> exists, return its value converted to an unsigned long long; otherwise
 // return <defaultVal>.
 //
-unsigned long long Config::get(const char * const key, const unsigned long long defaultVal)
+unsigned long long Config::get(const string& key, const unsigned long long defaultVal)
 {
     return exists(key) ? std::stoull(data_[key]) : defaultVal;
 }
@@ -178,7 +179,7 @@ unsigned long long Config::get(const char * const key, const unsigned long long 
 // get() - if key <key> exists, return its value converted to a float; otherwise return
 // <defaultVal>.
 //
-float Config::get(const char * const key, const float defaultVal)
+float Config::get(const string& key, const float defaultVal)
 {
     return exists(key) ? std::stof(data_[key]) : defaultVal;
 }
@@ -187,7 +188,7 @@ float Config::get(const char * const key, const float defaultVal)
 // get() - if key <key> exists, return its value converted to a double; otherwise return
 // <defaultVal>.
 //
-double Config::get(const char * const key, const double defaultVal)
+double Config::get(const string& key, const double defaultVal)
 {
     return exists(key) ? std::stod(data_[key]) : defaultVal;
 }

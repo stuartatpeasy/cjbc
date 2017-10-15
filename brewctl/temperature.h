@@ -9,6 +9,8 @@
     Part of brewctl
 */
 
+#include <string>
+
 
 typedef enum TemperatureUnit
 {
@@ -32,7 +34,7 @@ public:
     double                      F() const;
     double                      K() const;
 
-    static bool                 fromString(const char * const s, Temperature& t);
+    static bool                 fromString(const std::string& s, Temperature& t);
     static TemperatureUnit_t    unitFromChar(const char c);
 
 protected:

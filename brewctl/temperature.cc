@@ -10,6 +10,7 @@
 #include "temperature.h"
 #include <cstdlib>
 
+using std::string;
 
 const double Temperature::zeroCelsiusInKelvin = 273.15;
 const double Temperature::zeroFahrenheitInKelvin = 255.372;
@@ -94,17 +95,14 @@ double Temperature::K() const
 // <t>.  Note that this function will fail for strings containing a "degree" symbol (i.e. a
 // superscript 'o').
 //
-bool Temperature::fromString(const char * const s, Temperature& t)
+bool Temperature::fromString(const string& s, Temperature& t)
 {
-    char *endptr = NULL;
+    size_t endptr;
 
-    if(s == NULL)
-        return false;
+    const double val = stod(s, &endptr);
+    TemperatureUnit_t unit = Temperature::unitFromChar(s[endptr]);
 
-    double val = ::strtod(s, &endptr);
-    TemperatureUnit_t unit = Temperature::unitFromChar(*endptr);
-
-    if((s == endptr) || (unit == TEMP_UNIT_UNKNOWN))
+    if(!endptr || (unit == TEMP_UNIT_UNKNOWN))
         return false;       // No conversion was done, or unit-suffix is invalid
 
     return t.set(val, unit);

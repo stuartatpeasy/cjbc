@@ -64,15 +64,6 @@ bool SQLiteStmt::bind(const int index, const string& arg, Error * const err)
 }
 
 
-// bind() - bind the zero-terminated string value <arg> to variable <index> in the current
-// statement.
-//
-bool SQLiteStmt::bind(const int index, const char * const arg, Error * const err)
-{
-    return checkError(::sqlite3_bind_text(stmt_, index, arg, -1, SQLITE_TRANSIENT), err);
-}
-
-
 // bind() - bind a BLOB value at <arg>, with length <len>, to variable <index> in the current
 // statement.
 //
@@ -95,65 +86,56 @@ bool SQLiteStmt::bindNull(const int index, Error * const err)
 
 // bind() - bind the double value <arg> to the named parameter <param> in the current statement.
 //
-bool SQLiteStmt::bind(const char * const param, const double arg, Error * const err)
+bool SQLiteStmt::bind(const string& param, const double arg, Error * const err)
 {
     // ::sqlite_bind_*() will return SQLITE_RANGE if <param> specifies an invalid param.
-    return bind(::sqlite3_bind_parameter_index(stmt_, param), arg, err);
+    return bind(::sqlite3_bind_parameter_index(stmt_, param.c_str()), arg, err);
 }
 
 // bind() - bind the double value <arg> to the named parameter <param> in the current statement.
 //
-bool SQLiteStmt::bind(const char * const param, const int arg, Error * const err)
+bool SQLiteStmt::bind(const string& param, const int arg, Error * const err)
 {
     // ::sqlite_bind_*() will return SQLITE_RANGE if <param> specifies an invalid param.
-    return bind(::sqlite3_bind_parameter_index(stmt_, param), arg, err);
-}
-
-
-// bind() - bind the double value <arg> to the named parameter <param> in the current statement.
-//
-bool SQLiteStmt::bind(const char * const param, const long long arg, Error * const err)
-{
-    // ::sqlite_bind_*() will return SQLITE_RANGE if <param> specifies an invalid param.
-    return bind(::sqlite3_bind_parameter_index(stmt_, param), arg, err);
+    return bind(::sqlite3_bind_parameter_index(stmt_, param.c_str()), arg, err);
 }
 
 
 // bind() - bind the double value <arg> to the named parameter <param> in the current statement.
 //
-bool SQLiteStmt::bind(const char * const param, const std::string& arg, Error * const err)
+bool SQLiteStmt::bind(const string& param, const long long arg, Error * const err)
 {
     // ::sqlite_bind_*() will return SQLITE_RANGE if <param> specifies an invalid param.
-    return bind(::sqlite3_bind_parameter_index(stmt_, param), arg, err);
+    return bind(::sqlite3_bind_parameter_index(stmt_, param.c_str()), arg, err);
 }
 
 
 // bind() - bind the double value <arg> to the named parameter <param> in the current statement.
 //
-bool SQLiteStmt::bind(const char * const param, const char * const arg, Error * const err)
+bool SQLiteStmt::bind(const string& param, const std::string& arg, Error * const err)
 {
     // ::sqlite_bind_*() will return SQLITE_RANGE if <param> specifies an invalid param.
-    return bind(::sqlite3_bind_parameter_index(stmt_, param), arg, err);
+    return bind(::sqlite3_bind_parameter_index(stmt_, param.c_str()), arg, err);
 }
 
 
 // bind() - bind a BLOB value at <arg>, with length <len>,  to the named parameter <param> in the
 // current statement.
 //
-bool SQLiteStmt::bind(const char * const param, const int len, const void * const arg,
+bool SQLiteStmt::bind(const string& param, const int len, const void * const arg,
                       Error * const err)
 {
     // ::sqlite_bind_*() will return SQLITE_RANGE if <param> specifies an invalid param.
-    return bind(::sqlite3_bind_parameter_index(stmt_, param), len, arg, err);
+    return bind(::sqlite3_bind_parameter_index(stmt_, param.c_str()), len, arg, err);
 }
 
 
 // bindNull() - bind an SQL NULL value to the named parameter <param> in the current statement.
 //
-bool SQLiteStmt::bindNull(const char * const param, Error * const err)
+bool SQLiteStmt::bindNull(const string& param, Error * const err)
 {
     // ::sqlite_bind_*() will return SQLITE_RANGE if <param> specifies an invalid param.
-    return bindNull(::sqlite3_bind_parameter_index(stmt_, param), err);
+    return bindNull(::sqlite3_bind_parameter_index(stmt_, param.c_str()), err);
 }
 
 

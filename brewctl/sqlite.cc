@@ -11,6 +11,8 @@
 #include <cstdlib>
 #include <memory>
 
+using std::string;
+
 
 SQLite::SQLite()
     : db_(nullptr)
@@ -26,12 +28,12 @@ SQLite::~SQLite()
 
 // open() - attempt to open a new database session using the database file <filename>.
 //
-bool SQLite::open(const char * const filename, const int flags, Error * const err)
+bool SQLite::open(const string& filename, const int flags, Error * const err)
 {
     if(!close(err))
         return false;
 
-    const int ret = ::sqlite3_open_v2(filename, &db_, flags, NULL);
+    const int ret = ::sqlite3_open_v2(filename.c_str(), &db_, flags, NULL);
     if(ret == SQLITE_OK)
     {
         path_ = filename;
@@ -68,13 +70,13 @@ bool SQLite::close(Error * const err)
 // prepare() - prepare the SQL statement <sql> for execution; on success, return a statement object
 // through <stmt>.  Return the SQLite retval in all cases.
 //
-bool SQLite::prepare(const char * const sql, SQLiteStmt& stmt, Error * const err)
+bool SQLite::prepare(const string& sql, SQLiteStmt& stmt, Error * const err)
 {
     int ret;
 
     if(isOpen())
     {
-        ret = ::sqlite3_prepare_v2(db_, sql, -1, stmt, NULL);
+        ret = ::sqlite3_prepare_v2(db_, sql.c_str(), -1, stmt, NULL);
 
         if(ret == SQLITE_OK)
             return true;
@@ -91,7 +93,7 @@ bool SQLite::prepare(const char * const sql, SQLiteStmt& stmt, Error * const err
 // prepared statement in order to execute the query and generate the first resulting record.  This
 // method is intended for use with queries in which the result-set is not required.
 //
-bool SQLite::prepareAndStep(const char * const sql, SQLiteStmt& stmt, Error * const err)
+bool SQLite::prepareAndStep(const std::string& sql, SQLiteStmt& stmt, Error * const err)
 {
     if(!prepare(sql, stmt, err))
         return false;

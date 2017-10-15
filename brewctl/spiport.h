@@ -13,6 +13,7 @@
 #include "device.h"
 #include "gpioport.h"
 #include <cstdint>
+#include <string>
 
 extern "C"
 {
@@ -22,7 +23,7 @@ extern "C"
 class SPIPort : public Device
 {
 public:
-                            SPIPort(GPIOPort& gpio, const char * const device);
+                            SPIPort(GPIOPort& gpio, const std::string& device);
     virtual                 ~SPIPort();
 
     bool                    setMode(const uint8_t mode);

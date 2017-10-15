@@ -39,7 +39,7 @@ public:
     virtual                     ~Application();
 
 protected:
-    void                        errExit(const ExitCode_t code, const char * const format, ...);
+    void                        errExit(const ExitCode_t code, const std::string& format, ...);
     void                        parseArgs(int argc, char **argv);
 
     Config                      config_;

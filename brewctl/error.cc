@@ -16,7 +16,7 @@ using std::string;
 using std::map;
 
 
-static map<ErrorCode_t, const char *> errorMessages =
+static map<ErrorCode_t, const string> errorMessages =
 {
     {DB_TOO_FEW_COLUMNS,        "Database error: too few columns returned by query"}
 };
@@ -83,12 +83,12 @@ Error& Error::init(const Error& rhs)
 // code.  Always returns false, so that a call to this method can be used as a retval in a failing
 // bool-returning method.
 //
-bool Error::format(const int code, const char * const format, ...)
+bool Error::format(const int code, const string& format, ...)
 {
     va_list ap;
     va_start(ap, format);
 
-    vformat(code, format, ap);
+    vformat(code, format.c_str(), ap);
     return false;
 }
 
@@ -100,12 +100,12 @@ bool Error::format(const ErrorCode_t code, ...)
 {
     va_list ap;
     va_start(ap, code);
-    const char *fmtstr;
+    string fmtstr;
 
     auto msg = errorMessages.find(code);
     fmtstr = (msg == errorMessages.end()) ? "Unknown internal error" : msg->second;
+    vformat(code, fmtstr.c_str(), ap);
 
-    vformat(code, fmtstr, ap);
     return false;
 }
 
@@ -113,11 +113,11 @@ bool Error::format(const ErrorCode_t code, ...)
 // vformat() - [private] use <args> to fill in the format string <format>, and store it; store
 // <code>.
 //
-void Error::vformat(const int code, const char * const format, va_list args)
+void Error::vformat(const int code, const string& format, va_list args)
 {
     char buffer[msg_buffer_len];
 
-    const int ret = ::vsnprintf(buffer, msg_buffer_len, format, args);
+    const int ret = ::vsnprintf(buffer, msg_buffer_len, format.c_str(), args);
     if(ret >= msg_buffer_len)
         buffer[msg_buffer_len - 1] = '\0';      // Output truncated
 

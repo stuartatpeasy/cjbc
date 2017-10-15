@@ -10,6 +10,7 @@
 
 #include "device.h"
 #include "gpioport.h"
+#include <string>
 
 // Character codes for custom LCD symbols
 #define LCD_CH_ARROW_UP     (1)
@@ -27,7 +28,7 @@ public:
     virtual        ~LCD();
 
     void            clear();
-    int             printAt(const int x, const int y, const char * const format, ...);
+    int             printAt(const int x, const int y, const std::string& format, ...);
     bool            putAt(const int x, const int y, const char c);
     bool            setCursorPos(const int x, const int y);
 

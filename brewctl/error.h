@@ -30,14 +30,14 @@ public:
     Error&              operator=(const Error& rhs);
     Error&              operator=(Error&& rhs) noexcept;
 
-    bool                format(const int code, const char * const format, ...);
+    bool                format(const int code, const std::string& format, ...);
     bool                format(const ErrorCode_t code, ...);
     const std::string&  message() const { return msg_; };
     int                 code() const { return code_; };
 
 private:
     Error&              init(const Error& rhs);
-    void                vformat(const int code, const char * const format, va_list args);
+    void                vformat(const int code, const std::string& format, va_list args);
 
     std::string         msg_;
     int                 code_;

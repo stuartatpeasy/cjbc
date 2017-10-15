@@ -34,26 +34,22 @@ public:
                                          Error * const err = nullptr);
                                bool bind(const int index, const std::string& arg,
                                          Error * const err = nullptr);
-                               bool bind(const int index, const char * const arg,
-                                         Error * const err = nullptr);
                                bool bind(const int index, const int len, const void * const arg,
                                          Error * const err = nullptr);
                                bool bindNull(const int index, Error * const err = nullptr);
 
                                     // Named-parameter bind methods
-                               bool bind(const char * const param, const double arg,
+                               bool bind(const std::string& param, const double arg,
                                          Error * const err = nullptr);
-                               bool bind(const char * const param, const int arg,
+                               bool bind(const std::string& param, const int arg,
                                          Error * const err = nullptr);
-                               bool bind(const char * const param, const long long arg,
+                               bool bind(const std::string& param, const long long arg,
                                          Error * const err = nullptr);
-                               bool bind(const char * const param, const std::string& arg,
+                               bool bind(const std::string& param, const std::string& arg,
                                          Error * const err = nullptr);
-                               bool bind(const char * const param, const char * const arg,
-                                         Error * const err = nullptr);
-                               bool bind(const char * const param, const int len,
+                               bool bind(const std::string& param, const int len,
                                          const void * const arg, Error * const err = nullptr);
-                               bool bindNull(const char * const param, Error * const err = nullptr);
+                               bool bindNull(const std::string& param, Error * const err = nullptr);
 
                                bool clearBindings(Error * const err = nullptr);
 

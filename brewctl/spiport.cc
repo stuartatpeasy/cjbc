@@ -32,6 +32,8 @@ extern "C"
 #include <sys/ioctl.h>
 }
 
+using std::string;
+
 #define SPI_DEFAULT_BPW     (8)             // Default SPI word length = 8 bits
 #define SPI_DEFAULT_CLOCK   (500000)        // Default SPI clock = 500kHz
 #define SPI_DEFAULT_MODE    (SPI_MODE_0)    // Default SPI mode = mode 0
@@ -47,7 +49,7 @@ typedef enum SPIPin
 } SPIPin_t;
 
 
-SPIPort::SPIPort(GPIOPort& gpio, const char * const device)
+SPIPort::SPIPort(GPIOPort& gpio, const string& device)
     : Device(), gpio_(gpio), fd_(0), modeSet_(false), bpwSet_(false), hzSet_(false)
 {
     const auto old_errno = errno;
@@ -57,7 +59,7 @@ SPIPort::SPIPort(GPIOPort& gpio, const char * const device)
             return;
 
     errno = 0;
-    fd_ = ::open(device, O_RDWR);
+    fd_ = ::open(device.c_str(), O_RDWR);
 
     ::bzero(&xfer_, sizeof(xfer_));
 

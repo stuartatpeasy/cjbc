@@ -96,14 +96,14 @@ Application::~Application()
 }
 
 
-void Application::errExit(const ExitCode_t code, const char * const format, ...)
+void Application::errExit(const ExitCode_t code, const string& format, ...)
 {
     va_list ap;
 
     va_start(ap, format);
 
     ::fprintf(stderr, "%s: ", appName_.c_str());
-    ::vfprintf(stderr, format, ap);
+    ::vfprintf(stderr, format.c_str(), ap);
     ::fputc('\n', stderr);
 
     ::exit(code);

@@ -13,6 +13,8 @@
 #include <cstdarg>
 #include <initializer_list>
 
+using std::string;
+
 extern "C"
 {
 #include <unistd.h>
@@ -279,7 +281,7 @@ bool LCD::setCursorPos(const int x, const int y)
 }
 
 
-int LCD::printAt(const int x, const int y, const char * const format, ...)
+int LCD::printAt(const int x, const int y, const string& format, ...)
 {
     va_list ap;
     char buffer[LCD_DISP_WIDTH + 1];
@@ -289,7 +291,7 @@ int LCD::printAt(const int x, const int y, const char * const format, ...)
 
     va_start(ap, format);
 
-    int ret = vsnprintf(buffer, (sizeof(buffer) / sizeof(buffer[0])) - x, format, ap);
+    int ret = vsnprintf(buffer, (sizeof(buffer) / sizeof(buffer[0])) - x, format.c_str(), ap);
 
     for(auto i = 0; i < ret; ++i)
     {
