@@ -62,6 +62,8 @@ public:
                                     operator sqlite3_stmt *() { return stmt_; };
                                     operator sqlite3_stmt **() { return &stmt_; };
 
+                             size_t id() const { return (size_t) stmt_; };
+
 private:
                                bool checkError(const int ret, Error * const err,
                                                int successCode = SQLITE_OK);

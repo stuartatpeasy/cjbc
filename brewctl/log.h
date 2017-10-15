@@ -9,11 +9,12 @@
 
 typedef enum
 {
-    LOG_LEVEL_DEBUG,
+    LOG_LEVEL_DEBUG = 0,
     LOG_LEVEL_INFO,
     LOG_LEVEL_NOTICE,
     LOG_LEVEL_WARNING,
-    LOG_LEVEL_ERROR
+    LOG_LEVEL_ERROR,
+    LOG_LEVEL_INVALID           // Not a real log level - just a placeholder
 } LogLevel_t;
 
 typedef enum
@@ -31,6 +32,9 @@ typedef enum
 
 bool logInit(const std::string& method);
 void logClose();
+LogLevel_t logSetLevel(const LogLevel_t newLevel);
+LogLevel_t logSetLevel(const std::string& newLevel);
+LogLevel_t logGetLevel();
 
 bool doLog(const char * const file, const int line, const LogLevel_t level, const std::string& fmt,
            ...);

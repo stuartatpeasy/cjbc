@@ -24,7 +24,8 @@ static ConfigData_t defaultConfig =
 {
     {"adc.ref_voltage",             "5.0"},
     {"database",                    "brewery.db"},      // FIXME - should be under /var/lib/brewctl
-    {"log",                         "syslog"},
+    {"log.method",                  "syslog"},
+    {"log.level",                   "debug"},
     {"spi.dev",                     "/dev/spidev0.0"},
     {"spi.mode",                    "0"},
     {"spi.max_clock",               "500000"},
@@ -47,13 +48,13 @@ Application::Application(int argc, char **argv)
 
     parseArgs(argc, argv);
 
-    logInit(config_("log").c_str());
+    logInit(config_("log.method"));
+    logSetLevel(config_("log.level"));
 
     logDebug("hello");
 
     Error e;
-    bool ret = db_.open(config_("database").c_str(),
-                        SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, &e);
+    bool ret = db_.open(config_("database"), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, &e);
     if(ret)
     {
         SQLiteStmt stmt;

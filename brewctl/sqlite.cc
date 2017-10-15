@@ -80,8 +80,8 @@ bool SQLite::prepare(const string& sql, SQLiteStmt& stmt, Error * const err)
 
     if(isOpen())
     {
-        logDebug("SQLite: preparing stmt: %s", sql.c_str());
         ret = ::sqlite3_prepare_v2(db_, sql.c_str(), -1, stmt, NULL);
+        logDebug("SQLite: prepared stmt %x: %s", stmt.id(), sql.c_str());
 
         if(ret == SQLITE_OK)
             return true;

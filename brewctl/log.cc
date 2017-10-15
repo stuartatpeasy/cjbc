@@ -3,6 +3,7 @@
 */
 
 #include "log.h"
+#include <boost/algorithm/string.hpp>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
@@ -25,6 +26,9 @@ static LogMethod_t logMethod = LOG_METHOD_NONE;
 static string logLevelStr(const LogLevel_t level);
 static bool logWrite(const LogLevel_t level, const string& str);
 static int logLevelToSyslogLevel(const LogLevel_t level);
+LogLevel_t logLevelFromStr(const string& level);
+
+static LogLevel_t logLevel = LOG_LEVEL_DEBUG;
 
 
 // logInit() - initialise the logging system according to the method string in <method>
@@ -85,6 +89,35 @@ void logClose()
 }
 
 
+// logSetLevel() - set the current logging level
+//
+LogLevel_t logSetLevel(const LogLevel_t newLevel)
+{
+    const LogLevel_t oldLevel = logLevel;
+
+    if(newLevel < LOG_LEVEL_INVALID)
+        logLevel = newLevel;
+
+    return oldLevel;
+}
+
+
+// logSetLevel() - set the current logging level using the level string in <newLevel>.
+//
+LogLevel_t logSetLevel(const string& newLevel)
+{
+    return logSetLevel(logLevelFromStr(newLevel));
+}
+
+
+// logGetLevel() - get the current logging level
+//
+LogLevel_t logGetLevel()
+{
+    return logLevel;
+}
+
+
 // logWrite() - write the contents of <str> to the current log destination.
 //
 static bool logWrite(const LogLevel_t level, const string& str)
@@ -122,6 +155,20 @@ static string logLevelStr(const LogLevel_t level)
 }
 
 
+// logLevelFromStr() - return a LogLevel_t corresponding to the string in <level>.  Uses case-
+// insensitive comparison.
+//
+LogLevel_t logLevelFromStr(const string& level)
+{
+         if(boost::iequals(level, "DEBUG"))     return LOG_LEVEL_DEBUG;
+    else if(boost::iequals(level, "INFO"))      return LOG_LEVEL_INFO;
+    else if(boost::iequals(level, "NOTICE"))    return LOG_LEVEL_NOTICE;
+    else if(boost::iequals(level, "WARNING"))   return LOG_LEVEL_WARNING;
+    else if(boost::iequals(level, "ERROR"))     return LOG_LEVEL_ERROR;
+    else                                        return LOG_LEVEL_INVALID;
+}
+
+
 // logLevelToSyslogLevel() - given a LogLevel_t in <level>, return a corresponding value for the
 // <level> argument to ::syslog().
 //
@@ -144,6 +191,9 @@ static int logLevelToSyslogLevel(const LogLevel_t level)
 bool doLog(const char * const file, const int line, const LogLevel_t level, const std::string& fmt,
            ...)
 {
+    if(level < logLevel)
+        return true;
+
     va_list ap;
     va_start(ap, fmt);
     char logBuf[LOG_BUF_SIZE];
