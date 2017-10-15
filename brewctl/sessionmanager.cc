@@ -7,6 +7,7 @@
 */
 
 #include "sessionmanager.h"
+#include "log.h"
 
 
 SessionManager::SessionManager(SQLite& db)
@@ -35,15 +36,15 @@ bool SessionManager::init(Error * const err)
             if(sessionId == nullptr)
                 return err->format(DB_TOO_FEW_COLUMNS);
 
-            if(db_.prepare("SELECT * FROM sessionstage WHERE session_id=?id ORDER BY stage_id",
-                           sessions, err))
+            if(db_.prepare("SELECT * FROM sessionstage WHERE session_id=:id ORDER BY stage_id",
+                           stages, err))
             {
-                if(!sessions.bind("?id", (int) *sessionId))
+                if(!stages.bind(":id", (int) *sessionId, err))
                     return false;
 
                 while(stages.step(err))
                 {
-
+                    logDebug("stepping stage");
                 }
             }
         }

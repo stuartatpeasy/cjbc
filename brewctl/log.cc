@@ -149,7 +149,7 @@ bool doLog(const char * const file, const int line, const LogLevel_t level, cons
     char logBuf[LOG_BUF_SIZE];
     ostringstream msg;
 
-    if(::vsnprintf(logBuf, LOG_BUF_SIZE, fmt.c_str(), ap))
+    if(::vsnprintf(logBuf, LOG_BUF_SIZE, fmt.c_str(), ap) < 0)
         return false;
 
     msg << "<" << file << " +" << line << "> [" << logLevelStr(level) << "] " << logBuf;

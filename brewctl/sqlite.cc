@@ -8,6 +8,7 @@
 */
 
 #include "sqlite.h"
+#include "log.h"
 #include <cstdlib>
 #include <memory>
 
@@ -33,9 +34,11 @@ bool SQLite::open(const string& filename, const int flags, Error * const err)
     if(!close(err))
         return false;
 
+    logDebug("Opening database file '%s'", filename.c_str());
     const int ret = ::sqlite3_open_v2(filename.c_str(), &db_, flags, NULL);
     if(ret == SQLITE_OK)
     {
+        logDebug("Database file '%s' opened successfully", filename.c_str());
         path_ = filename;
         return true;
     }
@@ -54,6 +57,7 @@ bool SQLite::close(Error * const err)
     if(db_ == nullptr)
         return true;        // Database not open - return success
 
+    logDebug("SQLite: closing database");
     const int ret = ::sqlite3_close_v2(db_);
     if(ret == SQLITE_OK)
     {
@@ -76,13 +80,17 @@ bool SQLite::prepare(const string& sql, SQLiteStmt& stmt, Error * const err)
 
     if(isOpen())
     {
+        logDebug("SQLite: preparing stmt: %s", sql.c_str());
         ret = ::sqlite3_prepare_v2(db_, sql.c_str(), -1, stmt, NULL);
 
         if(ret == SQLITE_OK)
             return true;
     }
     else
+    {
+        logError("SQLite error: attempted to prepare statement without an open database");
         ret = SQLITE_ABORT;
+    }
 
     formatError(err, ret);
     return false;
@@ -95,6 +103,7 @@ bool SQLite::prepare(const string& sql, SQLiteStmt& stmt, Error * const err)
 //
 bool SQLite::prepareAndStep(const std::string& sql, SQLiteStmt& stmt, Error * const err)
 {
+    logDebug("SQLite: prepare-and-step stmt: %s", sql.c_str());
     if(!prepare(sql, stmt, err))
         return false;
 
@@ -112,6 +121,7 @@ bool SQLite::prepareAndStep(const std::string& sql, SQLiteStmt& stmt, Error * co
 //
 void SQLite::formatError(Error * const err, const int code)
 {
+    logWarning("SQLite error %d: %s", code, ::sqlite3_errstr(code));
     if(err != nullptr)
         err->format(code, "SQLite error %d: %s", code, ::sqlite3_errstr(code));
 }

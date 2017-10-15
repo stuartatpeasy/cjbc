@@ -7,6 +7,7 @@
 */
 
 #include "sqlitestmt.h"
+#include "log.h"
 #include <cstdlib>
 
 using std::string;
@@ -207,6 +208,10 @@ bool SQLiteStmt::checkError(const int ret, Error * const err, int successCode)
 //
 void SQLiteStmt::formatError(Error * const err, const int code)
 {
+    // Log any errors.  Exclude return values which do not indicate an error.
+    if(code != SQLITE_DONE)
+        logWarning("SQLite stmt error %d: %s", code, ::sqlite3_errstr(code));
+
     if(err != nullptr)
         err->format(code, "SQLiteStmt error %d: %s", code, ::sqlite3_errstr(code));
 }
