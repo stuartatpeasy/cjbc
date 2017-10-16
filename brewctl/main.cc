@@ -1,4 +1,6 @@
 #include "application.h"
+#include "error.h"
+
 #include "config.h"
 #include "spiport.h"
 #include "gpioport.h"
@@ -49,11 +51,9 @@ extern "C"
 
 int main(int argc, char **argv)
 {
-    (void) argc;        // Suppress "unused arg" warning
-    ::openlog(argv[0], LOG_PID, LOG_DAEMON);
-
-    Application app(argc, argv);
-
+    Error err;
+    Application app(argc, argv, &err);
+/*
     GPIOPort gpioPort;
     SPIPort spiPort(gpioPort, "/dev/spidev0.0");
     LCD lcd(gpioPort);
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 
         ::usleep(500 + (::rand() & 0x3ff));
     }
-
+*/
     return 0;
 }
 

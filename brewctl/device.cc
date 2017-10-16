@@ -7,6 +7,7 @@
 */
 
 #include "device.h"
+#include "log.h"
 
 
 Device::Device()
@@ -18,5 +19,4 @@ Device::Device()
 Device::~Device()
 {
 }
-
 

@@ -11,9 +11,29 @@
 #include <cstdarg>
 #include <cstdio>
 #include <map>
+#include <sstream>
 
-using std::string;
 using std::map;
+using std::ostringstream;
+using std::string;
+
+
+static map<ErrorCode_t, string> errStrings =
+{
+    {MISSING_ARGVAL,            "Missing value for argument '%s'"},
+    {UNKNOWN_ARG,               "Unrecognised argument '%s'"},
+    {CFG_FILE_OPEN_FAILED,      "Failed to open config file '%s'"},
+    {MALLOC_FAILED,             "Memory allocation failed"},
+    {DB_OPEN_FAILED,            "Failed to create or open database file '%s': %s (%d)"},
+    {DB_TOO_FEW_COLUMNS,        "Query returned too few columns"},
+    {DB_SQLITE_ERROR,           "SQLite error: %s (%d)"},
+    {DB_SQLITESTMT_ERROR,       "SQLiteStmt error: %s (%d)"},
+    {SPI_MODE_SET_FAILED,       "Failed to set SPI mode"},
+    {SPI_DEVICE_OPEN_FAILED,    "Failed to open SPI device"},
+    {SPI_PARAM_SET_FAILED,      "Failed to set SPI port parameter"},
+    {UNKNOWN_ERROR,             "Unknown error"},
+};
+
 
 
 static map<ErrorCode_t, const string> errorMessages =
@@ -79,20 +99,6 @@ Error& Error::init(const Error& rhs)
 }
 
 
-// format() - format and store the error message specified by <format>; store <code> as an error
-// code.  Always returns false, so that a call to this method can be used as a retval in a failing
-// bool-returning method.
-//
-bool Error::format(const int code, const string& format, ...)
-{
-    va_list ap;
-    va_start(ap, format);
-
-    vformat(code, format.c_str(), ap);
-    return false;
-}
-
-
 // format() - format and store the error message identified by <code>.  Always returns false, so
 // that a call to this method can be used as a retval in a failing bool-returning method.
 //
@@ -104,16 +110,16 @@ bool Error::format(const ErrorCode_t code, ...)
 
     auto msg = errorMessages.find(code);
     fmtstr = (msg == errorMessages.end()) ? "Unknown internal error" : msg->second;
-    vformat(code, fmtstr.c_str(), ap);
+    formatV(code, fmtstr.c_str(), ap);
 
     return false;
 }
 
 
-// vformat() - [private] use <args> to fill in the format string <format>, and store it; store
+// formatV() - [private] use <args> to fill in the format string <format>, and store it; store
 // <code>.
 //
-void Error::vformat(const int code, const string& format, va_list args)
+void Error::formatV(const ErrorCode_t code, const string& format, va_list args)
 {
     char buffer[msg_buffer_len];
 
@@ -123,5 +129,23 @@ void Error::vformat(const int code, const string& format, va_list args)
 
     code_ = code;
     msg_ = buffer;
+}
+
+
+// stringFromCode() - return an error string corresponding to the error code in <code>.
+//
+string Error::stringFromCode(const ErrorCode_t code)
+{
+    auto it = errStrings.find(code);
+
+    if(it == errStrings.end())
+    {
+        ostringstream msg;
+
+        msg << "Unexpected error code " << code;
+        return msg.str();
+    }
+
+    return it->second;
 }
 

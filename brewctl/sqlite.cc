@@ -123,6 +123,6 @@ void SQLite::formatError(Error * const err, const int code)
 {
     logWarning("SQLite error %d: %s", code, ::sqlite3_errstr(code));
     if(err != nullptr)
-        err->format(code, "SQLite error %d: %s", code, ::sqlite3_errstr(code));
+        err->format(DB_SQLITE_ERROR, code, ::sqlite3_errstr(code));
 }
 

@@ -10,7 +10,9 @@
 */
 
 
+#include "config.h"
 #include "device.h"
+#include "error.h"
 #include "gpioport.h"
 #include <cstdint>
 #include <string>
@@ -23,7 +25,7 @@ extern "C"
 class SPIPort : public Device
 {
 public:
-                            SPIPort(GPIOPort& gpio, const std::string& device);
+                            SPIPort(GPIOPort& gpio, Config& config, Error * const err);
     virtual                 ~SPIPort();
 
     bool                    setMode(const uint8_t mode);
@@ -35,18 +37,20 @@ public:
     bool                    transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data,
                                                const unsigned int len);
 
-    bool                    ready() const { return modeSet_ && bpwSet_ && hzSet_; };
+    bool                    ready() const { return ready_; };
 
 protected:
     bool                    doIoctl(const unsigned long type, void *val);
 
     GPIOPort&               gpio_;
+    Config&                 config_;
 
     int                     fd_;
+    uint8_t                 mode_;
+    uint8_t                 bpw_;
+    uint32_t                maxClock_;
 
-    bool                    modeSet_;
-    bool                    bpwSet_;
-    bool                    hzSet_;
+    bool                    ready_;
 
     struct spi_ioc_transfer xfer_;
 };

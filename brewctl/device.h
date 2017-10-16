@@ -9,6 +9,9 @@
 */
 
 #include "errno.h"
+#include "error.h"
+#include <string>
+
 
 class Device : public ErrNo
 {

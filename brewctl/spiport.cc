@@ -20,9 +20,10 @@
 */
 
 #include "spiport.h"
-#include <initializer_list>
+#include "error.h"
 #include <cerrno>
 #include <cstring>
+#include <initializer_list>
 
 extern "C"
 {
@@ -49,31 +50,36 @@ typedef enum SPIPin
 } SPIPin_t;
 
 
-SPIPort::SPIPort(GPIOPort& gpio, const string& device)
-    : Device(), gpio_(gpio), fd_(0), modeSet_(false), bpwSet_(false), hzSet_(false)
+SPIPort::SPIPort(GPIOPort& gpio, Config& config, Error * const err)
+    : Device(), gpio_(gpio), config_(config), fd_(0), mode_(0), bpw_(0), maxClock_(0), ready_(false)
 {
-    const auto old_errno = errno;
-
     for(auto pin : {GPIO_MOSI, GPIO_MISO, GPIO_SCLK})
         if(!gpio_.setMode(pin, PIN_ALT0))
+        {
+            err->format(SPI_MODE_SET_FAILED);
             return;
+        }
 
-    errno = 0;
-    fd_ = ::open(device.c_str(), O_RDWR);
+    fd_ = ::open(config_("spi.dev").c_str(), O_RDWR);
 
     ::bzero(&xfer_, sizeof(xfer_));
 
     if(fd_ == -1)
     {
-        errno_ = errno;
-        errno = old_errno;
+        err->format(SPI_DEVICE_OPEN_FAILED);
         return;
     }
 
     // Attempt to set port defaults
-    bpwSet_ = setBitsPerWord(SPI_DEFAULT_BPW);
-    hzSet_ = setMaxSpeed(SPI_DEFAULT_CLOCK);
-    modeSet_ = setMode(SPI_DEFAULT_MODE);
+    if(!setBitsPerWord(SPI_DEFAULT_BPW) ||
+       !setMaxSpeed(config_.get("spi.max_clock", SPI_DEFAULT_CLOCK)) ||
+       !setMode(config_.get("spi.mode", SPI_DEFAULT_MODE)))
+    {
+        err->format(SPI_PARAM_SET_FAILED);
+        return;
+    }
+
+    ready_ = true;
 }
 
 
@@ -106,12 +112,13 @@ bool SPIPort::setMode(const uint8_t mode)
 {
     uint8_t mode_local = mode;
     
-    const auto ret = doIoctl(SPI_IOC_WR_MODE, &mode_local);
+    if(doIoctl(SPI_IOC_WR_MODE, &mode_local))
+    {
+        mode_ = mode_local;
+        return true;
+    }
 
-    if(ret)
-        modeSet_ = true;
-
-    return ret;
+    return false;
 }
 
 
@@ -119,14 +126,14 @@ bool SPIPort::setBitsPerWord(const uint8_t bpw)
 {
     uint8_t bpw_local = bpw;
 
-    const bool ret = doIoctl(SPI_IOC_WR_BITS_PER_WORD, &bpw_local);
-    if(ret)
+    if(doIoctl(SPI_IOC_WR_BITS_PER_WORD, &bpw_local))
     {
-        xfer_.bits_per_word = bpw;
-        bpwSet_ = true;
+        xfer_.bits_per_word = bpw_local;
+        bpw_ = bpw_local;
+        return true;
     }
 
-    return ret;
+    return false;
 }
 
 
@@ -134,14 +141,14 @@ bool SPIPort::setMaxSpeed(const uint32_t hz)
 {
     uint32_t hz_local = hz;
 
-    const bool ret = doIoctl(SPI_IOC_WR_MAX_SPEED_HZ, &hz_local);
-    if(ret)
+    if(doIoctl(SPI_IOC_WR_MAX_SPEED_HZ, &hz_local))
     {
         xfer_.speed_hz = hz;
-        hzSet_ = true;
+        maxClock_ = hz_local;
+        return true;
     }
 
-    return ret;
+    return false;
 }
 
 

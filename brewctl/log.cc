@@ -196,10 +196,20 @@ bool doLog(const char * const file, const int line, const LogLevel_t level, cons
 
     va_list ap;
     va_start(ap, fmt);
+
+    return doLogV(file, line, level, fmt, ap);
+}
+
+
+// doLogV() - called by the log*V() macros, this function does the actual logging.
+//
+bool doLogV(const char * const file, const int line, const LogLevel_t level, const std::string& fmt,
+            va_list args)
+{
     char logBuf[LOG_BUF_SIZE];
     ostringstream msg;
 
-    if(::vsnprintf(logBuf, LOG_BUF_SIZE, fmt.c_str(), ap) < 0)
+    if(::vsnprintf(logBuf, LOG_BUF_SIZE, fmt.c_str(), args) < 0)
         return false;
 
     msg << "<" << file << " +" << line << "> [" << logLevelStr(level) << "] " << logBuf;

@@ -216,6 +216,6 @@ void SQLiteStmt::formatError(Error * const err, const int code)
         logWarning("SQLite stmt %x: error %d: %s", id(), code, ::sqlite3_errstr(code));
 
     if(err != nullptr)
-        err->format(code, "SQLiteStmt error %d: %s", code, ::sqlite3_errstr(code));
+        err->format(DB_SQLITESTMT_ERROR, code, ::sqlite3_errstr(code));
 }
 

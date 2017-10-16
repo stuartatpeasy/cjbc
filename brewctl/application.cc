@@ -35,59 +35,49 @@ static ConfigData_t defaultConfig =
     {"thermistor.isource_ua",       "147"},
 };
 
-#include <iostream>
-Application::Application(int argc, char **argv)
-{
-    using std::cout;
-    using std::endl;
 
+Application::Application(int argc, char **argv, Error * const err)
+{
     appName_ = argc ? argv[0] : "<NoAppName>";
 
     config_.add(defaultConfig);             // add default values to config
     config_.add("/etc/brewctl.conf");       // default config file location
 
-    parseArgs(argc, argv);
+    if(!parseArgs(argc, argv, err))
+        return;
 
     logInit(config_("log.method"));
     logSetLevel(config_("log.level"));
 
-    logDebug("hello");
-
-    Error e;
-    bool ret = db_.open(config_("database"), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, &e);
-    if(ret)
+    if(!db_.open(config_("database"), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, err))
     {
-        SQLiteStmt stmt;
-
-        ret = db_.prepare("SELECT * FROM session", stmt, &e);
-        if(ret)
-        {
-            stmt.step();
-            cout << "Statement returned " << stmt.numCols() << " columns" << endl;
-            for(auto i = 0; i < stmt.numCols(); ++i)
-            {
-                std::cout << i << ": ";
-                auto col = stmt.column(i);
-
-                if(col == nullptr)
-                   std::cout << "(null)";
-                else
-                    std::cout << (const char *) *col;
-                std::cout << std::endl;
-            }
-        }
-        else
-        {
-            std::cout << "prepare() error: " << e.message() << std::endl;
-        }
-    }
-    else
-    {
-        std::cout << "open() error: " << e.message() << std::endl;
+        err->format(DB_OPEN_FAILED, config_("database").c_str(),
+                    err->message().c_str(), err->code());
+        return;
     }
 
     sessionManager_ = new SessionManager(db_);
-    sessionManager_->init(&e);
+    if(sessionManager_ == nullptr)
+    {
+        err->format(MALLOC_FAILED);
+        return;
+    }
+
+    spi_ = new SPIPort(gpio_, config_, err);
+    if(spi_ == nullptr)
+    {
+        err->format(MALLOC_FAILED);
+        return;
+    }
+
+    if(err->code())
+        return;
+
+    adc_ = new ADC(&gpio_, spi_, config_);
+
+    sessionManager_->init(err);
+    if(err->code())
+        return;
 }
 
 
@@ -111,7 +101,9 @@ void Application::errExit(const ExitCode_t code, const string& format, ...)
 }
 
 
-void Application::parseArgs(int argc, char **argv)
+// parseArgs() - parse command-line arguments; populate <err> if any errors are found.
+//
+bool Application::parseArgs(int argc, char **argv, Error * const err)
 {
     queue<string> args;
     for(int i = 1; i < argc; ++i)
@@ -125,19 +117,30 @@ void Application::parseArgs(int argc, char **argv)
         if(arg == "-c")
         {
             if(args.empty())
-                errExit(E_MISSING_ARGVAL, "Missing value for argument '%s'", arg.c_str());
+            {
+                err->format(MISSING_ARGVAL, arg.c_str());
+                return false;
+            }
 
             const string fileName = args.front();
             args.pop();
 
             ifstream cfgFile(fileName);
             if(!cfgFile.good())
-                errExit(E_FILE_OPEN, "Cannot open config file '%s'", fileName.c_str());
+            {
+                err->format(CFG_FILE_OPEN_FAILED, fileName.c_str());
+                return false;
+            }
 
             config_.add(fileName.c_str());
         }
         else
-            errExit(E_UNKNOWN_ARG, "Unrecognised argument '%s'", arg.c_str());
+        {
+            err->format(UNKNOWN_ARG, arg.c_str());
+            return false;
+        }
     }
+
+    return true;
 }
 

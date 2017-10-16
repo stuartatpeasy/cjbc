@@ -9,6 +9,7 @@
 */
 
 #include "device.h"
+#include "config.h"
 #include "gpioport.h"
 #include "spiport.h"
 
@@ -16,15 +17,15 @@
 class ADC : public Device
 {
 public:
-                    ADC(GPIOPort& gpio, SPIPort& spi, const double& vref);
+                    ADC(GPIOPort* gpio, SPIPort* spi, Config& config);
     virtual         ~ADC();
 
     bool            read(const unsigned int channel, double& voltage);
     double          vref() const { return vref_; };
 
 protected:
-    GPIOPort&       gpio_;
-    SPIPort         spi_;
+    GPIOPort *      gpio_;
+    SPIPort *       spi_;
     double          vref_;
     bool            ready_;
 };

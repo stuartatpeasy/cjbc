@@ -30,6 +30,13 @@ typedef enum
 #define logWarning(...)     doLog(__FILE__, __LINE__, LOG_LEVEL_WARNING, __VA_ARGS__)
 #define logError(...)       doLog(__FILE__, __LINE__, LOG_LEVEL_ERROR, __VA_ARGS__)
 
+#define logDebugV(fmt, args)    doLogV(__FILE__, __LINE__, LOG_LEVEL_DEBUG, fmt, args)
+#define logInfoV(fmt, args)     doLogV(__FILE__, __LINE__, LOG_LEVEL_INFO, fmt, args)
+#define logNoticeV(fmt, args)   doLogV(__FILE__, __LINE__, LOG_LEVEL_NOTICE, fmt, args)
+#define logWarningV(fmt, args)  doLogV(__FILE__, __LINE__, LOG_LEVEL_WARNING, fmt, args)
+#define logErrorV(fmt, args)    doLogV(__FILE__, __LINE__, LOG_LEVEL_ERROR, fmt, args)
+
+
 bool logInit(const std::string& method);
 void logClose();
 LogLevel_t logSetLevel(const LogLevel_t newLevel);
@@ -38,6 +45,8 @@ LogLevel_t logGetLevel();
 
 bool doLog(const char * const file, const int line, const LogLevel_t level, const std::string& fmt,
            ...);
+bool doLogV(const char * const file, const int line, const LogLevel_t level, const std::string& fmt,
+            va_list args);
 
 #endif // LOG_H_INC
 
