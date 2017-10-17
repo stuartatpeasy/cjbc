@@ -24,19 +24,19 @@
 class LCD : public Device
 {
 public:
-                    LCD(GPIOPort& gpio);
+                    LCD(GPIOPort& gpio, Error * const err = nullptr);
     virtual        ~LCD();
 
-    void            clear();
+    bool            clear(Error * const err = nullptr);
     int             printAt(const int x, const int y, const std::string& format, ...);
-    bool            putAt(const int x, const int y, const char c);
-    bool            setCursorPos(const int x, const int y);
+    bool            putAt(const int x, const int y, const char c, Error * const err = nullptr);
+    bool            setCursorPos(const int x, const int , Error * const err = nullptr);
 
 protected:
-    void            init();
-    void            writeCommand(uint8_t cmd);
-    void            writeData(uint8_t cmd);
-    void            toggleEClock();
+    bool            init(Error * const err = nullptr);
+    bool            writeCommand(uint8_t cmd, Error * const err = nullptr);
+    bool            writeData(uint8_t cmd, Error * const err = nullptr);
+    bool            toggleEClock(Error * const err = nullptr);
 
     GPIOPort        gpio_;
 };

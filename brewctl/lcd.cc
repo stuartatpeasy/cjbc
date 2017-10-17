@@ -7,7 +7,6 @@
 */
 
 #include "lcd.h"
-#include <cerrno>
 #include <cstdint>
 #include <cstdio>
 #include <cstdarg>
@@ -163,17 +162,20 @@ typedef enum LCDPin
 #define LCD_E_CLK_STATE_TIME_US (50)        // 50 microseconds
 
 
-LCD::LCD(GPIOPort& gpio)
+LCD::LCD(GPIOPort& gpio, Error * const err)
     : Device(), gpio_(gpio)
 {
     for(auto pin : {GPIO_LCD_RS, GPIO_LCD_E, GPIO_LCD_D0, GPIO_LCD_D1, GPIO_LCD_D2, GPIO_LCD_D3,
                     GPIO_LCD_D4, GPIO_LCD_D5, GPIO_LCD_D6, GPIO_LCD_D7})
     {
-        gpio_.write(pin, 0);
-        gpio_.setMode(pin, PIN_OUTPUT);
+        if(!gpio_.write(pin, 0, err))
+            return;
+
+        if(!gpio_.setMode(pin, PIN_OUTPUT, err))
+            return;
     }
 
-    init();
+    init(err);
 }
 
 
@@ -182,11 +184,13 @@ LCD::~LCD()
 }
 
 
-void LCD::init()
+bool LCD::init(Error * const err)
 {
     for(auto i = 0; i < 3; ++i)
     {
-        writeCommand(LCD_CMD_FUNCTION_SET | LCD_ARG_DATA_LEN);
+        if(!writeCommand(LCD_CMD_FUNCTION_SET | LCD_ARG_DATA_LEN, err))
+            return false;
+
         ::usleep(i ? 500 : 10000);
     }
 
@@ -197,71 +201,88 @@ void LCD::init()
                     LCD_CMD_SET_DDRAM_ADDR,
                     LCD_CMD_DISPLAY_CONTROL | LCD_ARG_DISP_ENABLE})
     {
-        writeCommand(cmd);
+        if(!writeCommand(cmd, err))
+            return false;
+
         ::usleep(1000);
     }
 
-    writeCommand(LCD_CMD_HOME);
+    if(!writeCommand(LCD_CMD_HOME, err))
+        return false;
+
     ::usleep(2000);
 
-    writeCommand(LCD_CMD_SET_CGRAM_ADDR);
+    if(!writeCommand(LCD_CMD_SET_CGRAM_ADDR, err))
+        return false;
+
     ::usleep(1000);
     for(size_t i = 0; i < (sizeof(charData) / sizeof(charData[0])); ++i)
     {
-        writeData(charData[i]);
+        if(!writeData(charData[i], err))
+            return false;
+
         ::usleep(1000);
     }
+
+    return true;
 }
 
 
-void LCD::toggleEClock()
+bool LCD::toggleEClock(Error * const err)
 {
     for(auto i: {1, 0})
     {
-        gpio_.write(GPIO_LCD_E, i);
+        if(!gpio_.write(GPIO_LCD_E, i, err))
+            return false;
+
         ::usleep(LCD_E_CLK_STATE_TIME_US);
     }
+
+    return true;
 }
 
 
-void LCD::writeCommand(uint8_t cmd)
+bool LCD::writeCommand(uint8_t cmd, Error * const err)
 {
     // Set RS=0
-    gpio_.write(GPIO_LCD_RS, 0);
+    if(!gpio_.write(GPIO_LCD_RS, 0, err))
+        return false;
 
     // Place command on data bus
     for(int i = GPIO_LCD_D0; i <= GPIO_LCD_D7; ++i, cmd >>= 1)
-        gpio_.write(i, cmd & 1);
+        if(!gpio_.write(i, cmd & 1, err))
+            return false;
 
-    toggleEClock();
+    return toggleEClock();
 }
 
 
-void LCD::writeData(uint8_t data)
+bool LCD::writeData(uint8_t data, Error * const err)
 {
     // Set RS=1
-    gpio_.write(GPIO_LCD_RS, 1);
+    if(!gpio_.write(GPIO_LCD_RS, 1, err))
+        return false;
 
     // Place data on data bus
     for(int i = GPIO_LCD_D0; i <= GPIO_LCD_D7; ++i, data >>= 1)
-        gpio_.write(i, data & 1);
+        if(!gpio_.write(i, data & 1, err))
+            return false;
 
-    toggleEClock();
+    return toggleEClock();
 }
 
 
-void LCD::clear()
+bool LCD::clear(Error * const err)
 {
-    writeCommand(LCD_CMD_CLEAR);
-    errno_ = 0;
+    return writeCommand(LCD_CMD_CLEAR, err);
 }
 
 
-bool LCD::setCursorPos(const int x, const int y)
+bool LCD::setCursorPos(const int x, const int y, Error * const err)
 {
     if((x < 0) || (x >= LCD_DISP_WIDTH) || (y < 0) || (y > LCD_DISP_HEIGHT))
     {
-        errno_ = EINVAL;
+        formatError(err, LCD_INVALID_CURSOR_POS);
         return false;
     }
 
@@ -273,9 +294,10 @@ bool LCD::setCursorPos(const int x, const int y)
     if(y & 1)
         pos += 0x40;
 
-    writeCommand(LCD_CMD_SET_DDRAM_ADDR | pos);
+    if(!writeCommand(LCD_CMD_SET_DDRAM_ADDR | pos, err))
+        return false;
+
     ::usleep(400);
-    errno_ = 0;
 
     return true;
 }
@@ -299,17 +321,18 @@ int LCD::printAt(const int x, const int y, const string& format, ...)
         ::usleep(500);
     }
 
-    errno_ = 0;
     return ret;
 }
 
 
-bool LCD::putAt(const int x, const int y, const char c)
+bool LCD::putAt(const int x, const int y, const char c, Error * const err)
 {
-    if(!setCursorPos(x, y))
+    if(!setCursorPos(x, y, err))
         return false;
 
-    writeData(c);
+    if(!writeData(c, err))
+        return false;
+
     ::usleep(500);
 
     return true;

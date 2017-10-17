@@ -11,7 +11,6 @@
 
 
 Device::Device()
-    : ErrNo()
 {
 }
 

@@ -7,7 +7,7 @@
 */
 
 #include "adc.h"
-#include <cerrno>
+
 
 #define ADC_MAX_CHANNEL         (7)         // This ADC has channels numbered 0-7.
 #define ADC_BITS                (10)        // This ADC has 10-bit resolution.
@@ -27,7 +27,7 @@ typedef enum ADCPin
 } ADCPin_t;
 
 
-ADC::ADC(GPIOPort* gpio, SPIPort* spi, Config& config)
+ADC::ADC(GPIOPort* gpio, SPIPort* spi, Config& config, Error * const err)
     : Device(), gpio_(gpio), spi_(spi), ready_(false)
 {
     vref_ = config.get("adc.ref_voltage", ADC_DEFAULT_REF_VOLTAGE);
@@ -36,7 +36,10 @@ ADC::ADC(GPIOPort* gpio, SPIPort* spi, Config& config)
     gpio_->write(GPIO_ADC_nCS, 1);
     
     if(!gpio_->setMode(GPIO_ADC_nCS, PIN_OUTPUT))
+    {
+        formatError(err, GPIO_PIN_MODE_SET_FAILED);
         return;
+    }
 
     if(vref_ > 0.0)
         ready_ = true;
@@ -48,20 +51,20 @@ ADC::~ADC()
 }
 
 
-bool ADC::read(const unsigned int channel, double& voltage)
+bool ADC::read(const unsigned int channel, double& voltage, Error * const err)
 {
     uint8_t tx_data[ADC_PACKET_LEN], rx_data[ADC_PACKET_LEN];
     unsigned short val;
 
     if(!ready_)
     {
-        errno_ = EAGAIN;
+        formatError(err, ADC_NOT_READY);
         return false;
     }
 
     if(channel > ADC_MAX_CHANNEL)
     {
-        errno_ = EINVAL;
+        formatError(err, ADC_INVALID_CHANNEL);
         return false;
     }
 
@@ -71,7 +74,8 @@ bool ADC::read(const unsigned int channel, double& voltage)
     tx_data[1] = ADC_SINGLE_MODE_BIT | (channel << ADC_CHANNEL_SHIFT);
     tx_data[2] = 0;     // Don't care
 
-    const bool ret = spi_->transmitAndReceive(tx_data, rx_data, ADC_PACKET_LEN);
+    // FIXME - pass err to transmitAndReceive()
+    const bool ret = spi_->transmitAndReceive(tx_data, rx_data, ADC_PACKET_LEN, err);
 
     gpio_->write(GPIO_ADC_nCS, 1);      // Negate the ADC's nCS line
 
@@ -79,12 +83,6 @@ bool ADC::read(const unsigned int channel, double& voltage)
     {
         val = ((rx_data[1] & 0x03) << 8) + rx_data[2];                      // Calculate raw value
         voltage = (double) val * vref_ / (double) ((1 << ADC_BITS) - 1);    // Convert to voltage
-        errno_ = 0;
-    }
-    else
-    {
-        errno_ = spi_->errNo();
-        spi_->resetErrNo();
     }
 
     return ret;

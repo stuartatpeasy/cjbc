@@ -14,18 +14,28 @@
 
 typedef enum
 {
-    MISSING_ARGVAL          = 0x00000001,
-    UNKNOWN_ARG             = 0x00000002,
-    CFG_FILE_OPEN_FAILED    = 0x00000003,
-    MALLOC_FAILED           = 0x10000000,
-    DB_OPEN_FAILED          = 0x11000000,
-    DB_TOO_FEW_COLUMNS      = 0x11000001,
-    DB_SQLITE_ERROR         = 0x11000002,
-    DB_SQLITESTMT_ERROR     = 0x11000003,
-    SPI_MODE_SET_FAILED     = 0x12000000,
-    SPI_DEVICE_OPEN_FAILED  = 0x12000001,
-    SPI_PARAM_SET_FAILED    = 0x12000002,
-    UNKNOWN_ERROR           = 0xffffffff
+    MISSING_ARGVAL              = 0x0001,
+    UNKNOWN_ARG                 = 0x0002,
+    CFG_FILE_OPEN_FAILED        = 0x0003,
+    MALLOC_FAILED               = 0x0004,
+    LIBWIRINGPI_INIT_FAILED     = 0x0005,
+    DB_OPEN_FAILED              = 0x1100,
+    DB_TOO_FEW_COLUMNS          = 0x1101,
+    DB_SQLITE_ERROR             = 0x1102,
+    DB_SQLITESTMT_ERROR         = 0x1103,
+    SPI_MODE_SET_FAILED         = 0x1200,
+    SPI_DEVICE_OPEN_FAILED      = 0x1201,
+    SPI_PARAM_SET_FAILED        = 0x1202,
+    GPIO_NOT_READY              = 0x1300,
+    GPIO_PIN_MODE_SET_FAILED    = 0x1301,
+    GPIO_NO_DATA                = 0x1302,
+    GPIO_IOCTL_FAILED           = 0x1304,
+    GPIO_INVALID_PIN            = 0x1305,
+    GPIO_INVALID_PIN_MODE       = 0x1306,
+    ADC_NOT_READY               = 0x1400,
+    ADC_INVALID_CHANNEL         = 0x1401,
+    LCD_INVALID_CURSOR_POS      = 0x1500,
+    UNKNOWN_ERROR               = 0xffff
 } ErrorCode_t;
 
 
@@ -40,7 +50,8 @@ public:
     Error&              operator=(const Error& rhs);
     Error&              operator=(Error&& rhs) noexcept;
 
-    bool                format(const ErrorCode_t code, ...);
+    void                format(const ErrorCode_t code, ...);
+    void                formatV(const ErrorCode_t code, va_list args);
     void                formatV(const ErrorCode_t code, const std::string& format, va_list args);
     static std::string  stringFromCode(const ErrorCode_t code);
     const std::string&  message() const { return msg_; };
@@ -53,4 +64,7 @@ private:
     int                 code_;
 };
 
+void formatError(Error * const err, const ErrorCode_t code, ...);
+
 #endif // ERROR_H_INC
+

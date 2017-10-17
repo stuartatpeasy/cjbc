@@ -24,6 +24,7 @@ static map<ErrorCode_t, string> errStrings =
     {UNKNOWN_ARG,               "Unrecognised argument '%s'"},
     {CFG_FILE_OPEN_FAILED,      "Failed to open config file '%s'"},
     {MALLOC_FAILED,             "Memory allocation failed"},
+    {LIBWIRINGPI_INIT_FAILED,   "Failed to initialise libWiringPi"},
     {DB_OPEN_FAILED,            "Failed to create or open database file '%s': %s (%d)"},
     {DB_TOO_FEW_COLUMNS,        "Query returned too few columns"},
     {DB_SQLITE_ERROR,           "SQLite error: %s (%d)"},
@@ -31,6 +32,15 @@ static map<ErrorCode_t, string> errStrings =
     {SPI_MODE_SET_FAILED,       "Failed to set SPI mode"},
     {SPI_DEVICE_OPEN_FAILED,    "Failed to open SPI device"},
     {SPI_PARAM_SET_FAILED,      "Failed to set SPI port parameter"},
+    {GPIO_NOT_READY,            "GPIO port not ready"},
+    {GPIO_PIN_MODE_SET_FAILED,  "Failed to set GPIO pin mode"},
+    {GPIO_NO_DATA,              "Missing data buffers for GPIO operation"},
+    {GPIO_IOCTL_FAILED,         "GPIO port ioctl() failed"},
+    {GPIO_INVALID_PIN,          "Invalid pin number for GPIO operation"},
+    {GPIO_INVALID_PIN_MODE,     "Invalid mode specified for pin %d"},
+    {ADC_NOT_READY,             "ADC not ready"},
+    {ADC_INVALID_CHANNEL,       "Invalid channel number for ADC conversion"},
+    {LCD_INVALID_CURSOR_POS,    "Invalid LCD cursor position requested"},
     {UNKNOWN_ERROR,             "Unknown error"},
 };
 
@@ -99,20 +109,24 @@ Error& Error::init(const Error& rhs)
 }
 
 
-// format() - format and store the error message identified by <code>.  Always returns false, so
-// that a call to this method can be used as a retval in a failing bool-returning method.
+// format() - format and store the error message identified by <code>.
 //
-bool Error::format(const ErrorCode_t code, ...)
+void Error::format(const ErrorCode_t code, ...)
 {
-    va_list ap;
-    va_start(ap, code);
-    string fmtstr;
+    va_list args;
+    va_start(args, code);
 
-    auto msg = errorMessages.find(code);
-    fmtstr = (msg == errorMessages.end()) ? "Unknown internal error" : msg->second;
-    formatV(code, fmtstr.c_str(), ap);
+    formatV(code, args);
+}
 
-    return false;
+
+// formatV() - format and store the error message identified by <code>. 
+//
+void Error::formatV(const ErrorCode_t code, va_list args)
+{
+    const auto msg = errorMessages.find(code);
+    const string fmtstr = (msg == errorMessages.end()) ? "Unknown internal error" : msg->second;
+    formatV(code, fmtstr.c_str(), args);
 }
 
 
@@ -147,5 +161,17 @@ string Error::stringFromCode(const ErrorCode_t code)
     }
 
     return it->second;
+}
+
+
+void formatError(Error * const err, const ErrorCode_t code, ...)
+{
+    if(err != nullptr)
+    {
+        va_list args;
+        va_start(args, code);
+
+        err->formatV(code, args);
+    }
 }
 

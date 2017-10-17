@@ -8,7 +8,6 @@
 */
 
 #include "gpioport.h"
-#include <cerrno>
 
 extern "C"
 {
@@ -16,12 +15,12 @@ extern "C"
 }
 
 
-GPIOPort::GPIOPort()
+GPIOPort::GPIOPort(Error * const err)
     : Device(), ready_(false)
 {
     if(::wiringPiSetup() == -1)
     {
-        errno_ = errno;
+        formatError(err, LIBWIRINGPI_INIT_FAILED);
         return;
     }
 
@@ -34,20 +33,20 @@ GPIOPort::~GPIOPort()
 }
 
 
-// preValidate() - check ready state and supplied pin number; set errno accordingly.  Return true if
-// the device is ready and the pin number is valid; false otherwise.
+// preValidate() - check ready state and supplied pin number.  Return true if the device is ready
+// and the pin number is valid; false otherwise.
 //
-bool GPIOPort::preValidate(const int pin)
+bool GPIOPort::preValidate(const int pin, Error * const err)
 {
     if(!ready_)
     {
-        errno_ = EAGAIN;
+        formatError(err, GPIO_NOT_READY);
         return false;
     }
 
     if((pin < 0) || (pin > GPIO_PIN_MAX))
     {
-        errno_ = EINVAL;
+        formatError(err, GPIO_INVALID_PIN);
         return false;
     }
 
@@ -55,29 +54,28 @@ bool GPIOPort::preValidate(const int pin)
 }
 
 
-bool GPIOPort::read(const int pin)
+bool GPIOPort::read(const int pin, Error * const err)
 {
-    if(!preValidate(pin))
+    if(!preValidate(pin, err))
         return false;
 
-    errno_ = 0;
     return ::digitalRead(pin) == HIGH;
 }
 
 
-void GPIOPort::write(const int pin, const bool val)
+bool GPIOPort::write(const int pin, const bool val, Error * const err)
 {
-    if(!preValidate(pin))
-        return;
+    if(!preValidate(pin, err))
+        return false;
 
     ::digitalWrite(pin, val ? HIGH : LOW);
-    errno_ = 0;
+    return true;
 }
 
 
-bool GPIOPort::setMode(const int pin, const GPIOPinMode_t mode)
+bool GPIOPort::setMode(const int pin, const GPIOPinMode_t mode, Error * const err)
 {
-    if(!preValidate(pin))
+    if(!preValidate(pin, err))
         return false;
 
     switch(mode)
@@ -94,17 +92,18 @@ bool GPIOPort::setMode(const int pin, const GPIOPinMode_t mode)
         case PIN_ALT4:              ::pinModeAlt(pin, 0b011);           break;
         case PIN_ALT5:              ::pinModeAlt(pin, 0b010);           break;
 
-        default:                    errno_ = EINVAL;                    return false;
+        default:
+            formatError(err, GPIO_INVALID_PIN_MODE, pin);
+            return false;
     }
 
-    errno_ = 0;
     return true;
 }
 
 
-bool GPIOPort::setPullupMode(const int pin, const GPIOPinPullupMode_t mode)
+bool GPIOPort::setPullupMode(const int pin, const GPIOPinPullupMode_t mode, Error * const err)
 {
-    if(!preValidate(pin))
+    if(!preValidate(pin, err))
         return false;
 
     switch(mode)
@@ -113,10 +112,11 @@ bool GPIOPort::setPullupMode(const int pin, const GPIOPinPullupMode_t mode)
         case PPM_DOWN:              ::pullUpDnControl(pin, PUD_DOWN);   break;
         case PPM_NONE:              ::pullUpDnControl(pin, PUD_OFF);    break;
 
-        default:                    errno_ = EINVAL;                    return false;
+        default:
+            formatError(err, GPIO_INVALID_PIN_MODE, pin);
+            return false;
     }
 
-    errno_ = 0;
     return true;
 }
 

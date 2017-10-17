@@ -8,18 +8,9 @@
     Part of brewctl
 */
 
-#include "adc.h"
 #include "config.h"
 #include "error.h"
-#include "gpioport.h"
-#include "lcd.h"
 #include "sessionmanager.h"
-#include "shiftreg.h"
-#include "spiport.h"
-#include "sqlite.h"
-#include "temperature.h"
-#include "tempsensor.h"
-#include "thermistor.h"
 #include <string>
 #include <vector>
 
@@ -42,19 +33,14 @@ public:
     virtual                     ~Application();
 
 protected:
-    void                        errExit(const ExitCode_t code, const std::string& format, ...);
     bool                        parseArgs(int argc, char **argv, Error * const err);
 
     Config                      config_;
     std::string                 appName_;
 //    std::vector<std::string>    configLocations_;
 
-    ADC *                       adc_;
-    GPIOPort                    gpio_;
     SessionManager *            sessionManager_;
-    ShiftReg *                  sr_;
-    SPIPort *                   spi_;
-    SQLite                      db_;
+//    ShiftReg *                  sr_;
 };
 
 #endif // APPLICATION_H_INC

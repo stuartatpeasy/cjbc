@@ -8,12 +8,11 @@
     Part of brewctl
 */
 
-#include "errno.h"
 #include "error.h"
 #include <string>
 
 
-class Device : public ErrNo
+class Device
 {
 protected:
                         Device();

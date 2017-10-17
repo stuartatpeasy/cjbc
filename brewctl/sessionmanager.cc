@@ -10,9 +10,35 @@
 #include "log.h"
 
 
-SessionManager::SessionManager(SQLite& db)
-    : db_(db)
+SessionManager::SessionManager(Config& config, Error * const err)
+    : config_(config)
 {
+    if(!db_.open(config_("database"), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, err))
+    {
+        formatError(err, DB_OPEN_FAILED, config_("database").c_str(), err->message().c_str(),
+                    err->code());
+        return;
+    }
+
+    spi_ = new SPIPort(gpio_, config_, err);
+    if(spi_ == nullptr)
+    {
+        formatError(err, MALLOC_FAILED);
+        return;
+    }
+
+    if(err->code())
+        return;
+
+    adc_ = new ADC(&gpio_, spi_, config_, err);
+    if(adc_ == nullptr)
+    {
+        formatError(err, MALLOC_FAILED);
+        return;
+    }
+
+    if(err->code())
+        return;
 }
 
 
@@ -34,7 +60,10 @@ bool SessionManager::init(Error * const err)
 
             auto sessionId = sessions.column(0);
             if(sessionId == nullptr)
-                return err->format(DB_TOO_FEW_COLUMNS);
+            {
+               formatError(err, DB_TOO_FEW_COLUMNS);
+               return false;
+            }
 
             if(db_.prepare("SELECT * FROM sessionstage WHERE session_id=:id ORDER BY stage_id",
                            stages, err))

@@ -10,6 +10,7 @@
 */
 
 #include "device.h"
+#include <cstddef>
 #include <cstdint>
 
 
@@ -50,16 +51,18 @@ typedef enum GPIOPinPullupMode
 class GPIOPort : public Device
 {
 public:
-                        GPIOPort();
+                        GPIOPort(Error * const err = nullptr);
     virtual             ~GPIOPort();
 
-    bool                read(const int pin);
-    void                write(const int pin, const bool val);
-    bool                setMode(const int pin, const GPIOPinMode_t mode);
-    bool                setPullupMode(const int pin, const GPIOPinPullupMode_t mode);
+    bool                read(const int pin, Error * const err = nullptr);
+    bool                write(const int pin, const bool val, Error * const err = nullptr);
+    bool                setMode(const int pin, const GPIOPinMode_t mode,
+                                Error * const err = nullptr);
+    bool                setPullupMode(const int pin, const GPIOPinPullupMode_t mode,
+                                      Error * const err = nullptr);
 
 protected:
-    bool                preValidate(const int pin);
+    bool                preValidate(const int pin, Error * const err = nullptr);
 
     bool                ready_;
 };

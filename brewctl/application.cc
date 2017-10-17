@@ -49,34 +49,17 @@ Application::Application(int argc, char **argv, Error * const err)
     logInit(config_("log.method"));
     logSetLevel(config_("log.level"));
 
-    if(!db_.open(config_("database"), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, err))
-    {
-        err->format(DB_OPEN_FAILED, config_("database").c_str(),
-                    err->message().c_str(), err->code());
-        return;
-    }
-
-    sessionManager_ = new SessionManager(db_);
+    sessionManager_ = new SessionManager(config_, err);
     if(sessionManager_ == nullptr)
     {
         err->format(MALLOC_FAILED);
         return;
     }
 
-    spi_ = new SPIPort(gpio_, config_, err);
-    if(spi_ == nullptr)
-    {
-        err->format(MALLOC_FAILED);
-        return;
-    }
-
     if(err->code())
         return;
 
-    adc_ = new ADC(&gpio_, spi_, config_);
-
-    sessionManager_->init(err);
-    if(err->code())
+    if(!sessionManager_->init(err))
         return;
 }
 
@@ -84,20 +67,6 @@ Application::Application(int argc, char **argv, Error * const err)
 Application::~Application()
 {
     delete sessionManager_;
-}
-
-
-void Application::errExit(const ExitCode_t code, const string& format, ...)
-{
-    va_list ap;
-
-    va_start(ap, format);
-
-    ::fprintf(stderr, "%s: ", appName_.c_str());
-    ::vfprintf(stderr, format.c_str(), ap);
-    ::fputc('\n', stderr);
-
-    ::exit(code);
 }
 
 

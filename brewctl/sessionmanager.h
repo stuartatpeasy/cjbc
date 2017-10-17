@@ -8,20 +8,30 @@
     Part of brewctl
 */
 
-#include "sqlite.h"
+#include "adc.h"
+#include "config.h"
 #include "error.h"
+#include "gpioport.h"
+#include "spiport.h"
+#include "sqlite.h"
+#include <cstddef>
 
 
 class SessionManager
 {
 public:
-                    SessionManager(SQLite& db);
+                    SessionManager(Config& config, Error * const err = nullptr);
     virtual         ~SessionManager();
 
-    bool            init(Error * const err);
+    bool            init(Error * const err = nullptr);
 
 private:
-    SQLite&         db_;
+    Config&         config_;
+
+    ADC *           adc_;
+    GPIOPort        gpio_;
+    SPIPort *       spi_;
+    SQLite          db_;
 };
 
 #endif // SESSIONMANAGER_H_INC

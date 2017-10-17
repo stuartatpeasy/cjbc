@@ -17,10 +17,10 @@
 class ADC : public Device
 {
 public:
-                    ADC(GPIOPort* gpio, SPIPort* spi, Config& config);
+                    ADC(GPIOPort* gpio, SPIPort* spi, Config& config, Error * const err = nullptr);
     virtual         ~ADC();
 
-    bool            read(const unsigned int channel, double& voltage);
+    bool            read(const unsigned int channel, double& voltage, Error * const err = nullptr);
     double          vref() const { return vref_; };
 
 protected:

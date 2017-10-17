@@ -21,7 +21,6 @@
 
 #include "spiport.h"
 #include "error.h"
-#include <cerrno>
 #include <cstring>
 #include <initializer_list>
 
@@ -54,11 +53,8 @@ SPIPort::SPIPort(GPIOPort& gpio, Config& config, Error * const err)
     : Device(), gpio_(gpio), config_(config), fd_(0), mode_(0), bpw_(0), maxClock_(0), ready_(false)
 {
     for(auto pin : {GPIO_MOSI, GPIO_MISO, GPIO_SCLK})
-        if(!gpio_.setMode(pin, PIN_ALT0))
-        {
-            err->format(SPI_MODE_SET_FAILED);
+        if(!gpio_.setMode(pin, PIN_ALT0, err))
             return;
-        }
 
     fd_ = ::open(config_("spi.dev").c_str(), O_RDWR);
 
@@ -66,16 +62,16 @@ SPIPort::SPIPort(GPIOPort& gpio, Config& config, Error * const err)
 
     if(fd_ == -1)
     {
-        err->format(SPI_DEVICE_OPEN_FAILED);
+        formatError(err, SPI_DEVICE_OPEN_FAILED);
         return;
     }
 
     // Attempt to set port defaults
-    if(!setBitsPerWord(SPI_DEFAULT_BPW) ||
-       !setMaxSpeed(config_.get("spi.max_clock", SPI_DEFAULT_CLOCK)) ||
-       !setMode(config_.get("spi.mode", SPI_DEFAULT_MODE)))
+    if(!setBitsPerWord(SPI_DEFAULT_BPW, err) ||
+       !setMaxSpeed(config_.get("spi.max_clock", SPI_DEFAULT_CLOCK), err) ||
+       !setMode(config_.get("spi.mode", SPI_DEFAULT_MODE), err))
     {
-        err->format(SPI_PARAM_SET_FAILED);
+        formatError(err, SPI_PARAM_SET_FAILED);
         return;
     }
 
@@ -90,29 +86,25 @@ SPIPort::~SPIPort()
 }
 
 
-// doIoctl() - do an ioctl with a void * arg on our fd without affecting the value of ::errno.
-// Return 0 on success, or errno on failure.
+// doIoctl() - do an ioctl with a void * arg on our fd.  Return true on success, false otherwise.
 //
-bool SPIPort::doIoctl(const unsigned long type, void *val)
+bool SPIPort::doIoctl(const unsigned long type, void *val, Error * const err)
 {
-    const auto old_errno = errno;
-
-    errno_ = 0;
     if(::ioctl(fd_, type, val) < 0)
     {
-        errno_ = errno;
-        errno = old_errno;
+        formatError(err, GPIO_IOCTL_FAILED);
+        return false;
     }
 
-    return !errno_;
+    return true;
 }
 
 
-bool SPIPort::setMode(const uint8_t mode)
+bool SPIPort::setMode(const uint8_t mode, Error * const err)
 {
     uint8_t mode_local = mode;
     
-    if(doIoctl(SPI_IOC_WR_MODE, &mode_local))
+    if(doIoctl(SPI_IOC_WR_MODE, &mode_local, err))
     {
         mode_ = mode_local;
         return true;
@@ -122,11 +114,11 @@ bool SPIPort::setMode(const uint8_t mode)
 }
 
 
-bool SPIPort::setBitsPerWord(const uint8_t bpw)
+bool SPIPort::setBitsPerWord(const uint8_t bpw, Error * const err)
 {
     uint8_t bpw_local = bpw;
 
-    if(doIoctl(SPI_IOC_WR_BITS_PER_WORD, &bpw_local))
+    if(doIoctl(SPI_IOC_WR_BITS_PER_WORD, &bpw_local, err))
     {
         xfer_.bits_per_word = bpw_local;
         bpw_ = bpw_local;
@@ -137,11 +129,11 @@ bool SPIPort::setBitsPerWord(const uint8_t bpw)
 }
 
 
-bool SPIPort::setMaxSpeed(const uint32_t hz)
+bool SPIPort::setMaxSpeed(const uint32_t hz, Error * const err)
 {
     uint32_t hz_local = hz;
 
-    if(doIoctl(SPI_IOC_WR_MAX_SPEED_HZ, &hz_local))
+    if(doIoctl(SPI_IOC_WR_MAX_SPEED_HZ, &hz_local, err))
     {
         xfer_.speed_hz = hz;
         maxClock_ = hz_local;
@@ -154,7 +146,8 @@ bool SPIPort::setMaxSpeed(const uint32_t hz)
 
 // transmitAndReceive() - do a simultaneous transmit/receive of len bytes of data.
 //
-bool SPIPort::transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data, const unsigned int len)
+bool SPIPort::transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data, const unsigned int len,
+                                 Error * const err)
 {
     uint8_t *rx_data_local;
     const uint8_t *tx_data_local;
@@ -164,13 +157,13 @@ bool SPIPort::transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data, const
 
     if((tx_data == NULL) && (rx_data == NULL))
     {
-        errno_ = EINVAL;
+        formatError(err, GPIO_NO_DATA);
         return false;
     }
 
     if(!ready())
     {
-        errno_ = EAGAIN;
+        formatError(err, GPIO_NOT_READY);
         return false;
     }
 
@@ -179,7 +172,7 @@ bool SPIPort::transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data, const
         rx_data_local = new uint8_t[len];
         if(!rx_data_local)
         {
-            errno_ = ENOMEM;
+            formatError(err, MALLOC_FAILED);
             return false;
         }
     }
@@ -195,7 +188,7 @@ bool SPIPort::transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data, const
                 delete[] rx_data_local;
             delete[] tx_data_local;
 
-            errno_ = ENOMEM;
+            formatError(err, MALLOC_FAILED);
             return false;
         }
     }
@@ -206,10 +199,7 @@ bool SPIPort::transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data, const
     xfer_.tx_buf = (unsigned long) tx_data_local;
     xfer_.len = len;
 
-    const bool ret = doIoctl(SPI_IOC_MESSAGE(1), &xfer_);
-
-    if(ret)
-        errno_ = 0;
+    const bool ret = doIoctl(SPI_IOC_MESSAGE(1), &xfer_, err);
 
     if(rx_data == NULL)
         delete[] rx_data_local;
@@ -221,14 +211,14 @@ bool SPIPort::transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data, const
 }
 
 
-bool SPIPort::transmitByte(const uint8_t data)
+bool SPIPort::transmitByte(const uint8_t data, Error * const err)
 {
-    return transmitAndReceive(&data, NULL, 1);
+    return transmitAndReceive(&data, NULL, 1, err);
 }
 
 
-bool SPIPort::receiveByte(uint8_t& data)
+bool SPIPort::receiveByte(uint8_t& data, Error * const err)
 {
-    return transmitAndReceive(NULL, &data, 1);
+    return transmitAndReceive(NULL, &data, 1, err);
 }
 
