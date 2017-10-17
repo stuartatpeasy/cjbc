@@ -9,9 +9,11 @@
 #include "sqlitestmt.h"
 #include "log.h"
 #include <cstdlib>
+#include <initializer_list>
 
 using std::string;
 using std::unique_ptr;
+using std::vector;
 
 
 SQLiteStmt::SQLiteStmt()
@@ -160,11 +162,17 @@ int SQLiteStmt::numCols()
 }
 
 
-// step() - advance the current prepared statement result-set to the next record, if any.
+// step() - advance the current prepared statement result-set to the next record, if any.  Return
+// true if another record was found.  Return false and do not set <err> if there are no more
+// records.  Return false and set <err> if anything else went wrong.
 //
 bool SQLiteStmt::step(Error * const err)
 {
-    return checkError(::sqlite3_step(stmt_), err, SQLITE_ROW);
+    const int ret = ::sqlite3_step(stmt_);
+    if(ret == SQLITE_DONE)
+        return false;       // No more records; do not set err.
+
+    return checkError(ret, err, SQLITE_ROW);
 }
 
 
@@ -196,10 +204,24 @@ unique_ptr<SQLiteColumn> SQLiteStmt::column(const int index)
 // succeeded); otherwise, if <err> is non-null then populate it with an appropriate error code and
 // message, and return false.
 //
-bool SQLiteStmt::checkError(const int ret, Error * const err, int successCode)
+bool SQLiteStmt::checkError(const int ret, Error * const err, const int successCode)
 {
-    if(ret == successCode)
-        return true;
+    vector<int> codes;
+    codes.push_back(successCode);
+    return checkError(ret, err, codes);
+}
+
+
+// checkError() - given the result of a call to an sqlite3_*() fn in <ret>, and set of values
+// indicating that the call succeeded in <successCodes>, return try if <ret> is present in
+// <successCodes> (i.e. the call succeeded); otherwise, if <err> is non-null the populate it with an
+// appropriate error code and message, and return false.
+//
+bool SQLiteStmt::checkError(const int ret, Error * const err, vector<int> successCodes)
+{
+    for(auto code : successCodes)
+        if(ret == code)
+            return true;
 
     formatError(err, ret);
     return false;
@@ -215,7 +237,6 @@ void SQLiteStmt::formatError(Error * const err, const int code)
     if(code != SQLITE_DONE)
         logWarning("SQLite stmt %x: error %d: %s", id(), code, ::sqlite3_errstr(code));
 
-    if(err != nullptr)
-        err->format(DB_SQLITESTMT_ERROR, code, ::sqlite3_errstr(code));
+    ::formatError(err, DB_SQLITESTMT_ERROR, ::sqlite3_errstr(code), code);
 }
 

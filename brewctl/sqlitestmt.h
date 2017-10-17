@@ -10,6 +10,7 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 #include "sqlitecolumn.h"
 #include "error.h"
 
@@ -66,7 +67,9 @@ public:
 
 private:
                                bool checkError(const int ret, Error * const err,
-                                               int successCode = SQLITE_OK);
+                                               const int successCode = SQLITE_OK);
+                               bool checkError(const int ret, Error * const err,
+                                               std::vector<int> successCodes);
                                void formatError(Error * const err, const int code);
 
                      sqlite3_stmt * stmt_;

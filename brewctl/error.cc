@@ -11,6 +11,7 @@
 #include <cstdarg>
 #include <cstdio>
 #include <map>
+#include <iomanip>
 #include <sstream>
 
 using std::map;
@@ -18,7 +19,7 @@ using std::ostringstream;
 using std::string;
 
 
-static map<ErrorCode_t, string> errStrings =
+static map<ErrorCode_t, string> errorMessages =
 {
     {MISSING_ARGVAL,            "Missing value for argument '%s'"},
     {UNKNOWN_ARG,               "Unrecognised argument '%s'"},
@@ -43,14 +44,6 @@ static map<ErrorCode_t, string> errStrings =
     {LCD_INVALID_CURSOR_POS,    "Invalid LCD cursor position requested"},
     {UNKNOWN_ERROR,             "Unknown error"},
 };
-
-
-
-static map<ErrorCode_t, const string> errorMessages =
-{
-    {DB_TOO_FEW_COLUMNS,        "Database error: too few columns returned by query"}
-};
-
 
 
 static const int msg_buffer_len = 4096; // Length of buffer in which the error message is written
@@ -125,8 +118,18 @@ void Error::format(const ErrorCode_t code, ...)
 void Error::formatV(const ErrorCode_t code, va_list args)
 {
     const auto msg = errorMessages.find(code);
-    const string fmtstr = (msg == errorMessages.end()) ? "Unknown internal error" : msg->second;
-    formatV(code, fmtstr.c_str(), args);
+    string fmtstr;
+
+    if(msg != errorMessages.end())
+        fmtstr = msg->second;
+    else
+    {
+        ostringstream unk;
+        unk << "Unknown internal error (code 0x" << std::setw(4) << std::hex << (int) code << ")";
+        fmtstr = unk.str();
+    }
+
+    formatV(code, fmtstr, args);
 }
 
 
@@ -150,9 +153,9 @@ void Error::formatV(const ErrorCode_t code, const string& format, va_list args)
 //
 string Error::stringFromCode(const ErrorCode_t code)
 {
-    auto it = errStrings.find(code);
+    auto it = errorMessages.find(code);
 
-    if(it == errStrings.end())
+    if(it == errorMessages.end())
     {
         ostringstream msg;
 

@@ -1,22 +1,17 @@
+/*
+    main.cc - entry point for brewctl
+
+    Stuart Wallace <stuartw@atom.net>, October 2017.
+
+    Part of brewctl
+*/
+
 #include "application.h"
 #include "error.h"
 
-#include "config.h"
-#include "spiport.h"
-#include "gpioport.h"
-#include "lcd.h"
-#include "adc.h"
-#include "shiftreg.h"
-#include "temperature.h"
-#include "thermistor.h"
-#include "tempsensor.h"
-#include <cstdio>
-#include <cstdlib>          // rand()
-
 extern "C"
 {
-#include <syslog.h>
-#include <unistd.h>
+#include <error.h>
 }
 
 /*
@@ -53,6 +48,10 @@ int main(int argc, char **argv)
 {
     Error err;
     Application app(argc, argv, &err);
+
+    if(err.code())
+        error(err.code(), 0, err.message().c_str());
+
 /*
     GPIOPort gpioPort;
     SPIPort spiPort(gpioPort, "/dev/spidev0.0");
