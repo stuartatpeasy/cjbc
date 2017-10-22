@@ -12,6 +12,7 @@
 #include "config.h"
 #include "error.h"
 #include "gpioport.h"
+#include "lcd.h"
 #include "spiport.h"
 #include "sqlite.h"
 #include <cstddef>
@@ -24,6 +25,7 @@ public:
     virtual         ~SessionManager();
 
     bool            init(Error * const err = nullptr);
+    void            run();
 
 private:
     Config&         config_;
@@ -32,6 +34,7 @@ private:
     GPIOPort        gpio_;
     SPIPort *       spi_;
     SQLite          db_;
+    LCD             lcd_;
 };
 
 #endif // SESSIONMANAGER_H_INC

@@ -81,10 +81,12 @@ bool SQLite::prepare(const string& sql, SQLiteStmt& stmt, Error * const err)
     if(isOpen())
     {
         ret = ::sqlite3_prepare_v2(db_, sql.c_str(), -1, stmt, NULL);
-        logDebug("SQLite: prepared stmt %x: %s", stmt.id(), sql.c_str());
 
         if(ret == SQLITE_OK)
+        {
+            logDebug("SQLite: prepared stmt {%x}: %s", stmt.id(), sql.c_str());
             return true;
+        }
     }
     else
     {
@@ -122,7 +124,6 @@ bool SQLite::prepareAndStep(const std::string& sql, SQLiteStmt& stmt, Error * co
 void SQLite::formatError(Error * const err, const int code)
 {
     logWarning("SQLite error %d: %s", code, ::sqlite3_errstr(code));
-    if(err != nullptr)
-        err->format(DB_SQLITE_ERROR, code, ::sqlite3_errstr(code));
+    ::formatError(err, DB_SQLITE_ERROR, ::sqlite3_errstr(code), code);
 }
 

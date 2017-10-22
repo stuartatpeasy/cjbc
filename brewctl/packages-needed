@@ -1,3 +1,5 @@
+gcc-c++
+make
 wiringpi
 sqlite3
 libsqlite3-dev

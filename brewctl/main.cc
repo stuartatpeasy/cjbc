@@ -11,7 +11,7 @@
 
 extern "C"
 {
-#include <error.h>
+#include <error.h>          // ::error()
 }
 
 /*
@@ -44,72 +44,16 @@ extern "C"
 */
 
 
+// main() - application entry point
+//
 int main(int argc, char **argv)
 {
     Error err;
     Application app(argc, argv, &err);
 
     if(err.code())
-        error(err.code(), 0, err.message().c_str());
+        ::error(err.code(), 0, err.message().c_str());
 
-/*
-    GPIOPort gpioPort;
-    SPIPort spiPort(gpioPort, "/dev/spidev0.0");
-    LCD lcd(gpioPort);
-    ShiftReg sr(gpioPort, spiPort);
-
-    spiPort.setMode(SPI_MODE_0);        // TODO remove
-    spiPort.setBitsPerWord(8);          // TODO remove
-    spiPort.setMaxSpeed(500000);        // TODO remove
-
-    ADC adc(gpioPort, spiPort, 5.0);
-
-    Thermistor thermistor(3980, 4700, Temperature(25.0, TEMP_UNIT_CELSIUS));
-
-    TempSensor sensor1(thermistor, adc, 0, 0.000147),
-               sensor2(thermistor, adc, 1, 0.000147);
-
-    Temperature T1, T2;
-
-    for(int i = 0; i < 2; ++i)
-    {
-        lcd.printAt(0, i, "F%d", i + 1);
-        lcd.printAt(0, i + 2, "C%d", i + 1);
-    }
-
-    lcd.printAt(10, 0, "10d18h");
-    lcd.printAt(4, 1, "--.-");
-    lcd.printAt(4, 2, "--.-");
-    lcd.printAt(4, 3, "--.-");
-
-    sr.set(0);
-
-    for(int i = 0;; ++i)
-    {
-        sensor1.sense(T1);
-        sensor2.sense(T2);
-
-        if(!(i % 100))
-        {
-            if(T1.C() > -5.0)
-                lcd.printAt(4, 0, "%4.1lf\xdf", T1.C() + 0.05);
-            else
-                lcd.printAt(4, 0, "--.- ");
-
-            if(T2.C() > -5.0)
-                lcd.printAt(4, 1, "%4.1lf\xdf", T2.C() + 0.05);
-            else
-                lcd.printAt(4, 1, "--.- ");
-
-            lcd.putAt(3, 0, LCD_CH_ARROW_2DOWN);
-
-            // XXX output switch 1 = bit 8 .... 8 = bit 15
-            sr.toggle(10);
-        }
-
-        ::usleep(500 + (::rand() & 0x3ff));
-    }
-*/
     return 0;
 }
 

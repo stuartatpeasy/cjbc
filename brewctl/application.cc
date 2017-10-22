@@ -61,6 +61,8 @@ Application::Application(int argc, char **argv, Error * const err)
 
     if(!sessionManager_->init(err))
         return;
+
+    sessionManager_->run();
 }
 
 

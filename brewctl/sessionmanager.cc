@@ -8,10 +8,19 @@
 
 #include "sessionmanager.h"
 #include "log.h"
+#include "shiftreg.h"
+#include "temperature.h"
+#include "tempsensor.h"
+#include <cstdlib>          // ::rand()
+
+extern "C"
+{
+#include <unistd.h>         // ::usleep()
+}
 
 
 SessionManager::SessionManager(Config& config, Error * const err)
-    : config_(config)
+    : config_(config), lcd_(gpio_)
 {
     if(!db_.open(config_("database"), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, err))
     {
@@ -47,28 +56,38 @@ SessionManager::~SessionManager()
 }
 
 
+#include <iostream>     // FIXME remove
+using namespace std;    // FIXME remove
 bool SessionManager::init(Error * const err)
 {
     SQLiteStmt sessions;
 
-    if(db_.prepare("SELECT id, gyle, type FROM session WHERE date_start<=CURRENT_TIMESTAMP",
-                   sessions, err))
+    if(db_.prepare("SELECT "
+                       "id, gyle, profile_id, "
+                       "CAST((JULIANDAY(date_start) - 2440587.5) * 86400.0 AS INT) AS start_ts "
+                   "FROM session "
+                   "WHERE date_start<=CURRENT_TIMESTAMP AND date_finish IS NULL "
+                   "ORDER BY date_start", sessions, err))
     {
         while(sessions.step(err))
         {
             SQLiteStmt stages;
 
-            auto sessionId = sessions.column(0);
-            if(sessionId == nullptr)
+            cout << "Processing session " << sessions.column(1)->asCString() << endl;
+
+            auto profileId = sessions.column(2);
+            if(profileId == nullptr)
             {
                formatError(err, DB_TOO_FEW_COLUMNS);
                return false;
             }
 
-            if(db_.prepare("SELECT * FROM sessionstage WHERE session_id=:id ORDER BY stage_id",
+            if(db_.prepare("SELECT * FROM profilestage "
+                           "WHERE profile_id=:profile_id "
+                           "ORDER BY stage_id",
                            stages, err))
             {
-                if(!stages.bind(":id", (int) *sessionId, err))
+                if(!stages.bind(":profile_id", (int) *profileId, err))
                     return false;
 
                 while(stages.step(err))
@@ -78,10 +97,62 @@ bool SessionManager::init(Error * const err)
             }
         }
 
-        if(err->code() != SQLITE_DONE)
+        if(err->code() && (err->code() != SQLITE_DONE))
             return false;
     }
 
     return true;
+}
+
+
+void SessionManager::run()
+{
+    Thermistor thermistor(3980, 4700, Temperature(25.0, TEMP_UNIT_CELSIUS));
+
+    TempSensor sensor1(thermistor, *adc_, 0, 0.000147),
+               sensor2(thermistor, *adc_, 1, 0.000147);
+
+    ShiftReg sr(gpio_, *spi_);
+
+    Temperature T1, T2;
+
+    for(int i = 0; i < 2; ++i)
+    {
+        lcd_.printAt(0, i, "F%d", i + 1);
+        lcd_.printAt(0, i + 2, "C%d", i + 1);
+    }
+
+    lcd_.printAt(10, 0, "10d18h");
+    lcd_.printAt(4, 1, "--.-");
+    lcd_.printAt(4, 2, "--.-");
+    lcd_.printAt(4, 3, "--.-");
+
+    sr.set(0);
+
+    for(int i = 0;; ++i)
+    {
+        sensor1.sense(T1);
+        sensor2.sense(T2);
+
+        if(!(i % 100))
+        {
+            if(T1.C() > -5.0)
+                lcd_.printAt(4, 0, "%4.1lf\xdf", T1.C() + 0.05);
+            else
+                lcd_.printAt(4, 0, "--.- ");
+
+            if(T2.C() > -5.0)
+                lcd_.printAt(4, 1, "%4.1lf\xdf", T2.C() + 0.05);
+            else
+                lcd_.printAt(4, 1, "--.- ");
+
+            lcd_.putAt(3, 0, LCD_CH_ARROW_2DOWN);
+
+            // XXX output switch 1 = bit 8 .... 8 = bit 15
+            sr.toggle(10);
+        }
+
+        ::usleep(500 + (::rand() & 0x3ff));
+    }
 }
 

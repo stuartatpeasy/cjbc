@@ -28,7 +28,7 @@ SQLiteStmt::~SQLiteStmt()
 {
     if(stmt_ != NULL)
     {
-        logDebug("SQLiteStmt: stmt %x: finalizing", id());
+        logDebug("SQLiteStmt: stmt {%x}: finalizing", id());
         ::sqlite3_finalize(stmt_);
     }
 }
@@ -235,7 +235,7 @@ void SQLiteStmt::formatError(Error * const err, const int code)
 {
     // Log any errors.  Exclude return values which do not indicate an error.
     if(code != SQLITE_DONE)
-        logWarning("SQLite stmt %x: error %d: %s", id(), code, ::sqlite3_errstr(code));
+        logWarning("SQLite stmt {%x}: error %d: %s", id(), code, ::sqlite3_errstr(code));
 
     ::formatError(err, DB_SQLITESTMT_ERROR, ::sqlite3_errstr(code), code);
 }
