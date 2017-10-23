@@ -15,10 +15,13 @@ Session::Session(SQLite& db, const int id, Error * const err)
 {
     SQLiteStmt session;
 
-    if(!db_.prepareAndStep("SELECT gyle, profile_id, "
-                               "CAST((JULIANDAY(date_start, 2440587.5) * 86400.0 AS INT) "
-                                   "AS start_ts "
-                           "FROM session", session, err))
+    if(!db_.prepare("SELECT gyle, profile_id, "
+                        "CAST((JULIANDAY(date_start) - 2440587.5) * 86400.0 AS INT) AS start_ts "
+                    "FROM session "
+                    "WHERE id=:id", session, err))
+        return;
+
+    if(!session.bind(":id", id, err) || !session.step(err))
         return;
 
     gyle_ = session.column(0)->asString();

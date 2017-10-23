@@ -95,6 +95,7 @@ bool SQLite::prepare(const string& sql, SQLiteStmt& stmt, Error * const err)
         ret = SQLITE_ABORT;
     }
 
+    logWarning("Failed to prepare stmt: %s", sql.c_str());
     formatError(err, ret);
     return false;
 }

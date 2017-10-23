@@ -1,3 +1,0 @@
-#!/bin/sh
-
-g++ -g -Wall -Wextra -Werror -pedantic -std=c++17 -lwiringPi -lsqlite3 *.cc -obrewctl

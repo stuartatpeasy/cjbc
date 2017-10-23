@@ -60,22 +60,20 @@ bool SessionManager::init(Error * const err)
 {
     SQLiteStmt sessions;
 
-    if(db_.prepare("SELECT "
-                       "id, gyle, profile_id, "
-                       "CAST((JULIANDAY(date_start) - 2440587.5) * 86400.0 AS INT) AS start_ts "
-                   "FROM session "
-                   "WHERE date_start<=CURRENT_TIMESTAMP AND date_finish IS NULL "
-                   "ORDER BY date_start", sessions, err))
+    if(!db_.prepare("SELECT id "
+                    "FROM session "
+                    "WHERE date_start<=CURRENT_TIMESTAMP AND date_finish IS NULL "
+                    "ORDER BY date_start", sessions, err))
+        return false;
+
+    while(sessions.step(err))
     {
-        while(sessions.step(err))
-        {
-            sessions_.push_back(Session(db_, sessions.column(0)->asInt(), err));
-            if(err->code())
-                return false;
-        }
+        sessions_.push_back(Session(db_, sessions.column(0)->asInt(), err));
+        if(err->code())
+            return false;
     }
 
-    return true;
+    return !err->code();
 }
 
 
