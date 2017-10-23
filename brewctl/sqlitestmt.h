@@ -63,6 +63,7 @@ public:
                                     operator sqlite3_stmt *() { return stmt_; };
                                     operator sqlite3_stmt **() { return &stmt_; };
 
+                               void finalise();
                              size_t id() const { return (size_t) stmt_; };
 
 private:

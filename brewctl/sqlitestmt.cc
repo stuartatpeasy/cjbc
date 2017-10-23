@@ -26,11 +26,7 @@ SQLiteStmt::SQLiteStmt()
 //
 SQLiteStmt::~SQLiteStmt()
 {
-    if(stmt_ != NULL)
-    {
-        logDebug("SQLiteStmt: stmt {%x}: finalizing", id());
-        ::sqlite3_finalize(stmt_);
-    }
+    finalise();
 }
 
 //
@@ -196,6 +192,19 @@ unique_ptr<SQLiteColumn> SQLiteStmt::column(const int index)
     unique_ptr<SQLiteColumn> col(new SQLiteColumn(*this, index));
 
     return col;
+}
+
+
+// finalise() - "finalise", i.e. destruct, a stmt.
+//
+void SQLiteStmt::finalise()
+{
+    if(stmt_ != NULL)
+    {
+        logDebug("SQLiteStmt: stmt {%x}: finalizing", id());
+        ::sqlite3_finalize(stmt_);
+        stmt_ = NULL;
+    }
 }
 
 

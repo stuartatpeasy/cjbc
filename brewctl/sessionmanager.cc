@@ -11,7 +11,7 @@
 #include "shiftreg.h"
 #include "temperature.h"
 #include "tempsensor.h"
-#include <cstdlib>          // ::rand()
+#include <cstdlib>          // ::rand(), NULL
 
 extern "C"
 {
@@ -56,8 +56,6 @@ SessionManager::~SessionManager()
 }
 
 
-#include <iostream>     // FIXME remove
-using namespace std;    // FIXME remove
 bool SessionManager::init(Error * const err)
 {
     SQLiteStmt sessions;
@@ -71,34 +69,10 @@ bool SessionManager::init(Error * const err)
     {
         while(sessions.step(err))
         {
-            SQLiteStmt stages;
-
-            cout << "Processing session " << sessions.column(1)->asCString() << endl;
-
-            auto profileId = sessions.column(2);
-            if(profileId == nullptr)
-            {
-               formatError(err, DB_TOO_FEW_COLUMNS);
-               return false;
-            }
-
-            if(db_.prepare("SELECT * FROM profilestage "
-                           "WHERE profile_id=:profile_id "
-                           "ORDER BY stage_id",
-                           stages, err))
-            {
-                if(!stages.bind(":profile_id", (int) *profileId, err))
-                    return false;
-
-                while(stages.step(err))
-                {
-                    logDebug("stepping stage");
-                }
-            }
+            sessions_.push_back(Session(db_, sessions.column(0)->asInt(), err));
+            if(err->code())
+                return false;
         }
-
-        if(err->code() && (err->code() != SQLITE_DONE))
-            return false;
     }
 
     return true;

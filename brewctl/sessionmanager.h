@@ -13,28 +13,32 @@
 #include "error.h"
 #include "gpioport.h"
 #include "lcd.h"
+#include "session.h"
 #include "spiport.h"
 #include "sqlite.h"
 #include <cstddef>
+#include <vector>
 
 
 class SessionManager
 {
 public:
-                    SessionManager(Config& config, Error * const err = nullptr);
-    virtual         ~SessionManager();
+                            SessionManager(Config& config, Error * const err = nullptr);
+    virtual                 ~SessionManager();
 
-    bool            init(Error * const err = nullptr);
-    void            run();
+    bool                    init(Error * const err = nullptr);
+    void                    run();
 
 private:
-    Config&         config_;
+    Config&                 config_;
 
-    ADC *           adc_;
-    GPIOPort        gpio_;
-    SPIPort *       spi_;
-    SQLite          db_;
-    LCD             lcd_;
+    ADC *                   adc_;
+    GPIOPort                gpio_;
+    SPIPort *               spi_;
+    SQLite                  db_;
+    LCD                     lcd_;
+
+    std::vector<Session>    sessions_;
 };
 
 #endif // SESSIONMANAGER_H_INC

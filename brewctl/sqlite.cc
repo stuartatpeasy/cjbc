@@ -80,6 +80,7 @@ bool SQLite::prepare(const string& sql, SQLiteStmt& stmt, Error * const err)
 
     if(isOpen())
     {
+        stmt.finalise();        // in case stmt represents an active statement
         ret = ::sqlite3_prepare_v2(db_, sql.c_str(), -1, stmt, NULL);
 
         if(ret == SQLITE_OK)

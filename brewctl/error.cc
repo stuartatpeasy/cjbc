@@ -26,6 +26,7 @@ static map<ErrorCode_t, string> errorMessages =
     {CFG_FILE_OPEN_FAILED,      "Failed to open config file '%s'"},
     {MALLOC_FAILED,             "Memory allocation failed"},
     {LIBWIRINGPI_INIT_FAILED,   "Failed to initialise libWiringPi"},
+    {NO_SUCH_SESSION,           "Session %d does not exist"},
     {DB_OPEN_FAILED,            "Failed to create or open database file '%s': %s (%d)"},
     {DB_TOO_FEW_COLUMNS,        "Query returned too few columns"},
     {DB_SQLITE_ERROR,           "SQLite error: %s (%d)"},
