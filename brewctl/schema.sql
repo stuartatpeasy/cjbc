@@ -133,8 +133,21 @@ DELETE FROM thermistor;
 INSERT INTO thermistor(id, name, type, Tref_C, Rref, beta, range_min, range_max) VALUES
     (1, "B57891M0472K000", "NTC", 25.0, 4700.0, 3980.0, -5.0, 40.0);
 
+DELETE FROM sensortype;
+INSERT INTO sensortype(id, name, type, type_id) VALUES
+    (1, "Temperature sensor", "thermistor", 1);
+
 -- remove this
 DELETE FROM session;
 INSERT INTO session(id, gyle, profile_id, date_create, date_start, date_finish) VALUES
     (1, "G107", 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
+
+DELETE FROM sessioneffector;
+INSERT INTO sessioneffector(session_id, effectortype_id, channel) VALUES
+    (1, 1, 0),
+    (1, 2, 1);
+
+DELETE FROM sessionsensor;
+INSERT INTO sessionsensor(session_id, sensortype_id, channel) VALUES
+    (1, 1, 0);
 

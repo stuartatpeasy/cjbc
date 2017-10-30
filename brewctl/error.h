@@ -36,6 +36,7 @@ typedef enum
     ADC_NOT_READY               = 0x1400,
     ADC_INVALID_CHANNEL         = 0x1401,
     LCD_INVALID_CURSOR_POS      = 0x1500,
+    SENSOR_INVALID_TYPE         = 0x1600,
     UNKNOWN_ERROR               = 0xffff
 } ErrorCode_t;
 

@@ -9,6 +9,8 @@
 #include "session.h"
 #include <cstdlib>      // NULL
 
+#include <iostream>     // FIXME remove
+using namespace std;    // FIXME remove
 
 Session::Session(SQLite& db, const int id, Error * const err)
     : db_(db), id_(id), start_ts_(0)
@@ -43,9 +45,16 @@ Session::Session(SQLite& db, const int id, Error * const err)
 
         offset +=  duration;
         stages_.push_back(SessionStage_t(duration, session.column(2)->asDouble()));
+
+        cout << "Session stage: duration " << duration / 3600 << "h, temp " << session.column(2)->asDouble() << endl;
     }
 
     end_ts_ = offset;
+
+    if(isActive())
+        cout << "Session is active; current temp should be " << targetTemp().C() << "deg C" << endl;
+    else
+        cout << "Session is not active" << endl;
 
     if(err->code())
         return;
@@ -60,11 +69,10 @@ Temperature Session::targetTemp()
     time_t offset = start_ts_;
 
     for(auto it = stages_.begin(); it != stages_.end(); ++it)
-    {
         if((offset + it->first) > now)
             return Temperature(it->second, TEMP_UNIT_CELSIUS);
-    }
 
+    // Session is not active
     return Temperature(0, TEMP_UNIT_KELVIN);
 }
 
