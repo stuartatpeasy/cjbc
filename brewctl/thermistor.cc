@@ -19,11 +19,6 @@ Thermistor::Thermistor(const double beta, const double R0, const Temperature& T0
 }
 
 
-Thermistor::~Thermistor()
-{
-}
-
-
 // T() - return the temperature corresponding to the resistance R, given in ohms.
 //
 Temperature Thermistor::T(const double R) const

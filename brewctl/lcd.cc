@@ -178,13 +178,6 @@ LCD::LCD(GPIOPort& gpio, Error * const err)
         if(!gpio.setMode(pin, PIN_OUTPUT, err))
             return;
     }
-
-    init(err);
-}
-
-
-LCD::~LCD()
-{
 }
 
 
@@ -234,7 +227,7 @@ bool LCD::init(Error * const err)
 
 bool LCD::toggleEClock(Error * const err)
 {
-    auto gpio = Registry::instance().gpio();
+    auto& gpio = Registry::instance().gpio();
     for(auto i: {1, 0})
     {
         if(!gpio.write(GPIO_LCD_E, i, err))
@@ -249,7 +242,7 @@ bool LCD::toggleEClock(Error * const err)
 
 bool LCD::writeCommand(uint8_t cmd, Error * const err)
 {
-    auto gpio = Registry::instance().gpio();
+    auto& gpio = Registry::instance().gpio();
 
     // Set RS=0
     if(!gpio.write(GPIO_LCD_RS, 0, err))
@@ -266,7 +259,7 @@ bool LCD::writeCommand(uint8_t cmd, Error * const err)
 
 bool LCD::writeData(uint8_t data, Error * const err)
 {
-    auto gpio = Registry::instance().gpio();
+    auto& gpio = Registry::instance().gpio();
 
     // Set RS=1
     if(!gpio.write(GPIO_LCD_RS, 1, err))

@@ -72,11 +72,6 @@ Error::Error(Error&& rhs) noexcept
 }
 
 
-Error::~Error()
-{
-}
-
-
 Error& Error::operator=(const Error& rhs)
 {
     return init(rhs);
@@ -120,7 +115,7 @@ void Error::format(const ErrorCode_t code, ...)
 //
 void Error::formatV(const ErrorCode_t code, va_list args)
 {
-    const auto msg = errorMessages.find(code);
+    const auto& msg = errorMessages.find(code);
     string fmtstr;
 
     if(msg != errorMessages.end())

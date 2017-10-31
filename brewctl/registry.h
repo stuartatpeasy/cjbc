@@ -20,7 +20,7 @@
 class Registry
 {
 public:
-    static void         init(Config& config, Error * const err);
+    static bool         init(Config& config, Error * const err);
 
     static Registry&    instance()  { return *instance_; };
 

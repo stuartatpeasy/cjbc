@@ -25,15 +25,14 @@ class LCD
 {
 public:
                     LCD(GPIOPort& gpio, Error * const err = nullptr);
-    virtual        ~LCD();
 
     bool            clear(Error * const err = nullptr);
     int             printAt(const int x, const int y, const std::string& format, ...);
     bool            putAt(const int x, const int y, const char c, Error * const err = nullptr);
     bool            setCursorPos(const int x, const int , Error * const err = nullptr);
+    bool            init(Error * const err = nullptr);
 
 protected:
-    bool            init(Error * const err = nullptr);
     bool            writeCommand(uint8_t cmd, Error * const err = nullptr);
     bool            writeData(uint8_t cmd, Error * const err = nullptr);
     bool            toggleEClock(Error * const err = nullptr);

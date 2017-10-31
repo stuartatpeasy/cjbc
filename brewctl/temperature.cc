@@ -32,11 +32,6 @@ Temperature::Temperature(const double value, const TemperatureUnit_t unit)
 }
 
 
-Temperature::~Temperature()
-{
-}
-
-
 bool Temperature::set(const double value, const TemperatureUnit_t unit)
 {
     switch(unit)

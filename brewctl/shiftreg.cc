@@ -32,7 +32,7 @@ typedef enum ShiftRegPin
 ShiftReg::ShiftReg(Error * const err)
     : ready_(false), currentVal_(0)
 {
-    auto r = Registry::instance();
+    auto& r = Registry::instance();
 
     // Force the register-clock signal to be an output, and de-assert it
     if(!r.gpio().write(GPIO_SR_RCLK, 0, err) ||
@@ -50,7 +50,7 @@ ShiftReg::ShiftReg(Error * const err)
 //
 bool ShiftReg::strobeRegClk(Error * const err)
 {
-    auto gpio = Registry::instance().gpio();
+    auto& gpio = Registry::instance().gpio();
 
     if(!gpio.write(GPIO_SR_RCLK, 1, err))
         return false;
@@ -69,7 +69,7 @@ bool ShiftReg::strobeRegClk(Error * const err)
 //
 bool ShiftReg::write(const uint16_t val, Error * const err)
 {
-    auto r = Registry::instance();
+    auto& r = Registry::instance();
     uint16_t valLocal = val;
 
     if(!ready_)

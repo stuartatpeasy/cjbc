@@ -24,56 +24,56 @@ class SQLiteStmt
 {
 public:
                                     SQLiteStmt();
-                            virtual ~SQLiteStmt();
+    virtual                         ~SQLiteStmt();
 
                                     // Indexed bind methods
-                               bool bind(const int index, const double arg,
+	bool                            bind(const int index, const double arg,
                                          Error * const err = nullptr);
-                               bool bind(const int index, const int arg,
+	bool                            bind(const int index, const int arg,
                                          Error * const err = nullptr);
-                               bool bind(const int index, const long long arg,
+	bool                            bind(const int index, const long long arg,
                                          Error * const err = nullptr);
-                               bool bind(const int index, const std::string& arg,
+	bool                            bind(const int index, const std::string& arg,
                                          Error * const err = nullptr);
-                               bool bind(const int index, const int len, const void * const arg,
+	bool                            bind(const int index, const int len, const void * const arg,
                                          Error * const err = nullptr);
-                               bool bindNull(const int index, Error * const err = nullptr);
+	bool                            bindNull(const int index, Error * const err = nullptr);
 
                                     // Named-parameter bind methods
-                               bool bind(const std::string& param, const double arg,
+	bool                            bind(const std::string& param, const double arg,
                                          Error * const err = nullptr);
-                               bool bind(const std::string& param, const int arg,
+	bool                            bind(const std::string& param, const int arg,
                                          Error * const err = nullptr);
-                               bool bind(const std::string& param, const long long arg,
+	bool                            bind(const std::string& param, const long long arg,
                                          Error * const err = nullptr);
-                               bool bind(const std::string& param, const std::string& arg,
+	bool                            bind(const std::string& param, const std::string& arg,
                                          Error * const err = nullptr);
-                               bool bind(const std::string& param, const int len,
+	bool                            bind(const std::string& param, const int len,
                                          const void * const arg, Error * const err = nullptr);
-                               bool bindNull(const std::string& param, Error * const err = nullptr);
+	bool                            bindNull(const std::string& param, Error * const err = nullptr);
 
-                               bool clearBindings(Error * const err = nullptr);
+	bool                            clearBindings(Error * const err = nullptr);
 
-                                int numCols();
+    int                             numCols();
 
-                               bool step(Error * const err = nullptr);
-                               bool reset(Error * const err = nullptr);
-      std::unique_ptr<SQLiteColumn> column(const int index);
+	bool                            step(Error * const err = nullptr);
+	bool                            reset(Error * const err = nullptr);
+    std::unique_ptr<SQLiteColumn>   column(const int index);
 
                                     operator sqlite3_stmt *() { return stmt_; };
                                     operator sqlite3_stmt **() { return &stmt_; };
 
-                               void finalise();
-                             size_t id() const { return (size_t) stmt_; };
+    void                            finalise();
+    size_t                          id() const { return (size_t) stmt_; };
 
 private:
-                               bool checkError(const int ret, Error * const err,
+	bool                            checkError(const int ret, Error * const err,
                                                const int successCode = SQLITE_OK);
-                               bool checkError(const int ret, Error * const err,
+	bool                            checkError(const int ret, Error * const err,
                                                std::vector<int> successCodes);
-                               void formatError(Error * const err, const int code);
+    void                            formatError(Error * const err, const int code);
 
-                     sqlite3_stmt * stmt_;
+    sqlite3_stmt *                  stmt_;
 };
 
 #endif // SQLITESTMT_H_INC

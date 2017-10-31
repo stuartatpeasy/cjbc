@@ -48,7 +48,6 @@ public:
                         Error();
                         Error(const Error& rhs);
                         Error(Error&& rhs) noexcept;
-    virtual             ~Error();
 
     Error&              operator=(const Error& rhs);
     Error&              operator=(Error&& rhs) noexcept;

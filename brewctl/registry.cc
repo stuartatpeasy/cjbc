@@ -33,9 +33,14 @@ Registry::Registry(Config& config, Error * const err)
 }
 
 
-void Registry::init(Config& config, Error * const err)
+bool Registry::init(Config& config, Error * const err)
 {
     if(instance_ == nullptr)
+    {
         instance_ = new Registry(config, err);
+        return !err->code();
+    }
+
+    return true;
 }
 

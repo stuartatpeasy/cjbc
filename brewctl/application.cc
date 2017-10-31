@@ -48,14 +48,13 @@ Application::Application(int argc, char **argv, Error * const err)
     if(!parseArgs(argc, argv, err))
         return;
 
+    // FIXME error-checking in these methods
     logInit(config_("log.method"));
     logSetLevel(config_("log.level"));
 
-    Registry::init(config_, err);
-    if(err->code())
-        return;
-
-    if(!sessionManager_.init(err))
+    if(!Registry::init(config_, err) ||             // Initialise registry
+       !Registry::instance().lcd().init(err) ||     // Initialise LCD
+       !sessionManager_.init(err))                  // Initialise session manager
         return;
 
     sessionManager_.run();

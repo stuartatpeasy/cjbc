@@ -19,9 +19,6 @@ typedef std::map<std::string, std::string> ConfigData_t;
 class Config
 {
 public:
-                        Config();
-    virtual             ~Config();
-
     void                add(std::istream& is, const std::string& name = "<istream>");
     void                add(const std::string& filename);
     void                add(const ConfigData_t data);

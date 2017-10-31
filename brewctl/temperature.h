@@ -26,7 +26,6 @@ class Temperature
 public:
                                 Temperature();
                                 Temperature(const double value, const TemperatureUnit_t unit);
-    virtual                     ~Temperature();
 
     bool                        set(const double value, const TemperatureUnit_t unit);
 

@@ -25,16 +25,6 @@ using std::string;
 using boost::algorithm::trim;
 
 
-Config::Config()
-{
-}
-
-
-Config::~Config()
-{
-}
-
-
 // add() - read the supplied input stream <is> (whose "name", e.g. a filename) is given in <name>,
 // and add the key/value pairs found in the stream to the configuration store.
 //
