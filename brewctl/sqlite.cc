@@ -1,6 +1,5 @@
 /*
-    sqlite.h: minimal wrapper around common SQLite functions and management for a SQLite database
-    object.
+    sqlite.h: minimal wrapper around common SQLite functions and management for a SQLite database object.
 
     Stuart Wallace <stuartw@atom.net>, September 2017.
 
@@ -49,8 +48,8 @@ bool SQLite::open(const string& filename, const int flags, Error * const err)
 }
 
 
-// close() - attempt to close the currently-open database session.  Returns true on success, or if
-// there is no currently-open session; false otherwise.
+// close() - attempt to close the currently-open database session.  Returns true on success, or if there is no
+// currently-open session; false otherwise.
 //
 bool SQLite::close(Error * const err)
 {
@@ -71,8 +70,8 @@ bool SQLite::close(Error * const err)
 }
 
 
-// prepare() - prepare the SQL statement <sql> for execution; on success, return a statement object
-// through <stmt>.  Return the SQLite retval in all cases.
+// prepare() - prepare the SQL statement <sql> for execution; on success, return a statement object through <stmt>.
+// Return the SQLite retval in all cases.
 //
 bool SQLite::prepare(const string& sql, SQLiteStmt& stmt, Error * const err)
 {
@@ -101,9 +100,9 @@ bool SQLite::prepare(const string& sql, SQLiteStmt& stmt, Error * const err)
 }
 
 
-// prepareAndStep() - prepare the SQL query in <sql> and - if successful - execute step() on the
-// prepared statement in order to execute the query and generate the first resulting record.  This
-// method is intended for use with queries in which the result-set is not required.
+// prepareAndStep() - prepare the SQL query in <sql> and - if successful - execute step() on the prepared statement in
+// order to execute the query and generate the first resulting record.  This method is intended for use with queries in
+//which the result-set is not required.
 //
 bool SQLite::prepareAndStep(const std::string& sql, SQLiteStmt& stmt, Error * const err)
 {
@@ -120,8 +119,8 @@ bool SQLite::prepareAndStep(const std::string& sql, SQLiteStmt& stmt, Error * co
 }
 
 
-// formatError() - populate Error object err (if non-null) with the supplied error code and an
-// appropriate human-readable error message.
+// formatError() - populate Error object err (if non-null) with the supplied error code and an appropriate
+// human-readable error message.
 //
 void SQLite::formatError(Error * const err, const int code)
 {

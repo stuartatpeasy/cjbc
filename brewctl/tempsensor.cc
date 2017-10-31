@@ -1,6 +1,6 @@
 /*
-    tempsensor.cc: models a temperature sensor based on a NTC thermistor driven by a constant-
-    current source, and an ADC channel.
+    tempsensor.cc: models a temperature sensor based on a NTC thermistor driven by a constant-current source, and an ADC
+    channel.
 
     Stuart Wallace <stuartw@atom.net>, September 2017.
 
@@ -12,12 +12,14 @@
 
 
 TempSensor::TempSensor(Thermistor& thermistor, const int channel, const double Idrive)
-    : thermistor_(thermistor), channel_(channel), Idrive_(Idrive), nsamples_(1000),
-      tempKelvin_(0.0), sampleTaken_(false)
+    : thermistor_(thermistor), channel_(channel), Idrive_(Idrive), nsamples_(1000), tempKelvin_(0.0),
+      sampleTaken_(false)
 {
 }
 
 
+// setMovingAvgLen() - set the number of samples in the moving average.  No-op if <len> == 0.
+//
 TempSensor& TempSensor::setMovingAvgLen(const unsigned int len)
 {
     if(len)
@@ -27,6 +29,9 @@ TempSensor& TempSensor::setMovingAvgLen(const unsigned int len)
 }
 
 
+// sense() - read our ADC channel, update the moving average, and return the moving-average temperature through <T>.
+// Return true on success, false otherwise.
+//
 bool TempSensor::sense(Temperature& T)
 {
     double adcVoltage = 0.0;
@@ -36,9 +41,8 @@ bool TempSensor::sense(Temperature& T)
 
     const Temperature sample = thermistor_.T(adcVoltage / Idrive_);
 
-    // If this is the first sample, set the moving-average value to the sampled temperature in order
-    // to initialise it to an approximate value.  If this is not the first sample, use the data to
-    // adjust the moving average value.
+    // If this is the first sample, set the moving-average value to the sampled temperature in order to initialise it to
+    // an approximate value.  If this is not the first sample, use the data to adjust the moving average value.
     if(sampleTaken_)
     {
         // At least one sample has already been taken

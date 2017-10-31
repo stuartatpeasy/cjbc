@@ -1,6 +1,5 @@
 /*
-    thermistor.cc: models an NTC thermistor using the beta parameter.  Deals with temperatures in
-    Celsius.
+    thermistor.cc: models an NTC thermistor using the beta parameter.  Deals with temperatures in Celsius.
 
     Stuart Wallace <stuartw@atom.net>, September 2017.
 

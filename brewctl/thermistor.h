@@ -1,8 +1,7 @@
 #ifndef THERMISTOR_H_INC
 #define THERMISTOR_H_INC
 /*
-    thermistor.h: models an NTC thermistor using the beta parameter.  Deals with temperatures in
-    Celsius.
+    thermistor.h: models an NTC thermistor using the beta parameter.  Deals with temperatures in Celsius.
 
     Stuart Wallace <stuartw@atom.net>, September 2017.
 

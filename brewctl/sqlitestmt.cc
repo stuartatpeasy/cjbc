@@ -61,8 +61,7 @@ bool SQLiteStmt::bind(const int index, const long long arg, Error * const err)
 //
 bool SQLiteStmt::bind(const int index, const string& arg, Error * const err)
 {
-    return checkError(::sqlite3_bind_text(stmt_, index, arg.c_str(), arg.length(),
-                                          SQLITE_TRANSIENT), err);
+    return checkError(::sqlite3_bind_text(stmt_, index, arg.c_str(), arg.length(), SQLITE_TRANSIENT), err);
 }
 
 
@@ -121,8 +120,7 @@ bool SQLiteStmt::bind(const string& param, const std::string& arg, Error * const
 }
 
 
-// bind() - bind a BLOB value at <arg>, with length <len>,  to the named parameter <param> in the
-// current statement.
+// bind() - bind a BLOB value at <arg>, with length <len>,  to the named parameter <param> in the current statement.
 //
 bool SQLiteStmt::bind(const string& param, const int len, const void * const arg,
                       Error * const err)
@@ -149,8 +147,8 @@ bool SQLiteStmt::clearBindings(Error * const err)
 }
 
 
-// numCols() - return the number of columns associated with the current statement, or 0 if there is
-// no current statement.
+// numCols() - return the number of columns associated with the current statement, or 0 if there is no current
+// statement.
 //
 int SQLiteStmt::numCols()
 {
@@ -158,9 +156,9 @@ int SQLiteStmt::numCols()
 }
 
 
-// step() - advance the current prepared statement result-set to the next record, if any.  Return
-// true if another record was found.  Return false and do not set <err> if there are no more
-// records.  Return false and set <err> if anything else went wrong.
+// step() - advance the current prepared statement result-set to the next record, if any.  Return true if another record
+// was found.  Return false and do not set <err> if there are no more records.  Return false and set <err> if anything
+// else went wrong.
 //
 bool SQLiteStmt::step(Error * const err)
 {
@@ -172,8 +170,7 @@ bool SQLiteStmt::step(Error * const err)
 }
 
 
-// reset() - reset the current statement to its initial state, preserving any existing variable-to-
-// column bindings.
+// reset() - reset the current statement to its initial state, preserving any existing variable-to-column bindings.
 //
 bool SQLiteStmt::reset(Error * const err)
 {
@@ -181,8 +178,8 @@ bool SQLiteStmt::reset(Error * const err)
 }
 
 
-// column() - obtain column <index> from the current record in the result set for the current
-// statement.  Return nullptr if <index> is out-of-bounds.
+// column() - obtain column <index> from the current record in the result set for the current statement.  Return nullptr
+// if <index> is out-of-bounds.
 //
 unique_ptr<SQLiteColumn> SQLiteStmt::column(const int index)
 {
@@ -208,10 +205,9 @@ void SQLiteStmt::finalise()
 }
 
 
-// checkError() - given the result of a call to an sqlite3_*() fn in <ret>, and a value indicating
-// that the call succeeded in <successCode>, return true if <ret> == <successCode> (i.e. the call
-// succeeded); otherwise, if <err> is non-null then populate it with an appropriate error code and
-// message, and return false.
+// checkError() - given the result of a call to an sqlite3_*() fn in <ret>, and a value indicating that the call
+// succeeded in <successCode>, return true if <ret> == <successCode> (i.e. the call succeeded); otherwise, if <err> is
+// non-null then populate it with an appropriate error code and message, and return false.
 //
 bool SQLiteStmt::checkError(const int ret, Error * const err, const int successCode)
 {
@@ -221,10 +217,9 @@ bool SQLiteStmt::checkError(const int ret, Error * const err, const int successC
 }
 
 
-// checkError() - given the result of a call to an sqlite3_*() fn in <ret>, and set of values
-// indicating that the call succeeded in <successCodes>, return try if <ret> is present in
-// <successCodes> (i.e. the call succeeded); otherwise, if <err> is non-null the populate it with an
-// appropriate error code and message, and return false.
+// checkError() - given the result of a call to an sqlite3_*() fn in <ret>, and set of values indicating that the call
+// succeeded in <successCodes>, return try if <ret> is present in <successCodes> (i.e. the call succeeded); otherwise,
+// if <err> is non-null the populate it with an appropriate error code and message, and return false.
 //
 bool SQLiteStmt::checkError(const int ret, Error * const err, vector<int> successCodes)
 {
@@ -237,8 +232,8 @@ bool SQLiteStmt::checkError(const int ret, Error * const err, vector<int> succes
 }
 
 
-// formatError() - populate Error object err (if non-null) with the supplied error code and an
-// appropriate human-readable error message.
+// formatError() - populate Error object err (if non-null) with the supplied error code and an appropriate
+// human-readable error message.
 //
 void SQLiteStmt::formatError(Error * const err, const int code)
 {

@@ -45,8 +45,8 @@ ShiftReg::ShiftReg(Error * const err)
 }
 
 
-// strobeRegClk() - strobe the RCLK pin of the 74xx595.  This has the effect of transferring to the
-// output pins the last eight bits received in the register.
+// strobeRegClk() - strobe the RCLK pin of the 74xx595.  This has the effect of transferring to the output pins the last
+// eight bits received in the register.
 //
 bool ShiftReg::strobeRegClk(Error * const err)
 {
@@ -64,8 +64,7 @@ bool ShiftReg::strobeRegClk(Error * const err)
 }
 
 
-// write() - write the value in <val> to the shift register.  Returns true on success; on failure,
-// returns false.
+// write() - write the value in <val> to the shift register.  Returns true on success; on failure, returns false.
 //
 bool ShiftReg::write(const uint16_t val, Error * const err)
 {
@@ -93,50 +92,49 @@ bool ShiftReg::write(const uint16_t val, Error * const err)
 }
 
 
-// operator|=() - OR the current shift register value with the value in <rhs> and update the shift
-// register.  Returns true on success, false otherwise.
+// operator|=() - OR the current shift register value with the value in <rhs> and update the shift register.  Returns
+// true on success, false otherwise.
 //
 uint16_t ShiftReg::operator|=(const uint16_t rhs)
 {
     write(currentVal_ | rhs);
 
-    // If write() succeeds, currentVal_ will equal the new value (ie. or'ed with rhs), which is the
-    // correct return value for the success condition.  If it fails, currentVal_ will be unchanged,
-    // which is the appropriate return value for the failure condition.
+    // If write() succeeds, currentVal_ will equal the new value (ie. or'ed with rhs), which is the correct return value
+    // for the success condition.  If it fails, currentVal_ will be unchanged, which is the appropriate return value for
+    // the failure condition.
     return currentVal_;
 }
 
 
-// operator&=() - AND the current shift register value with the value in <rhs> and update the shift
-// register.  Returns true on success, false otherwise.
+// operator&=() - AND the current shift register value with the value in <rhs> and update the shift register.  Returns
+// true on success, false otherwise.
 //
 uint16_t ShiftReg::operator&=(const uint16_t rhs)
 {
     write(currentVal_ & rhs);
 
-    // If write() succeeds, currentVal_ will equal the new value (ie. or'ed with rhs), which is the
-    // correct return value for the success condition.  If it fails, currentVal_ will be unchanged,
-    // which is the appropriate return value for the failure condition.
+    // If write() succeeds, currentVal_ will equal the new value (ie. or'ed with rhs), which is the correct return value
+    // for the success condition.  If it fails, currentVal_ will be unchanged, which is the appropriate return value for
+    // the failure condition.
     return currentVal_;
 }
 
 
-// operator^=() - exclusive-OR the current shift register value with the value in <rhs> and update
-// the shift register.  Returns true on success, false otherwise.
+// operator^=() - exclusive-OR the current shift register value with the value in <rhs> and update the shift register.
+// Returns true on success, false otherwise.
 //
 uint16_t ShiftReg::operator^=(const uint16_t rhs)
 {
     write(currentVal_ ^ rhs);
 
-    // If write() succeeds, currentVal_ will equal the new value (ie. or'ed with rhs), which is the
-    // correct return value for the success condition.  If it fails, currentVal_ will be unchanged,
-    // which is the appropriate return value for the failure condition.
+    // If write() succeeds, currentVal_ will equal the new value (ie. or'ed with rhs), which is the correct return value
+    // for the success condition.  If it fails, currentVal_ will be unchanged, which is the appropriate return value for
+    // the failure condition.
     return currentVal_;
 }
 
 
-// set() - set bit <bit>.  Returns true on success; false if the set operation failed, or if <bit>
-// is out of range.
+// set() - set bit <bit>.  Returns true on success; false if the set operation failed, or if <bit> is out of range.
 //
 bool ShiftReg::set(const unsigned int bit, Error * const err)
 {
@@ -150,8 +148,8 @@ bool ShiftReg::set(const unsigned int bit, Error * const err)
 }
 
 
-// clear() - clear bit <bit>.  Returns true on success; false if the clear operation failed, or if
-// <bit> is out of range.
+// clear() - clear bit <bit>.  Returns true on success; false if the clear operation failed, or if <bit> is out of
+// range.
 //
 bool ShiftReg::clear(const unsigned int bit, Error * const err)
 {
@@ -165,8 +163,8 @@ bool ShiftReg::clear(const unsigned int bit, Error * const err)
 }
 
 
-// toggle() - toggle the value of bit <bit>.  Returns true on success; false if the toggle operation
-// failed, or if <bit> is out of range.
+// toggle() - toggle the value of bit <bit>.  Returns true on success; false if the toggle operation failed, or if <bit>
+// is out of range.
 //
 bool ShiftReg::toggle(const unsigned int bit, Error * const err)
 {
@@ -180,8 +178,7 @@ bool ShiftReg::toggle(const unsigned int bit, Error * const err)
 }
 
 
-// isSet() - return true if bit <bit> is set (1); false otherwise.  Returns false if <bit> is out of
-// range.
+// isSet() - return true if bit <bit> is set (1); false otherwise.  Returns false if <bit> is out of range.
 //
 bool ShiftReg::isSet(const unsigned int bit, Error * const err)
 {

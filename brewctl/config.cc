@@ -25,8 +25,8 @@ using std::string;
 using boost::algorithm::trim;
 
 
-// add() - read the supplied input stream <is> (whose "name", e.g. a filename) is given in <name>,
-// and add the key/value pairs found in the stream to the configuration store.
+// add() - read the supplied input stream <is> (whose "name", e.g. a filename) is given in <name>, and add the key/value
+// pairs found in the stream to the configuration store.
 //
 void Config::add(istream& is, const string& name)
 {
@@ -46,8 +46,7 @@ void Config::add(istream& is, const string& name)
             size_t delim = line.find('=');
             if((delim == string::npos) || !delim)
             {
-                logNotice("config: %s+%d: ignoring line: missing delimiter or key name",
-                         name.c_str(), linenum);
+                logNotice("config: %s+%d: ignoring line: missing delimiter or key name", name.c_str(), linenum);
                 continue;       // Ignore malformed lines
             }
 
@@ -62,8 +61,8 @@ void Config::add(istream& is, const string& name)
 }
 
 
-// add() - open the file <filename>, and pass it as an input stream to another overload of the add()
-// method in order to add the contents of the file to the configuration store.
+// add() - open the file <filename>, and pass it as an input stream to another overload of the add() method in order to
+// add the contents of the file to the configuration store.
 //
 void Config::add(const string& filename)
 {
@@ -106,8 +105,7 @@ bool Config::exists(const std::string& key) const
 }
 
 
-// operator() - return the value of the key identified by the argument; return an empty string if no
-// such key exists.
+// operator() - return the value of the key identified by the argument; return an empty string if no such key exists.
 //
 string Config::operator()(const string& key)
 {
@@ -139,8 +137,7 @@ long Config::get(const string& key, const long defaultVal)
 }
 
 
-// get() - if key <key> exists, return its value converted to a long long; otherwise return
-// <defaultVal>.
+// get() - if key <key> exists, return its value converted to a long long; otherwise return <defaultVal>.
 //
 long long Config::get(const string& key, const long long defaultVal)
 {
@@ -148,8 +145,7 @@ long long Config::get(const string& key, const long long defaultVal)
 }
 
 
-// get() - if key <key> exists, return its value converted to an unsigned long; otherwise return
-// <defaultVal>.
+// get() - if key <key> exists, return its value converted to an unsigned long; otherwise return <defaultVal>.
 //
 unsigned long Config::get(const string& key, const unsigned long defaultVal)
 {
@@ -157,8 +153,7 @@ unsigned long Config::get(const string& key, const unsigned long defaultVal)
 }
 
 
-// get() - if key <key> exists, return its value converted to an unsigned long long; otherwise
-// return <defaultVal>.
+// get() - if key <key> exists, return its value converted to an unsigned long long; otherwise return <defaultVal>.
 //
 unsigned long long Config::get(const string& key, const unsigned long long defaultVal)
 {
@@ -166,8 +161,7 @@ unsigned long long Config::get(const string& key, const unsigned long long defau
 }
 
 
-// get() - if key <key> exists, return its value converted to a float; otherwise return
-// <defaultVal>.
+// get() - if key <key> exists, return its value converted to a float; otherwise return <defaultVal>.
 //
 float Config::get(const string& key, const float defaultVal)
 {
@@ -175,8 +169,7 @@ float Config::get(const string& key, const float defaultVal)
 }
 
 
-// get() - if key <key> exists, return its value converted to a double; otherwise return
-// <defaultVal>.
+// get() - if key <key> exists, return its value converted to a double; otherwise return <defaultVal>.
 //
 double Config::get(const string& key, const double defaultVal)
 {

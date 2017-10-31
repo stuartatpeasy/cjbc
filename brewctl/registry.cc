@@ -13,6 +13,9 @@
 Registry * Registry::instance_ = nullptr;
 
 
+// private ctor - initialise the various members in a well-defined order, as there are dependencies.  Attempt to open
+// the database file specified in config.
+//
 Registry::Registry(Config& config, Error * const err)
     : config_(config),
       gpio_(err),
@@ -26,13 +29,15 @@ Registry::Registry(Config& config, Error * const err)
     // Initialise database object and open database
     if(!db_.open(config_("database"), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, err))
     {
-        formatError(err, DB_OPEN_FAILED, config_("database").c_str(), err->message().c_str(),
-                    err->code());
+        formatError(err, DB_OPEN_FAILED, config_("database").c_str(), err->message().c_str(), err->code());
         return;
     }
 }
 
 
+// init() - functions as a one-off public ctor to initialise the singleton.  Subsequent access to the object is via the
+// instance() method.
+//
 bool Registry::init(Config& config, Error * const err)
 {
     if(instance_ == nullptr)

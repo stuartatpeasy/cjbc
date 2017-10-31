@@ -1,10 +1,10 @@
 /*
-    spiport.cc: spi port abstraction class.  wraps calls to the linux kernel spi driver; also
-    uses libwiringpi functions to manage port pins.
+    spiport.cc: SPI port abstraction class.  Wraps calls to the linux kernel SPI driver; also uses libWiringPi functions
+    to manage port pins.
 
-    stuart wallace <stuartw@atom.net>, september 2017.
+    Stuart Wallace <stuartw@atom.net>, September 2017.
 
-    part of brewctl
+    Part of brewctl
 
     
     SPI clock modes
@@ -50,10 +50,9 @@ typedef enum SPIPin
 } SPIPin_t;
 
 
-// ctor - note that we can't use Registry members here; instead we must take explicit args for
-// objects which are normally read from the registry.  This is because the SPI port is normally
-// init'ed from within the Registry ctor, hence we wouldn't be able to obtain a registry instance
-// here.
+// ctor - note that we can't use Registry members here; instead we must take explicit args for objects which are
+// normally read from the registry.  This is because the SPI port is normally init'ed from within the Registry ctor,
+// hence we wouldn't be able to obtain a registry instance here.
 //
 SPIPort::SPIPort(GPIOPort& gpio, Config& config, Error * const err)
     : fd_(0), mode_(0), bpw_(0), maxClock_(0), ready_(false)
@@ -85,6 +84,8 @@ SPIPort::SPIPort(GPIOPort& gpio, Config& config, Error * const err)
 }
 
 
+// dtor - close the SPI port file descriptor, if it is open.
+//
 SPIPort::~SPIPort()
 {
     if(fd_ > 0)
@@ -106,6 +107,8 @@ bool SPIPort::doIoctl(const unsigned long type, void *val, Error * const err)
 }
 
 
+// setMode() - set the SPI mode (0..3) for the port.  Return true on success, false otherwise.
+//
 bool SPIPort::setMode(const uint8_t mode, Error * const err)
 {
     uint8_t mode_local = mode;
@@ -120,6 +123,9 @@ bool SPIPort::setMode(const uint8_t mode, Error * const err)
 }
 
 
+// setBitsPerWord() - set the number of bits in each word transmitted or received on the SPI port.  Return true on
+// success, false otherwise.
+//
 bool SPIPort::setBitsPerWord(const uint8_t bpw, Error * const err)
 {
     uint8_t bpw_local = bpw;
@@ -135,6 +141,9 @@ bool SPIPort::setBitsPerWord(const uint8_t bpw, Error * const err)
 }
 
 
+// setMaxSpeed() - set the highest allowable clock speed for the port to <hz> Hz.  Note that the actual clock speed used
+// by the port may be lower.  Return true on success, false otherwise.
+//
 bool SPIPort::setMaxSpeed(const uint32_t hz, Error * const err)
 {
     uint32_t hz_local = hz;
@@ -150,7 +159,8 @@ bool SPIPort::setMaxSpeed(const uint32_t hz, Error * const err)
 }
 
 
-// transmitAndReceive() - do a simultaneous transmit/receive of len bytes of data.
+// transmitAndReceive() - do a simultaneous transmit/receive of len bytes of data.  Return true on success, false
+// otherwise.
 //
 bool SPIPort::transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data, const unsigned int len,
                                  Error * const err)
@@ -217,12 +227,16 @@ bool SPIPort::transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data, const
 }
 
 
+// transmitByte() - transmit the byte in <data> to the SPI port.  Return true on success, false otherwise.
+//
 bool SPIPort::transmitByte(const uint8_t data, Error * const err)
 {
     return transmitAndReceive(&data, NULL, 1, err);
 }
 
 
+// receiveByte() - receive a byte from the SPI port into <data>.  Return true on success, false otherwise.
+//
 bool SPIPort::receiveByte(uint8_t& data, Error * const err)
 {
     return transmitAndReceive(NULL, &data, 1, err);

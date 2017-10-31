@@ -1,6 +1,5 @@
 /*
-    gpioport.cc: GPIO port driver for Raspberry Pi.  This is a simple abstraction around the
-    wiringPi library.
+    gpioport.cc: GPIO port driver for Raspberry Pi.  This is a simple abstraction around the wiringPi library.
 
     Stuart Wallace <stuartw@atom.net>, September 2017.
 
@@ -28,8 +27,8 @@ GPIOPort::GPIOPort(Error * const err)
 }
 
 
-// preValidate() - check ready state and supplied pin number.  Return true if the device is ready
-// and the pin number is valid; false otherwise.
+// preValidate() - check ready state and supplied pin number.  Return true if the device is ready and the pin number is
+// valid; false otherwise.
 //
 bool GPIOPort::preValidate(const int pin, Error * const err)
 {
@@ -49,6 +48,10 @@ bool GPIOPort::preValidate(const int pin, Error * const err)
 }
 
 
+// read() - read the logic level of pin <pin> and return it.  Return false if the pin number is out of range, or the
+// port is not ready.
+// FIXME: this is not ideal - the return value is overloaded.
+//
 bool GPIOPort::read(const int pin, Error * const err)
 {
     if(!preValidate(pin, err))
@@ -58,6 +61,8 @@ bool GPIOPort::read(const int pin, Error * const err)
 }
 
 
+// write() - write the logic level <val> to pin <pin>.  Return true on success, false otherwise.
+//
 bool GPIOPort::write(const int pin, const bool val, Error * const err)
 {
     if(!preValidate(pin, err))
@@ -68,6 +73,8 @@ bool GPIOPort::write(const int pin, const bool val, Error * const err)
 }
 
 
+// setMode() - set pin <pin>'s mode to <mode>, e.g. input / output / ...  Return true on success, false otherwise.
+//
 bool GPIOPort::setMode(const int pin, const GPIOPinMode_t mode, Error * const err)
 {
     if(!preValidate(pin, err))
@@ -96,6 +103,8 @@ bool GPIOPort::setMode(const int pin, const GPIOPinMode_t mode, Error * const er
 }
 
 
+// setPullupMode() - activate/deactivate pullup/pulldown on pin <pin>.  Return true on success, false otherwise.
+//
 bool GPIOPort::setPullupMode(const int pin, const GPIOPinPullupMode_t mode, Error * const err)
 {
     if(!preValidate(pin, err))
@@ -114,5 +123,4 @@ bool GPIOPort::setPullupMode(const int pin, const GPIOPinPullupMode_t mode, Erro
 
     return true;
 }
-
 

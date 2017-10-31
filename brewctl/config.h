@@ -29,8 +29,7 @@ public:
     bool                exists(const std::string& key) const;
     std::string         operator()(const std::string& key);
     
-    std::string         get(const std::string& key,
-                            const std::string& defaultVal = std::string(""));
+    std::string         get(const std::string& key, const std::string& defaultVal = std::string(""));
     int                 get(const std::string& key, const int defaultVal = 0);
     long                get(const std::string& key, const long defaultVal = 0L);
     long long           get(const std::string& key, const long long defaultVal = 0LL);

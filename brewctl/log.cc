@@ -1,5 +1,9 @@
 /*
     log.cc: global logging functions
+
+    Stuart Wallace <stuartw@atom.net>, October 2017.
+
+    Part of brewctl
 */
 
 #include "log.h"
@@ -125,8 +129,7 @@ static bool logWrite(const LogLevel_t level, const string& str)
     switch(logMethod)
     {
         case LOG_METHOD_FILE:
-            return (logFp == NULL) ?
-                    false : (::fwrite(str.c_str(), 1, str.length(), logFp) == str.length());
+            return (logFp == NULL) ?  false : (::fwrite(str.c_str(), 1, str.length(), logFp) == str.length());
 
         case LOG_METHOD_SYSLOG:
             ::syslog(logLevelToSyslogLevel(level), str.c_str());
@@ -155,8 +158,7 @@ static string logLevelStr(const LogLevel_t level)
 }
 
 
-// logLevelFromStr() - return a LogLevel_t corresponding to the string in <level>.  Uses case-
-// insensitive comparison.
+// logLevelFromStr() - return a LogLevel_t corresponding to the string in <level>.  Uses case-insensitive comparison.
 //
 LogLevel_t logLevelFromStr(const string& level)
 {
@@ -169,8 +171,8 @@ LogLevel_t logLevelFromStr(const string& level)
 }
 
 
-// logLevelToSyslogLevel() - given a LogLevel_t in <level>, return a corresponding value for the
-// <level> argument to ::syslog().
+// logLevelToSyslogLevel() - given a LogLevel_t in <level>, return a corresponding value for the <level> argument to
+// ::syslog().
 //
 static int logLevelToSyslogLevel(const LogLevel_t level)
 {
@@ -188,8 +190,7 @@ static int logLevelToSyslogLevel(const LogLevel_t level)
 
 // doLog() - called by the log*() macros, this function does the actual logging.
 //
-bool doLog(const char * const file, const int line, const LogLevel_t level, const std::string& fmt,
-           ...)
+bool doLog(const char * const file, const int line, const LogLevel_t level, const std::string& fmt, ...)
 {
     if(level < logLevel)
         return true;
@@ -203,8 +204,7 @@ bool doLog(const char * const file, const int line, const LogLevel_t level, cons
 
 // doLogV() - called by the log*V() macros, this function does the actual logging.
 //
-bool doLogV(const char * const file, const int line, const LogLevel_t level, const std::string& fmt,
-            va_list args)
+bool doLogV(const char * const file, const int line, const LogLevel_t level, const std::string& fmt, va_list args)
 {
     char logBuf[LOG_BUF_SIZE];
     ostringstream msg;

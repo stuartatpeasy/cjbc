@@ -2,6 +2,10 @@
 #define LOG_H_INC
 /*
     log.h: global logging functions
+
+    Stuart Wallace <stuartw@atom.net>, October 2017.
+
+    Part of brewctl
 */
 
 #include <string>
@@ -43,10 +47,8 @@ LogLevel_t logSetLevel(const LogLevel_t newLevel);
 LogLevel_t logSetLevel(const std::string& newLevel);
 LogLevel_t logGetLevel();
 
-bool doLog(const char * const file, const int line, const LogLevel_t level, const std::string& fmt,
-           ...);
-bool doLogV(const char * const file, const int line, const LogLevel_t level, const std::string& fmt,
-            va_list args);
+bool doLog(const char * const file, const int line, const LogLevel_t level, const std::string& fmt, ...);
+bool doLogV(const char * const file, const int line, const LogLevel_t level, const std::string& fmt, va_list args);
 
 #endif // LOG_H_INC
 

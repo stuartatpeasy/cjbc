@@ -1,9 +1,8 @@
 #ifndef TEMPERATURESENSOR_H_INC
 #define TEMPERATURESENSOR_H_INC
 /*
-    temperaturesensor.h: models a temperature sensor (i.e. a thermistor) attached to an ADC channel.
-    Assumes that there is a constance current flowing through the sensor and developing a voltage
-    across it.
+    temperaturesensor.h: models a temperature sensor (i.e. a thermistor) attached to an ADC channel.  Assumes that there
+    is a constance current flowing through the sensor and developing a voltage across it.
 
     Stuart Wallace <stuartw@atom.net>, October 2017.
 
@@ -21,8 +20,7 @@
 class TemperatureSensor : public Sensor
 {
 public:
-                    TemperatureSensor(const int thermistor_id, const int channel,
-                                      Error * const err = nullptr);
+                    TemperatureSensor(const int thermistor_id, const int channel, Error * const err = nullptr);
 
     bool            sense(Temperature& T, Error * const err = nullptr);
 

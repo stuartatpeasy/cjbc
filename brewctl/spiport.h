@@ -1,12 +1,12 @@
 #ifndef SPIPORT_H_INC
 #define SPIPORT_H_INC
 /*
-    spiport.cc: spi port abstraction class.  wraps calls to the linux kernel spi driver; also
-    uses libwiringpi functions to manage port pins.
+    spiport.cc: SPI port abstraction class.  Wraps calls to the linux kernel SPI driver; also uses libWiringPi functions
+    to manage port pins.
 
-    stuart wallace <stuartw@atom.net>, september 2017.
+    Stuart Wallace <stuartw@atom.net>, September 2017.
 
-    part of brewctl
+    Part of brewctl
 */
 
 
@@ -35,14 +35,13 @@ public:
 
     bool                    transmitByte(const uint8_t data, Error * const err = nullptr);
     bool                    receiveByte(uint8_t&  data, Error * const err = nullptr);
-    bool                    transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data,
-                                               const unsigned int len, Error * const err = nullptr);
+    bool                    transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data, const unsigned int len,
+                                               Error * const err = nullptr);
 
     bool                    ready() const { return ready_; };
 
 protected:
-    bool                    doIoctl(const unsigned long type, void *val,
-                                    Error * const err = nullptr);
+    bool                    doIoctl(const unsigned long type, void *val, Error * const err = nullptr);
 
     int                     fd_;
     uint8_t                 mode_;

@@ -28,9 +28,9 @@ typedef enum ADCPin
 } ADCPin_t;
 
 
-// ctor - note that we can't use Registry members here; instead we must take explicit args for
-// objects which are normally read from the registry.  This is because the ADC is normally init'ed
-// from within the Registry ctor, hence we wouldn't be able to obtain a registry instance here.
+// ctor - note that we can't use Registry members here; instead we must take explicit args for objects which are
+// normally read from the registry.  This is because the ADC is normally init'ed from within the Registry ctor, hence
+// we wouldn't be able to obtain a registry instance here.
 //
 ADC::ADC(GPIOPort& gpio, Config& config, Error * const err)
     : ready_(false)
@@ -38,13 +38,9 @@ ADC::ADC(GPIOPort& gpio, Config& config, Error * const err)
     vref_ = config.get("adc.ref_voltage", ADC_DEFAULT_REF_VOLTAGE);
 
     // Set ADC_nCS as an output, and de-assert it
-    gpio.write(GPIO_ADC_nCS, 1);
-    
-    if(!gpio.setMode(GPIO_ADC_nCS, PIN_OUTPUT))
-    {
-        formatError(err, GPIO_PIN_MODE_SET_FAILED);
+    if(!gpio.write(GPIO_ADC_nCS, 1, err) ||
+       !gpio.setMode(GPIO_ADC_nCS, PIN_OUTPUT, err))
         return;
-    }
 
     if(vref_ > 0.0)
         ready_ = true;

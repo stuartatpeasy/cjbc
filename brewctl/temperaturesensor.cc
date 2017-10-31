@@ -1,7 +1,6 @@
 /*
-    temperaturesensor.h: models a temperature sensor (i.e. a thermistor) attached to an ADC channel.
-    Assumes that there is a constance current flowing through the sensor and developing a voltage
-    across it.
+    temperaturesensor.h: models a temperature sensor (i.e. a thermistor) attached to an ADC channel.  Assumes that there
+    is a constance current flowing through the sensor and developing a voltage across it.
 
     Stuart Wallace <stuartw@atom.net>, October 2017.
 
@@ -14,8 +13,7 @@
 
 
 TemperatureSensor::TemperatureSensor(const int thermistor_id, const int channel, Error * const err)
-    : Sensor(channel), thermistor_id_(thermistor_id), thermistor_(nullptr), tempKelvin_(0.0),
-      sampleTaken_(false)
+    : Sensor(channel), thermistor_id_(thermistor_id), thermistor_(nullptr), tempKelvin_(0.0), sampleTaken_(false)
 {
     // Initialise: read sensor data from the database
     SQLite& db = Registry::instance().db();
@@ -51,8 +49,8 @@ TemperatureSensor::TemperatureSensor(const int thermistor_id, const int channel,
 }
 
 
-// sense() - take a temperature reading from the temperature sensor, update the moving average, and
-// return the moving-average value through <T>.  Return true on success, false on error.
+// sense() - take a temperature reading from the temperature sensor, update the moving average, and return the
+// moving-average value through <T>.  Return true on success, false on error.
 //
 bool TemperatureSensor::sense(Temperature& T, Error * const err)
 {
@@ -63,9 +61,8 @@ bool TemperatureSensor::sense(Temperature& T, Error * const err)
 
     const Temperature sample = thermistor_->T(voltage / Idrive_);
 
-    // If this is the first sample, set the moving-average value to the sampled temperature in order
-    // to initialise it to an approximate value.  If this is not the first sample, use the data to
-    // adjust the moving-average value.
+    // If this is the first sample, set the moving-average value to the sampled temperature in order to initialise it to
+    // an approximate value.  If this is not the first sample, use the data to adjust the moving-average value.
     if(sampleTaken_)
     {
         // At least one sample has already been taken

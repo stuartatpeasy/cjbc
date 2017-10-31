@@ -1,6 +1,5 @@
 /*
-    temperature.cc: declares class Temperature, which provides a unit-agnostic way of working with
-    temperatures.
+    temperature.cc: declares class Temperature, which provides a unit-agnostic way of working with temperatures.
 
     Stuart Wallace <stuartw@atom.net>, September 2017.
 
@@ -63,6 +62,7 @@ bool Temperature::set(const double value, const TemperatureUnit_t unit)
 
 
 // C() - return a double representing this object's temperature in degrees Celsius.
+//
 double Temperature::C() const
 {
     return (valKelvin_ - zeroCelsiusInKelvin) / kelvinPerDegreeCelsius;
@@ -85,10 +85,9 @@ double Temperature::K() const
 }
 
 
-// fromString() - attempt to parse a string containing a temperature (expressed as a number
-// understood by strtod()) followed by a "unit suffix" (e.g. "C", "F") into the Temperature object
-// <t>.  Note that this function will fail for strings containing a "degree" symbol (i.e. a
-// superscript 'o').
+// fromString() - attempt to parse a string containing a temperature (expressed as a number understood by strtod())
+// followed by a "unit suffix" (e.g. "C", "F") into the Temperature object <t>.  Note that this function will fail for
+// strings containing a "degree" symbol (i.e. a superscript 'o').
 //
 bool Temperature::fromString(const string& s, Temperature& t)
 {
@@ -104,8 +103,8 @@ bool Temperature::fromString(const string& s, Temperature& t)
 }
 
 
-// fromString() - return the TemperatureUnit_t corresponding to the specified "unit suffix"
-// character, e.g. 'C' -> TEMP_UNIT_CELSIUS.
+// fromString() - return the TemperatureUnit_t corresponding to the specified "unit suffix" character, e.g.
+// 'C' -> TEMP_UNIT_CELSIUS.
 //
 TemperatureUnit_t Temperature::unitFromChar(const char c)
 {

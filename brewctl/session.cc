@@ -13,6 +13,7 @@
 #include <iostream>     // FIXME remove
 using namespace std;    // FIXME remove
 
+
 Session::Session(const int id, Error * const err)
     : id_(id), start_ts_(0)
 {
@@ -20,8 +21,7 @@ Session::Session(const int id, Error * const err)
     SQLite& db = Registry::instance().db();
     SQLiteStmt session;
 
-    if(!db.prepare("SELECT gyle, profile_id, "
-                       "CAST((JULIANDAY(date_start) - 2440587.5) * 86400.0 AS INT) AS start_ts "
+    if(!db.prepare("SELECT gyle, profile_id, CAST((JULIANDAY(date_start) - 2440587.5) * 86400.0 AS INT) AS start_ts "
                    "FROM session "
                    "WHERE id=:id", session, err) ||
        !session.bind(":id", id, err) ||
@@ -58,8 +58,7 @@ Session::Session(const int id, Error * const err)
 
     // Read session sensor configuration
     SQLiteStmt sensor;
-    if(!db.prepare("SELECT sensortype_id, channel FROM sessionsensor WHERE session_id=:id",
-                   sensor, err) ||
+    if(!db.prepare("SELECT sensortype_id, channel FROM sessionsensor WHERE session_id=:id", sensor, err) ||
        !sensor.bind(":id", id, err))
         return;
 
@@ -99,8 +98,8 @@ bool Session::updateEffectors()
 }
 */
 
-// isActive() - return bool indicating whether the current session is "active", i.e. the current
-// time is between the session's start time and its end time.
+// isActive() - return bool indicating whether the current session is "active", i.e. the current time is between the
+// session's start time and its end time.
 //
 bool Session::isActive() const
 {

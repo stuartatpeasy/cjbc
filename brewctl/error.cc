@@ -1,6 +1,5 @@
 /*
-    error.h: declares the Error class, which acts as a container for runtime errors and their
-    descriptions.
+    error.h: declares the Error class, which acts as a container for runtime errors and their descriptions.
 
     Stuart Wallace <stuartw@atom.net>, September 2017.
 
@@ -88,8 +87,8 @@ Error& Error::operator=(Error&& rhs) noexcept
 }
 
 
-// init() - helper function used by copy ctor and assignment operator to initialise this object
-// from another Error object.
+// init() - helper function used by copy ctor and assignment operator to initialise this object from another Error
+// object.
 //
 Error& Error::init(const Error& rhs)
 {
@@ -131,8 +130,7 @@ void Error::formatV(const ErrorCode_t code, va_list args)
 }
 
 
-// formatV() - [private] use <args> to fill in the format string <format>, and store it; store
-// <code>.
+// formatV() - [private] use <args> to fill in the format string <format>, and store it; store <code>.
 //
 void Error::formatV(const ErrorCode_t code, const string& format, va_list args)
 {
@@ -173,8 +171,8 @@ void Error::reset()
 }
 
 
-// formatError() - global error-formatter function.  If <err> is non-null, populate it with an
-// error message according to <code> and <...>. If <err> is null, take no action.
+// formatError() - global error-formatter function.  If <err> is non-null, populate it with an error message according
+// to <code> and <...>. If <err> is null, take no action.
 //
 void formatError(Error * const err, const ErrorCode_t code, ...)
 {

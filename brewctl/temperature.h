@@ -1,8 +1,7 @@
 #ifndef TEMPERATURE_H_INC
 #define TEMPERATURE_H_INC
 /*
-    temperature.h: declares class Temperature, which provides a unit-agnostic way of working with
-    temperatures.
+    temperature.h: declares class Temperature, which provides a unit-agnostic way of working with temperatures.
 
     Stuart Wallace <stuartw@atom.net>, September 2017.
 

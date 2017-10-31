@@ -163,14 +163,14 @@ typedef enum LCDPin
 #define LCD_E_CLK_STATE_TIME_US (50)        // 50 microseconds
 
 
-// ctor - note that we can't use Registry members here; instead we must take explicit args for
-// objects which are normally read from the registry.  This is because the LCD is normally init'ed
-// from within the Registry ctor, hence we wouldn't be able to obtain a registry instance here.
+// ctor - note that we can't use Registry members here; instead we must take explicit args for objects which are
+// normally read from the registry.  This is because the LCD is normally init'ed from within the Registry ctor, hence we
+// wouldn't be able to obtain a registry instance here.
 //
 LCD::LCD(GPIOPort& gpio, Error * const err)
 {
-    for(auto pin : {GPIO_LCD_RS, GPIO_LCD_E, GPIO_LCD_D0, GPIO_LCD_D1, GPIO_LCD_D2, GPIO_LCD_D3,
-                    GPIO_LCD_D4, GPIO_LCD_D5, GPIO_LCD_D6, GPIO_LCD_D7})
+    for(auto pin : {GPIO_LCD_RS, GPIO_LCD_E, GPIO_LCD_D0, GPIO_LCD_D1, GPIO_LCD_D2, GPIO_LCD_D3, GPIO_LCD_D4,
+                    GPIO_LCD_D5, GPIO_LCD_D6, GPIO_LCD_D7})
     {
         if(!gpio.write(pin, 0, err))
             return;
@@ -181,6 +181,9 @@ LCD::LCD(GPIOPort& gpio, Error * const err)
 }
 
 
+// init() - initialise the LCD by sending the reset command sequence followed by the initialisation sequence.  Returns
+// true on success, false otherwise.
+//
 bool LCD::init(Error * const err)
 {
     for(auto i = 0; i < 3; ++i)
@@ -225,6 +228,8 @@ bool LCD::init(Error * const err)
 }
 
 
+// toggleEClock() - toggle (high -> low) the LCD's "E" (enable) clock.  Returns true on success, false otherwise.
+//
 bool LCD::toggleEClock(Error * const err)
 {
     auto& gpio = Registry::instance().gpio();
@@ -240,6 +245,8 @@ bool LCD::toggleEClock(Error * const err)
 }
 
 
+// writeCommand() - write the command <cmd> to the LCD.  Returns true on success, false otherwise.
+//
 bool LCD::writeCommand(uint8_t cmd, Error * const err)
 {
     auto& gpio = Registry::instance().gpio();
@@ -257,6 +264,8 @@ bool LCD::writeCommand(uint8_t cmd, Error * const err)
 }
 
 
+// writeData() - write the data byte <data> to the LCD.  Returns true on success, false otherwise.
+//
 bool LCD::writeData(uint8_t data, Error * const err)
 {
     auto& gpio = Registry::instance().gpio();
@@ -274,12 +283,17 @@ bool LCD::writeData(uint8_t data, Error * const err)
 }
 
 
+// clear() - erase all content from the LCD screen.  Returns true on success, false otherwise.
+//
 bool LCD::clear(Error * const err)
 {
     return writeCommand(LCD_CMD_CLEAR, err);
 }
 
 
+// setCursorPos() - set the LCD's cursor position to (<x>, <y>).  Returns true on success, false otherwise (including
+// cases where <x> or <y> are out of range).
+//
 bool LCD::setCursorPos(const int x, const int y, Error * const err)
 {
     if((x < 0) || (x >= LCD_DISP_WIDTH) || (y < 0) || (y > LCD_DISP_HEIGHT))
@@ -305,6 +319,9 @@ bool LCD::setCursorPos(const int x, const int y, Error * const err)
 }
 
 
+// printAt() - printf()-like output method to write text directly to the LCD at position (<x>, <y>).  Returns the number
+// of characters actually written, or a negative value on error.
+//
 int LCD::printAt(const int x, const int y, const string& format, ...)
 {
     va_list ap;
@@ -327,6 +344,9 @@ int LCD::printAt(const int x, const int y, const string& format, ...)
 }
 
 
+// putAt() - putchar()-like method to write a character directly to the LCD at position (<x>, <y>).  Returns true on
+// success, false otherwise.
+//
 bool LCD::putAt(const int x, const int y, const char c, Error * const err)
 {
     if(!setCursorPos(x, y, err))

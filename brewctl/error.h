@@ -1,8 +1,7 @@
 #ifndef ERROR_H_INC
 #define ERROR_H_INC
 /*
-    error.h: declares the Error class, which acts as a container for runtime errors and their
-    descriptions.
+    error.h: declares the Error class, which acts as a container for runtime errors and their descriptions.
 
     Stuart Wallace <stuartw@atom.net>, September 2017.
 
