@@ -11,7 +11,7 @@ endif
 APPNAME := brewctl
 
 SOURCES := \
-    adc.cc application.cc config.cc device.cc error.cc gpioport.cc lcd.cc log.cc main.cc           \
+    adc.cc application.cc config.cc error.cc gpioport.cc lcd.cc log.cc main.cc registry.cc         \
     sensor.cc session.cc sessionmanager.cc shiftreg.cc spiport.cc sqlite.cc sqlitecolumn.cc        \
     sqlitestmt.cc temperature.cc temperaturesensor.cc tempsensor.cc thermistor.cc
 

@@ -7,6 +7,7 @@
 */
 
 #include "lcd.h"
+#include "registry.h"
 #include <cstdint>
 #include <cstdio>
 #include <cstdarg>
@@ -162,16 +163,19 @@ typedef enum LCDPin
 #define LCD_E_CLK_STATE_TIME_US (50)        // 50 microseconds
 
 
+// ctor - note that we can't use Registry members here; instead we must take explicit args for
+// objects which are normally read from the registry.  This is because the LCD is normally init'ed
+// from within the Registry ctor, hence we wouldn't be able to obtain a registry instance here.
+//
 LCD::LCD(GPIOPort& gpio, Error * const err)
-    : Device(), gpio_(gpio)
 {
     for(auto pin : {GPIO_LCD_RS, GPIO_LCD_E, GPIO_LCD_D0, GPIO_LCD_D1, GPIO_LCD_D2, GPIO_LCD_D3,
                     GPIO_LCD_D4, GPIO_LCD_D5, GPIO_LCD_D6, GPIO_LCD_D7})
     {
-        if(!gpio_.write(pin, 0, err))
+        if(!gpio.write(pin, 0, err))
             return;
 
-        if(!gpio_.setMode(pin, PIN_OUTPUT, err))
+        if(!gpio.setMode(pin, PIN_OUTPUT, err))
             return;
     }
 
@@ -230,9 +234,10 @@ bool LCD::init(Error * const err)
 
 bool LCD::toggleEClock(Error * const err)
 {
+    auto gpio = Registry::instance().gpio();
     for(auto i: {1, 0})
     {
-        if(!gpio_.write(GPIO_LCD_E, i, err))
+        if(!gpio.write(GPIO_LCD_E, i, err))
             return false;
 
         ::usleep(LCD_E_CLK_STATE_TIME_US);
@@ -244,13 +249,15 @@ bool LCD::toggleEClock(Error * const err)
 
 bool LCD::writeCommand(uint8_t cmd, Error * const err)
 {
+    auto gpio = Registry::instance().gpio();
+
     // Set RS=0
-    if(!gpio_.write(GPIO_LCD_RS, 0, err))
+    if(!gpio.write(GPIO_LCD_RS, 0, err))
         return false;
 
     // Place command on data bus
     for(int i = GPIO_LCD_D0; i <= GPIO_LCD_D7; ++i, cmd >>= 1)
-        if(!gpio_.write(i, cmd & 1, err))
+        if(!gpio.write(i, cmd & 1, err))
             return false;
 
     return toggleEClock();
@@ -259,13 +266,15 @@ bool LCD::writeCommand(uint8_t cmd, Error * const err)
 
 bool LCD::writeData(uint8_t data, Error * const err)
 {
+    auto gpio = Registry::instance().gpio();
+
     // Set RS=1
-    if(!gpio_.write(GPIO_LCD_RS, 1, err))
+    if(!gpio.write(GPIO_LCD_RS, 1, err))
         return false;
 
     // Place data on data bus
     for(int i = GPIO_LCD_D0; i <= GPIO_LCD_D7; ++i, data >>= 1)
-        if(!gpio_.write(i, data & 1, err))
+        if(!gpio.write(i, data & 1, err))
             return false;
 
     return toggleEClock();

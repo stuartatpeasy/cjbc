@@ -10,8 +10,6 @@
     Part of brewctl
 */
 
-#include "adc.h"
-#include "config.h"
 #include "error.h"
 #include <memory>
 
@@ -19,13 +17,11 @@
 class Sensor
 {
 public:
-                        Sensor(ADC& adc, const int channel, const Config& config);
+                        Sensor(const int channel);
 protected:
     bool                readRaw(double& voltage, Error * const err = nullptr);
 
-    ADC&                adc_;
     const int           channel_;
-    const Config&       config_;
     double              vref_;
 };
 

@@ -16,7 +16,7 @@ extern "C"
 
 
 GPIOPort::GPIOPort(Error * const err)
-    : Device(), ready_(false)
+    : ready_(false)
 {
     if(::wiringPiSetup() == -1)
     {
@@ -25,11 +25,6 @@ GPIOPort::GPIOPort(Error * const err)
     }
 
     ready_ = true;
-}
-
-
-GPIOPort::~GPIOPort()
-{
 }
 
 

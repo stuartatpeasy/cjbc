@@ -7,6 +7,7 @@
 */
 
 #include "shiftreg.h"
+#include "registry.h"
 
 extern "C"
 {
@@ -28,40 +29,38 @@ typedef enum ShiftRegPin
 
 // ctor - configure GPIO port pins and set the shift register output value to 0.
 //
-ShiftReg::ShiftReg(GPIOPort& gpio, SPIPort& spi, Error * const err)
-    : Device(), ready_(false), gpio_(gpio), spi_(spi), currentVal_(0)
+ShiftReg::ShiftReg(Error * const err)
+    : ready_(false), currentVal_(0)
 {
-    // Force the register-clock signal to be an output, and de-assert it
-    gpio_.write(GPIO_SR_RCLK, 0);
+    auto r = Registry::instance();
 
-    if(!gpio_.setMode(GPIO_SR_RCLK, PIN_OUTPUT))
-    {
-        formatError(err, GPIO_PIN_MODE_SET_FAILED);
+    // Force the register-clock signal to be an output, and de-assert it
+    if(!r.gpio().write(GPIO_SR_RCLK, 0, err) ||
+       !r.gpio().setMode(GPIO_SR_RCLK, PIN_OUTPUT, err))
         return;
-    }
 
     // Force all shift-register outputs to zero.
-    if(spi_.transmitByte(0) && spi_.transmitByte(0))
-    {
-        strobeRegClk();
+    if(r.spi().transmitByte(0, err) && r.spi().transmitByte(0, err) && strobeRegClk(err))
         ready_ = true;
-    }
-}
-
-
-ShiftReg::~ShiftReg()
-{
 }
 
 
 // strobeRegClk() - strobe the RCLK pin of the 74xx595.  This has the effect of transferring to the
 // output pins the last eight bits received in the register.
 //
-void ShiftReg::strobeRegClk()
+bool ShiftReg::strobeRegClk(Error * const err)
 {
-    gpio_.write(GPIO_SR_RCLK, 1);
+    auto gpio = Registry::instance().gpio();
+
+    if(!gpio.write(GPIO_SR_RCLK, 1, err))
+        return false;
+
     ::usleep(SR_CLOCK_MIN_US);
-    gpio_.write(GPIO_SR_RCLK, 0);
+    
+    if(!gpio.write(GPIO_SR_RCLK, 0, err))
+        return false;
+
+    return true;
 }
 
 
@@ -70,6 +69,7 @@ void ShiftReg::strobeRegClk()
 //
 bool ShiftReg::write(const uint16_t val, Error * const err)
 {
+    auto r = Registry::instance();
     uint16_t valLocal = val;
 
     if(!ready_)
@@ -79,15 +79,15 @@ bool ShiftReg::write(const uint16_t val, Error * const err)
     }
 
     // Force the register clock low
-    gpio_.write(GPIO_SR_RCLK, 0);
+    r.gpio().write(GPIO_SR_RCLK, 0);
 
     // Transmit the bytes
     for(size_t i = 0; i < sizeof(val); ++i, valLocal >>= 8)
-        if(!spi_.transmitByte(valLocal, err))
+        if(!r.spi().transmitByte(valLocal, err))
             return false;
 
     currentVal_ = val;
-    strobeRegClk();
+    strobeRegClk(err);
 
     return true;
 }

@@ -21,6 +21,7 @@ using std::string;
 
 static map<ErrorCode_t, string> errorMessages =
 {
+    {NO_ERROR,                  ""},                                    // Not really an error code
     {MISSING_ARGVAL,            "Missing value for argument '%s'"},
     {UNKNOWN_ARG,               "Unrecognised argument '%s'"},
     {CFG_FILE_OPEN_FAILED,      "Failed to open config file '%s'"},
@@ -169,6 +170,17 @@ string Error::stringFromCode(const ErrorCode_t code)
 }
 
 
+// reset() - reset the error object to a "no error" state
+//
+void Error::reset()
+{
+    format(NO_ERROR);
+}
+
+
+// formatError() - global error-formatter function.  If <err> is non-null, populate it with an
+// error message according to <code> and <...>. If <err> is null, take no action.
+//
 void formatError(Error * const err, const ErrorCode_t code, ...)
 {
     if(err != nullptr)

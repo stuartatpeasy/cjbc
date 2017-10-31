@@ -30,7 +30,6 @@ class Application
 
 public:
                                 Application(int argc, char **argv, Error * const err);
-    virtual                     ~Application();
 
 protected:
     bool                        parseArgs(int argc, char **argv, Error * const err);
@@ -39,8 +38,7 @@ protected:
     std::string                 appName_;
 //    std::vector<std::string>    configLocations_;
 
-    SessionManager *            sessionManager_;
-//    ShiftReg *                  sr_;
+    SessionManager              sessionManager_;
 };
 
 #endif // APPLICATION_H_INC

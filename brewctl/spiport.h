@@ -11,7 +11,6 @@
 
 
 #include "config.h"
-#include "device.h"
 #include "error.h"
 #include "gpioport.h"
 #include <cstddef>
@@ -24,7 +23,7 @@ extern "C"
 }
 
 
-class SPIPort : public Device
+class SPIPort
 {
 public:
                             SPIPort(GPIOPort& gpio, Config& config, Error * const err = nullptr);
@@ -44,9 +43,6 @@ public:
 protected:
     bool                    doIoctl(const unsigned long type, void *val,
                                     Error * const err = nullptr);
-
-    GPIOPort&               gpio_;
-    Config&                 config_;
 
     int                     fd_;
     uint8_t                 mode_;

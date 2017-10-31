@@ -9,19 +9,20 @@
 */
 
 #include "temperaturesensor.h"
+#include "registry.h"
 #include "sqlitestmt.h"
 
 
-TemperatureSensor::TemperatureSensor(const int thermistor_id, SQLite& db, ADC& adc,
-                                     const int channel, const Config& config, Error * const err)
-    : Sensor(adc, channel, config), thermistor_id_(thermistor_id), db_(db), thermistor_(nullptr),
-      tempKelvin_(0.0), sampleTaken_(false)
+TemperatureSensor::TemperatureSensor(const int thermistor_id, const int channel, Error * const err)
+    : Sensor(channel), thermistor_id_(thermistor_id), thermistor_(nullptr), tempKelvin_(0.0),
+      sampleTaken_(false)
 {
     // Initialise: read sensor data from the database
+    SQLite& db = Registry::instance().db();
     SQLiteStmt thermistor_data;
 
-    if(!db_.prepare("SELECT name, type, Tref_C, Rref, beta, range_min, range_max "
-                    "FROM thermistor WHERE id=:id", thermistor_data, err)
+    if(!db.prepare("SELECT name, type, Tref_C, Rref, beta, range_min, range_max "
+                   "FROM thermistor WHERE id=:id", thermistor_data, err)
        || !thermistor_data.step(err))
         return;
 

@@ -14,6 +14,7 @@
 
 typedef enum
 {
+    NO_ERROR                    = 0x0000,
     MISSING_ARGVAL              = 0x0001,
     UNKNOWN_ARG                 = 0x0002,
     CFG_FILE_OPEN_FAILED        = 0x0003,
@@ -58,6 +59,7 @@ public:
     static std::string  stringFromCode(const ErrorCode_t code);
     const std::string&  message() const { return msg_; };
     int                 code() const { return code_; };
+    void                reset();
 
 private:
     Error&              init(const Error& rhs);

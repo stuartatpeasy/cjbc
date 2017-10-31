@@ -9,18 +9,15 @@
     Part of brewctl
 */
 
-#include "device.h"
-#include "adc.h"
 #include "thermistor.h"
 #include "temperature.h"
 
 
-class TempSensor : public Device
+class TempSensor
 {
 public:
-                            TempSensor(Thermistor& thermistor, ADC& adc, const int channel,
+                            TempSensor(Thermistor& thermistor, const int channel,
                                        const double Idrive);
-    virtual                 ~TempSensor();
 
     bool                    sense(Temperature& T);
     TempSensor&             setMovingAvgLen(const unsigned int len);
@@ -28,7 +25,6 @@ public:
 
 protected:
     Thermistor&             thermistor_;
-    ADC&                    adc_;
     int                     channel_;
     double                  Idrive_;
 

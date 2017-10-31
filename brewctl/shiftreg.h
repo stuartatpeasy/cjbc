@@ -8,18 +8,15 @@
     Part of brewctl
 */
 
-#include "device.h"
-#include "gpioport.h"
-#include "spiport.h"
+#include "error.h"
 #include <cstddef>
 #include <cstdint>
 
 
-class ShiftReg : public Device
+class ShiftReg
 {
 public:
-                            ShiftReg(GPIOPort& gpio, SPIPort& spi, Error * const err = nullptr);
-    virtual                 ~ShiftReg();
+                            ShiftReg(Error * const err = nullptr);
 
     bool                    write(uint16_t val, Error * const err = nullptr);
     uint16_t                read() const { return currentVal_; };
@@ -35,12 +32,9 @@ public:
     bool                    isSet(const unsigned int bit, Error * const err = nullptr);
 
 protected:
-    void                    strobeRegClk();
+    bool                    strobeRegClk(Error * const err = nullptr);
 
     bool                    ready_;
-
-    GPIOPort&               gpio_;
-    SPIPort&                spi_;
     uint16_t                currentVal_;
 };
 

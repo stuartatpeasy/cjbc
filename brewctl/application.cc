@@ -8,6 +8,7 @@
 
 #include "application.h"
 #include "log.h"
+#include "registry.h"
 #include <cstdarg>
 #include <cstdlib>
 #include <cstdio>
@@ -40,6 +41,7 @@ Application::Application(int argc, char **argv, Error * const err)
 {
     appName_ = argc ? argv[0] : "<NoAppName>";
 
+    // FIXME use Config obj in registry; don't store as a separate member
     config_.add(defaultConfig);             // add default values to config
     config_.add("/etc/brewctl.conf");       // default config file location
 
@@ -49,26 +51,14 @@ Application::Application(int argc, char **argv, Error * const err)
     logInit(config_("log.method"));
     logSetLevel(config_("log.level"));
 
-    sessionManager_ = new SessionManager(config_, err);
-    if(sessionManager_ == nullptr)
-    {
-        err->format(MALLOC_FAILED);
-        return;
-    }
-
+    Registry::init(config_, err);
     if(err->code())
         return;
 
-    if(!sessionManager_->init(err))
+    if(!sessionManager_.init(err))
         return;
 
-    sessionManager_->run();
-}
-
-
-Application::~Application()
-{
-    delete sessionManager_;
+    sessionManager_.run();
 }
 
 

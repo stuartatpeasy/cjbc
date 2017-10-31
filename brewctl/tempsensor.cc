@@ -8,16 +8,12 @@
 */
 
 #include "tempsensor.h"
+#include "registry.h"
 
 
-TempSensor::TempSensor(Thermistor& thermistor, ADC& adc, const int channel, const double Idrive)
-    : Device(), thermistor_(thermistor), adc_(adc), channel_(channel), Idrive_(Idrive),
-      nsamples_(1000), tempKelvin_(0.0), sampleTaken_(false)
-{
-}
-
-
-TempSensor::~TempSensor()
+TempSensor::TempSensor(Thermistor& thermistor, const int channel, const double Idrive)
+    : thermistor_(thermistor), channel_(channel), Idrive_(Idrive), nsamples_(1000),
+      tempKelvin_(0.0), sampleTaken_(false)
 {
 }
 
@@ -35,7 +31,7 @@ bool TempSensor::sense(Temperature& T)
 {
     double adcVoltage = 0.0;
 
-    if(!adc_.read(channel_, adcVoltage))
+    if(!Registry::instance().adc().read(channel_, adcVoltage))
         return false;
 
     const Temperature sample = thermistor_.T(adcVoltage / Idrive_);

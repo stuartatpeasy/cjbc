@@ -9,10 +9,11 @@
 */
 
 #include "sensor.h"
+#include "registry.h"
 
 
-Sensor::Sensor(ADC& adc, const int channel, const Config& config)
-    : adc_(adc), channel_(channel), config_(config)
+Sensor::Sensor(const int channel)
+    : channel_(channel)
 {
     
 }
@@ -20,6 +21,6 @@ Sensor::Sensor(ADC& adc, const int channel, const Config& config)
 
 bool Sensor::readRaw(double& voltage, Error * const err)
 {
-    return adc_.read(channel_, voltage, err);
+    return Registry::instance().adc().read(channel_, voltage, err);
 }
 

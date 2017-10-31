@@ -34,9 +34,10 @@ extern "C"
 
 using std::string;
 
-#define SPI_DEFAULT_BPW     (8)             // Default SPI word length = 8 bits
-#define SPI_DEFAULT_CLOCK   (500000)        // Default SPI clock = 500kHz
-#define SPI_DEFAULT_MODE    (SPI_MODE_0)    // Default SPI mode = mode 0
+#define SPI_DEFAULT_BPW     (8)                 // Default SPI word length = 8 bits
+#define SPI_DEFAULT_CLOCK   (500000)            // Default SPI clock = 500kHz
+#define SPI_DEFAULT_MODE    (SPI_MODE_0)        // Default SPI mode = mode 0
+#define SPI_DEFAULT_DEVICE  ("/dev/spidev0.0")  // Default SPI device
 
 //
 // Mapping of GPIO pin names to wiringPi pin numbers for SPI pins
@@ -49,14 +50,19 @@ typedef enum SPIPin
 } SPIPin_t;
 
 
+// ctor - note that we can't use Registry members here; instead we must take explicit args for
+// objects which are normally read from the registry.  This is because the SPI port is normally
+// init'ed from within the Registry ctor, hence we wouldn't be able to obtain a registry instance
+// here.
+//
 SPIPort::SPIPort(GPIOPort& gpio, Config& config, Error * const err)
-    : Device(), gpio_(gpio), config_(config), fd_(0), mode_(0), bpw_(0), maxClock_(0), ready_(false)
+    : fd_(0), mode_(0), bpw_(0), maxClock_(0), ready_(false)
 {
     for(auto pin : {GPIO_MOSI, GPIO_MISO, GPIO_SCLK})
-        if(!gpio_.setMode(pin, PIN_ALT0, err))
+        if(!gpio.setMode(pin, PIN_ALT0, err))
             return;
 
-    fd_ = ::open(config_("spi.dev").c_str(), O_RDWR);
+    fd_ = ::open(config.get("spi.dev", SPI_DEFAULT_DEVICE).c_str(), O_RDWR);
 
     ::bzero(&xfer_, sizeof(xfer_));
 
@@ -68,8 +74,8 @@ SPIPort::SPIPort(GPIOPort& gpio, Config& config, Error * const err)
 
     // Attempt to set port defaults
     if(!setBitsPerWord(SPI_DEFAULT_BPW, err) ||
-       !setMaxSpeed(config_.get("spi.max_clock", SPI_DEFAULT_CLOCK), err) ||
-       !setMode(config_.get("spi.mode", SPI_DEFAULT_MODE), err))
+       !setMaxSpeed(config.get("spi.max_clock", SPI_DEFAULT_CLOCK), err) ||
+       !setMode(config.get("spi.mode", SPI_DEFAULT_MODE), err))
     {
         formatError(err, SPI_PARAM_SET_FAILED);
         return;

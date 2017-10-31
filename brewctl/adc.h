@@ -8,24 +8,19 @@
     Part of brewctl
 */
 
-#include "device.h"
 #include "config.h"
 #include "gpioport.h"
-#include "spiport.h"
 
 
-class ADC : public Device
+class ADC
 {
 public:
-                    ADC(GPIOPort* gpio, SPIPort* spi, Config& config, Error * const err = nullptr);
-    virtual         ~ADC();
+                    ADC(GPIOPort& gpio, Config& config, Error * const err = nullptr);
 
     bool            read(const unsigned int channel, double& voltage, Error * const err = nullptr);
     double          vref() const { return vref_; };
 
 protected:
-    GPIOPort *      gpio_;
-    SPIPort *       spi_;
     double          vref_;
     bool            ready_;
 };

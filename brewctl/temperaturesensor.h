@@ -21,15 +21,13 @@
 class TemperatureSensor : public Sensor
 {
 public:
-                    TemperatureSensor(const int thermistor_id, SQLite& db, ADC& adc,
-                                      const int channel, const Config& config,
+                    TemperatureSensor(const int thermistor_id, const int channel,
                                       Error * const err = nullptr);
 
     bool            sense(Temperature& T, Error * const err = nullptr);
 
 protected:
     const int       thermistor_id_;
-    SQLite&         db_;
     std::string     name_;
     Thermistor *    thermistor_;
 
@@ -41,3 +39,4 @@ protected:
 
 
 #endif // TEMPERATURESENSOR_H_INC
+

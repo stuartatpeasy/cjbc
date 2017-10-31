@@ -19,56 +19,20 @@ extern "C"
 }
 
 
-SessionManager::SessionManager(Config& config, Error * const err)
-    : config_(config), lcd_(gpio_)
-{
-    if(!db_.open(config_("database"), SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, err))
-    {
-        formatError(err, DB_OPEN_FAILED, config_("database").c_str(), err->message().c_str(),
-                    err->code());
-        return;
-    }
-
-    spi_ = new SPIPort(gpio_, config_, err);
-    if(spi_ == nullptr)
-    {
-        formatError(err, MALLOC_FAILED);
-        return;
-    }
-
-    if(err->code())
-        return;
-
-    adc_ = new ADC(&gpio_, spi_, config_, err);
-    if(adc_ == nullptr)
-    {
-        formatError(err, MALLOC_FAILED);
-        return;
-    }
-
-    if(err->code())
-        return;
-}
-
-
-SessionManager::~SessionManager()
-{
-}
-
-
 bool SessionManager::init(Error * const err)
 {
+    SQLite& db = Registry::instance().db();
     SQLiteStmt sessions;
 
-    if(!db_.prepare("SELECT id "
-                    "FROM session "
-                    "WHERE date_start<=CURRENT_TIMESTAMP AND date_finish IS NULL "
-                    "ORDER BY date_start", sessions, err))
+    if(!db.prepare("SELECT id "
+                   "FROM session "
+                   "WHERE date_start<=CURRENT_TIMESTAMP AND date_finish IS NULL "
+                   "ORDER BY date_start", sessions, err))
         return false;
 
     while(sessions.step(err))
     {
-        sessions_.push_back(Session(db_, sessions.column(0)->asInt(), err));
+        sessions_.push_back(Session(sessions.column(0)->asInt(), err));
         if(err->code())
             return false;
     }
@@ -79,25 +43,26 @@ bool SessionManager::init(Error * const err)
 
 void SessionManager::run()
 {
+    Registry& r = Registry::instance();
     Thermistor thermistor(3980, 4700, Temperature(25.0, TEMP_UNIT_CELSIUS));
 
-    TempSensor sensor1(thermistor, *adc_, 0, 0.000147),
-               sensor2(thermistor, *adc_, 1, 0.000147);
+    TempSensor sensor1(thermistor, 0, 0.000147),
+               sensor2(thermistor, 1, 0.000147);
 
-    ShiftReg sr(gpio_, *spi_);
-
+    ShiftReg sr;
     Temperature T1, T2;
+    LCD& lcd = r.lcd();
 
     for(int i = 0; i < 2; ++i)
     {
-        lcd_.printAt(0, i, "F%d", i + 1);
-        lcd_.printAt(0, i + 2, "C%d", i + 1);
+        lcd.printAt(0, i, "F%d", i + 1);
+        lcd.printAt(0, i + 2, "C%d", i + 1);
     }
 
-    lcd_.printAt(10, 0, "10d18h");
-    lcd_.printAt(4, 1, "--.-");
-    lcd_.printAt(4, 2, "--.-");
-    lcd_.printAt(4, 3, "--.-");
+    lcd.printAt(10, 0, "10d18h");
+    lcd.printAt(4, 1, "--.-");
+    lcd.printAt(4, 2, "--.-");
+    lcd.printAt(4, 3, "--.-");
 
     sr.set(0);
 
@@ -109,16 +74,16 @@ void SessionManager::run()
         if(!(i % 100))
         {
             if(T1.C() > -5.0)
-                lcd_.printAt(4, 0, "%4.1lf\xdf", T1.C() + 0.05);
+                lcd.printAt(4, 0, "%4.1lf\xdf", T1.C() + 0.05);
             else
-                lcd_.printAt(4, 0, "--.- ");
+                lcd.printAt(4, 0, "--.- ");
 
             if(T2.C() > -5.0)
-                lcd_.printAt(4, 1, "%4.1lf\xdf", T2.C() + 0.05);
+                lcd.printAt(4, 1, "%4.1lf\xdf", T2.C() + 0.05);
             else
-                lcd_.printAt(4, 1, "--.- ");
+                lcd.printAt(4, 1, "--.- ");
 
-            lcd_.putAt(3, 0, LCD_CH_ARROW_2DOWN);
+            lcd.putAt(3, 0, LCD_CH_ARROW_2DOWN);
 
             // XXX output switch 1 = bit 8 .... 8 = bit 15
             sr.toggle(10);

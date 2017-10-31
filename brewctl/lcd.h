@@ -8,9 +8,9 @@
     Part of brewctl
 */
 
-#include "device.h"
 #include "gpioport.h"
 #include <string>
+
 
 // Character codes for custom LCD symbols
 #define LCD_CH_ARROW_UP     (1)
@@ -21,7 +21,7 @@
 #define LCD_CH_ARROW_RIGHT  (6)
 
 
-class LCD : public Device
+class LCD
 {
 public:
                     LCD(GPIOPort& gpio, Error * const err = nullptr);
@@ -37,8 +37,6 @@ protected:
     bool            writeCommand(uint8_t cmd, Error * const err = nullptr);
     bool            writeData(uint8_t cmd, Error * const err = nullptr);
     bool            toggleEClock(Error * const err = nullptr);
-
-    GPIOPort        gpio_;
 };
 
 #endif // LCD_H_INC

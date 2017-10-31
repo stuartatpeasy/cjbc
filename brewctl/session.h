@@ -9,11 +9,11 @@
 */
 
 #include "error.h"
-#include "sqlite.h"
 #include "temperature.h"
 #include <ctime>        // ::time()
 #include <map>
 #include <string>
+#include <vector>
 
 
 typedef std::pair<time_t, double> SessionStage_t;
@@ -22,12 +22,11 @@ typedef std::vector<SessionStage_t> SessionStages_t;
 class Session
 {
 public:
-                    Session(SQLite& db, const int id, Error * const err);
+                    Session(const int id, Error * const err);
     Temperature     targetTemp();
     bool            isActive() const;
 
 private:
-    SQLite&         db_;
     const int       id_;
     std::string     gyle_;
     int             profile_;
