@@ -19,9 +19,11 @@ public:
 
     bool            read(const unsigned int channel, double& voltage, Error * const err = nullptr);
     double          vref() const { return vref_; };
+    double          isource() const { return isource_; };
 
 protected:
     double          vref_;
+    double          isource_;
     bool            ready_;
 };
 

@@ -28,9 +28,9 @@ Session::Session(const int id, Error * const err)
        !session.step(err))
         return;
 
-    gyle_ = session.column(0)->asString();
-    profile_ = session.column(1)->asInt();
-    start_ts_ = session.column(2)->asInt();
+    gyle_ = session("gyle").asString();
+    profile_ = session("profile_id");
+    start_ts_ = session("start_ts");
 
     // Read session temperature-stage information
     if(!db.prepare("SELECT stage, duration_hours, temperature FROM profilestage "
@@ -41,12 +41,12 @@ Session::Session(const int id, Error * const err)
     time_t offset = start_ts_;
     while(session.step(err))
     {
-        const time_t duration = session.column(1)->asDouble() * 3600;
+        const time_t duration = session("duration_hours").asInt() * 3600;
 
-        offset +=  duration;
-        stages_.push_back(SessionStage_t(duration, session.column(2)->asDouble()));
+        offset += duration;
+        stages_.push_back(SessionStage_t(duration, session("temperature")));
 
-        cout << "Session stage: duration " << duration / 3600 << "h, temp " << session.column(2)->asDouble() << endl;
+        cout << "Session stage: duration " << duration / 3600 << "h, temp " << session("temperature").asDouble() << endl;
     }
 
     end_ts_ = offset;
@@ -58,14 +58,17 @@ Session::Session(const int id, Error * const err)
 
     // Read session sensor configuration
     SQLiteStmt sensor;
-    if(!db.prepare("SELECT sensortype_id, channel FROM sessionsensor WHERE session_id=:id", sensor, err) ||
+    if(!db.prepare("SELECT channel, thermistor_id FROM temperaturesensor WHERE session_id=:id", sensor, err) ||
        !sensor.bind(":id", id, err))
         return;
 
     while(sensor.step(err))
     {
-        // FIXME hmm
-//        createSensor(db_, adc_, sensor.column(0)->asInt(), sensor.column(1)->asInt(), err);
+        auto ts = TemperatureSensor(sensor("channel"), sensor("thermistor_id"), err);
+        if(err->code())
+            return;
+
+        tempSensors_.push_back(ts);
     }
 
     if(err->code())

@@ -10,6 +10,7 @@
 
 #include "error.h"
 #include "temperature.h"
+#include "temperaturesensor.h"
 #include <ctime>        // ::time()
 #include <map>
 #include <string>
@@ -22,17 +23,18 @@ typedef std::vector<SessionStage_t> SessionStages_t;
 class Session
 {
 public:
-                    Session(const int id, Error * const err);
-    Temperature     targetTemp();
-    bool            isActive() const;
+                                    Session(const int id, Error * const err);
+    Temperature                     targetTemp();
+    bool                            isActive() const;
 
 private:
-    const int       id_;
-    std::string     gyle_;
-    int             profile_;
-    time_t          start_ts_;
-    time_t          end_ts_;
-    SessionStages_t stages_;
+    const int                       id_;
+    std::string                     gyle_;
+    int                             profile_;
+    time_t                          start_ts_;
+    time_t                          end_ts_;
+    SessionStages_t                 stages_;
+    std::vector<TemperatureSensor>  tempSensors_;
 };
 
 #endif // SESSION_H_INC

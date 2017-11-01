@@ -24,6 +24,7 @@ using std::queue;
 static ConfigData_t defaultConfig =
 {
     {"adc.ref_voltage",             "5.0"},
+    {"adc.isource_ua",              "147"},             // ADC current-source current in microamps
     {"database",                    "brewery.db"},      // FIXME - should be under /var/lib/brewctl
     {"log.method",                  "syslog"},
     {"log.level",                   "debug"},
@@ -33,7 +34,6 @@ static ConfigData_t defaultConfig =
     {"thermistor.beta",             "3980"},
     {"thermistor.ref_temp",         "25C"},
     {"thermistor.ref_resistance",   "4700"},
-    {"thermistor.isource_ua",       "147"},
 };
 
 

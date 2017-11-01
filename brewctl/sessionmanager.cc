@@ -32,7 +32,7 @@ bool SessionManager::init(Error * const err)
 
     while(sessions.step(err))
     {
-        sessions_.push_back(Session(sessions.column(0)->asInt(), err));
+        sessions_.push_back(Session(sessions("id"), err));
         if(err->code())
             return false;
     }

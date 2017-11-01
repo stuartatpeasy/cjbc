@@ -1,3 +1,4 @@
+ntp                 # not needed for build; needed to ensure sysclock accuracy
 gcc-c++
 make
 wiringpi

@@ -17,7 +17,7 @@ using std::vector;
 
 
 SQLiteStmt::SQLiteStmt()
-    : stmt_(NULL)
+    : stmt_(NULL), firstStepDone_(false)
 {
 }
 
@@ -166,7 +166,20 @@ bool SQLiteStmt::step(Error * const err)
     if(ret == SQLITE_DONE)
         return false;       // No more records; do not set err.
 
-    return checkError(ret, err, SQLITE_ROW);
+    if(checkError(ret, err, SQLITE_ROW))
+    {
+        if(!firstStepDone_)
+        {
+            // This is the first call to step() on the current statement, or the first call since a call to finalise()
+            // or reset().  Build a list of column names in the result set.
+            getColumnNames();
+            firstStepDone_ = true;
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 
@@ -174,21 +187,34 @@ bool SQLiteStmt::step(Error * const err)
 //
 bool SQLiteStmt::reset(Error * const err)
 {
-    return checkError(::sqlite3_reset(stmt_), err);
+    if(checkError(::sqlite3_reset(stmt_), err))
+    {
+        columnNames_.clear();
+        firstStepDone_ = false;
+        return true;
+    }
+
+    return false;
 }
 
 
-// column() - obtain column <index> from the current record in the result set for the current statement.  Return nullptr
-// if <index> is out-of-bounds.
+// column() - obtain column <index> from the current record in the result set for the current statement.  Return a
+// "fake" column, containing an SQL NULL value, if <index> is out-of-bounds.
 //
-unique_ptr<SQLiteColumn> SQLiteStmt::column(const int index)
+SQLiteColumn SQLiteStmt::column(const int index)
 {
-    if((index < 0) || (index >= numCols()))
-        return nullptr;
+    return SQLiteColumn(*this, ((index < 0) || (index >= numCols())) ? -1 : index);
+}
 
-    unique_ptr<SQLiteColumn> col(new SQLiteColumn(*this, index));
 
-    return col;
+// column() - obtain the column called <name> from the current record in the result set for the current statement.
+// Return a "fake" column, containing an SQL NULL value, if <index> is out-of-bounds.
+//
+SQLiteColumn SQLiteStmt::column(const string& name)
+{
+    const auto n = columnNames_.find(name);
+    
+    return column((n == columnNames_.end()) ? -1 : n->second);
 }
 
 
@@ -201,6 +227,8 @@ void SQLiteStmt::finalise()
         logDebug("SQLiteStmt: stmt {%x}: finalizing", id());
         ::sqlite3_finalize(stmt_);
         stmt_ = NULL;
+        columnNames_.clear();
+        firstStepDone_ = false;
     }
 }
 
@@ -242,5 +270,33 @@ void SQLiteStmt::formatError(Error * const err, const int code)
         logWarning("SQLite stmt {%x}: error %d: %s", id(), code, ::sqlite3_errstr(code));
 
     ::formatError(err, DB_SQLITESTMT_ERROR, ::sqlite3_errstr(code), code);
+}
+
+
+// getColumnNames() - attempt to build into <columnNames_> a list of names of columns in the result-set.  Try to
+// retrieve assigned names (names to the right of an "... AS" expression) first; if this fails (e.g. if a column has no
+// "AS" clause), try to retrieve "original names".  If a column name cannot be retrieved by either of these methods,
+// no entry for the column will be made in <columnNames_>.
+//
+void SQLiteStmt::getColumnNames()
+{
+    columnNames_.clear();
+    for(int i = 0; i < numCols(); ++i)
+    {
+        // Try sqlite3_column_name() first.  This will return NULL if the column has not been explicitly named using an
+        // "AS ..." clause; otherwise it will return the name to the right of the "AS" keyword.
+        const char * name = ::sqlite3_column_name(stmt_, i);
+        if(name == NULL)
+        {
+            // sqlite3_column_name() returned NULL; try sqlite3_column_origin_name() instead.  This will fail if the
+            // column is an expression or a sub-SELECT, or if a memory-allocation fails.
+            // assigned to an expression or sub-query column.
+            name = ::sqlite3_column_origin_name(stmt_, i);
+        }
+
+        // If name is still NULL at this point, we really don't know the name of this column.
+        if(name != NULL)
+            columnNames_[name] = i;
+    }
 }
 

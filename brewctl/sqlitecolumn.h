@@ -24,47 +24,55 @@ class SQLiteColumn
     friend class SQLiteStmt;
 
 protected:
-                    SQLiteColumn(SQLiteStmt &stmt, const int index);
+                    SQLiteColumn(SQLiteStmt &stmt, const int index) noexcept;
+                    SQLiteColumn(SQLiteColumn&& rhs) noexcept;
+                    SQLiteColumn(const SQLiteColumn& rhs) noexcept;
 public:
-    virtual         ~SQLiteColumn();
+    virtual         ~SQLiteColumn() noexcept;
 
-    int             index() const { return index_; };
-    int             len() const { return len_; };
-    const void *    data() const { return data_; };
-    bool            isNull() const { return isNull_; };
+    int             index() const noexcept { return index_; };
+    int             len() const noexcept { return len_; };
+    const void *    data() const noexcept { return data_; };
+    bool            isNull() const noexcept { return isNull_; };
 
-    int             asInt() const
+    int             asInt() const noexcept
                     {
                         return (data_ == nullptr) ? 0 : ::strtol(data_, NULL, 10);
                     };
 
-    long            asLong() const
+    long            asLong() const noexcept
                     {
                         return (data_ == nullptr) ? 0 : ::strtol(data_, NULL, 10);
                     };
 
-    const char *    asCString() const
+    const char *    asCString() const noexcept
                     {
                         return (data_ == nullptr) ? "" : data_;
                     };
 
-    double          asDouble() const
+    double          asDouble() const noexcept
                     {
                         return (data_ == nullptr) ? 0.0 : ::strtod(data_, NULL);
                     };
 
-    std::string     asString() const
+    std::string     asString() const noexcept
                     {
                         return std::string((data_ == nullptr) ? "" : data_);
                     }
 
-                    operator int()          const { return asInt();     };
-                    operator long()         const { return asLong();    };
-                    operator const char *() const { return asCString(); };
-                    operator double()       const { return asDouble();  };
-                    operator std::string()  const { return asString();  };
+                    operator int()          const noexcept { return asInt();     };
+                    operator long()         const noexcept { return asLong();    };
+                    operator const char *() const noexcept { return asCString(); };
+                    operator double()       const noexcept { return asDouble();  };
+                    operator std::string()  const noexcept { return asString();  };
 
-protected:
+    SQLiteColumn&   operator=(const SQLiteColumn& rhs) noexcept;
+    SQLiteColumn&   operator=(SQLiteColumn&& rhs) noexcept;
+
+private:
+    SQLiteColumn&   copy(const SQLiteColumn& rhs) noexcept;
+    SQLiteColumn&   move(SQLiteColumn& rhs) noexcept;
+
     int             index_;
     char *          data_;
     int             len_;

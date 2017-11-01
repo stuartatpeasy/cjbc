@@ -1,93 +1,121 @@
+--
+-- effectortype
+--
 DROP TABLE IF EXISTS "effectortype";
 CREATE TABLE "effectortype"(
-    id INTEGER PRIMARY KEY NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    type CHAR(16) NOT NULL,
-    powerconsumption DECIMAL(4, 4) NOT NULL);
+    id                  INTEGER PRIMARY KEY NOT NULL,
+    name                VARCHAR(255) NOT NULL,
+    type                CHAR(16) NOT NULL,
+    powerconsumption    DECIMAL(4, 4) NOT NULL);
 
+--
+-- gyle
+--
 DROP TABLE IF EXISTS "gyle";
 CREATE TABLE "gyle"(
-    id INTEGER PRIMARY KEY NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    date_create DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);
+    id                  INTEGER PRIMARY KEY NOT NULL,
+    name                VARCHAR(255) NOT NULL,
+    date_create         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);
 
+--
+-- profile
+--
 DROP TABLE IF EXISTS "profile";
 CREATE TABLE "profile"(
-    id INTEGER PRIMARY KEY NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    type CHAR(16) NOT NULL);
+    id                  INTEGER PRIMARY KEY NOT NULL,
+    name                VARCHAR(255) NOT NULL,
+    type                CHAR(16) NOT NULL);
 
+--
+-- profilestage
+--
 DROP TABLE IF EXISTS "profilestage";
 CREATE TABLE "profilestage"(
-    profile_id INT UNSIGNED NOT NULL,
-    stage INT UNSIGNED NOT NULL,
-    duration_hours INT UNSIGNED NOT NULL,
-    temperature DECIMAL(4, 4));
-
-DROP TABLE IF EXISTS "sensortype";
-CREATE TABLE "sensortype"(
-    id INTEGER PRIMARY KEY NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    type CHAR(16) NOT NULL,
-    type_id INT UNSIGNED NOT NULL);
-
-DROP TABLE IF EXISTS "session";
-CREATE TABLE "session"(
-    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    gyle VARCHAR(255) NOT NULL,
-    profile_id INT UNSIGNED NOT NULL,
-    date_create DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    date_start DATETIME DEFAULT NULL,
-    date_finish DATETIME DEFAULT NULL);
-
-DROP TABLE IF EXISTS "sessionsensor";
-CREATE TABLE "sessionsensor"(
-    session_id INT UNSIGNED NOT NULL,
-    sensortype_id INT UNSIGNED NOT NULL,
-    channel INT UNSIGNED NOT NULL);
-
-DROP TABLE IF EXISTS "sessioneffector";
-CREATE TABLE "sessioneffector"(
-    session_id INT UNSIGNED NOT NULL,
-    effectortype_id INT UNSIGNED NOT NULL,
-    channel INT UNSIGNED NOT NULL);
-
-DROP TABLE IF EXISTS "temperature";
-CREATE TABLE "temperature"(
-    date_create DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    sensor_id INT UNSIGNED NOT NULL,
-    temperature DECIMAL(4, 4) NOT NULL);
-
-DROP TABLE IF EXISTS "thermistor";
-CREATE TABLE "thermistor"(
-    id INTEGER PRIMARY KEY NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    type CHAR(3) NOT NULL,
-    Tref_C DECIMAL(4, 4) NOT NULL,
-    Rref DECIMAL(7, 3) NOT NULL,
-    beta DECIMAL(7, 3) NOT NULL,
-    range_min DECIMAL(4, 4) NOT NULL,
-    range_max DECIMAL(4, 4) NOT NULL);
+    profile_id          INT UNSIGNED NOT NULL,
+    stage               INT UNSIGNED NOT NULL,
+    duration_hours      INT UNSIGNED NOT NULL,
+    temperature         DECIMAL(4, 4));
 
 DROP INDEX IF EXISTS profilestage_profile_id_stage;
 CREATE UNIQUE INDEX profilestage_profile_id_stage
     ON "profilestage"(profile_id, stage);
 
+--
+-- sensortype
+--
+DROP TABLE IF EXISTS "sensortype";
+CREATE TABLE "sensortype"(
+    id                  INTEGER PRIMARY KEY NOT NULL,
+    name                VARCHAR(255) NOT NULL,
+    type                CHAR(16) NOT NULL,
+    type_id             INT UNSIGNED NOT NULL);
+
+--
+-- session
+--
+DROP TABLE IF EXISTS "session";
+CREATE TABLE "session"(
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    gyle                VARCHAR(255) NOT NULL,
+    profile_id          INT UNSIGNED NOT NULL,
+    date_create         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    date_start          DATETIME DEFAULT NULL,
+    date_finish         DATETIME DEFAULT NULL);
+
 DROP INDEX IF EXISTS session_id_date_finish;
 CREATE UNIQUE INDEX session_id_date_finish
     ON "session"(id, date_finish);
 
-DROP INDEX IF EXISTS sessionsensor_session_id_sensortype_id_channel;
-CREATE UNIQUE INDEX sessionsensor_session_id_sensortype_id_channel
-    ON "sessionsensor"(session_id, sensortype_id, channel);
+--
+-- sessioneffector
+--
+DROP TABLE IF EXISTS "sessioneffector";
+CREATE TABLE "sessioneffector"(
+    session_id          INT UNSIGNED NOT NULL,
+    effectortype_id     INT UNSIGNED NOT NULL,
+    channel             INT UNSIGNED NOT NULL);
 
 DROP INDEX IF EXISTS sessioneffector_session_id_effectortype_id_channel;
 CREATE UNIQUE INDEX sessioneffector_session_id_effectortype_id_channel
     ON "sessioneffector"(session_id, effectortype_id, channel);
 
+--
+-- temperature
+--
+DROP TABLE IF EXISTS "temperature";
+CREATE TABLE "temperature"(
+    date_create         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    sensor_id           INT UNSIGNED NOT NULL,
+    temperature         DECIMAL(4, 4) NOT NULL);
+
 DROP INDEX IF EXISTS temperature_date_create_sensor_id;
 CREATE UNIQUE INDEX temperature_date_create_sensor_id
     ON "temperature"(date_create, sensor_id);
+
+--
+-- temperaturesensor
+--
+DROP TABLE IF EXISTS "temperaturesensor";
+CREATE TABLE "temperaturesensor"(
+    role                CHAR(16) NOT NULL,
+    session_id          INT UNSIGNED DEFAULT NULL,
+    channel             INT UNSIGNED NOT NULL,
+    thermistor_id       INT UNSIGNED NOT NULL);
+
+--
+-- thermistor
+--
+DROP TABLE IF EXISTS "thermistor";
+CREATE TABLE "thermistor"(
+    id                  INTEGER PRIMARY KEY NOT NULL,
+    name                VARCHAR(255) NOT NULL,
+    type                CHAR(3) NOT NULL,
+    Tref_C              DECIMAL(4, 4) NOT NULL,
+    Rref                DECIMAL(7, 3) NOT NULL,
+    beta                DECIMAL(7, 3) NOT NULL,
+    range_min           DECIMAL(4, 4) NOT NULL,
+    range_max           DECIMAL(4, 4) NOT NULL);
+
 
 DELETE FROM effectortype;
 INSERT INTO effectortype(id, name, type, powerconsumption) VALUES
@@ -133,10 +161,6 @@ DELETE FROM thermistor;
 INSERT INTO thermistor(id, name, type, Tref_C, Rref, beta, range_min, range_max) VALUES
     (1, "B57891M0472K000", "NTC", 25.0, 4700.0, 3980.0, -5.0, 40.0);
 
-DELETE FROM sensortype;
-INSERT INTO sensortype(id, name, type, type_id) VALUES
-    (1, "Temperature sensor", "thermistor", 1);
-
 -- remove this
 DELETE FROM session;
 INSERT INTO session(id, gyle, profile_id, date_create, date_start, date_finish) VALUES
@@ -147,7 +171,8 @@ INSERT INTO sessioneffector(session_id, effectortype_id, channel) VALUES
     (1, 1, 0),
     (1, 2, 1);
 
-DELETE FROM sessionsensor;
-INSERT INTO sessionsensor(session_id, sensortype_id, channel) VALUES
-    (1, 1, 0);
+DELETE FROM temperaturesensor;
+INSERT INTO temperaturesensor(role, session_id, channel, thermistor_id) VALUES
+    ("vessel",     1, 0, 1),
+    ("ambient", NULL, 7, 1);
 

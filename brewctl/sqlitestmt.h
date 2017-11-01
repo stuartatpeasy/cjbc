@@ -9,6 +9,7 @@
 */
 
 #include <string>
+#include <map>
 #include <memory>
 #include <vector>
 #include "sqlitecolumn.h"
@@ -50,10 +51,14 @@ public:
 
 	bool                            step(Error * const err = nullptr);
 	bool                            reset(Error * const err = nullptr);
-    std::unique_ptr<SQLiteColumn>   column(const int index);
+    SQLiteColumn                    column(const int index);
+    SQLiteColumn                    column(const std::string& name);
 
                                     operator sqlite3_stmt *() { return stmt_; };
                                     operator sqlite3_stmt **() { return &stmt_; };
+
+    SQLiteColumn                    operator()(const int index) { return column(index); };
+    SQLiteColumn                    operator()(const std::string& name) { return column(name); };
 
     void                            finalise();
     size_t                          id() const { return (size_t) stmt_; };
@@ -62,8 +67,11 @@ private:
 	bool                            checkError(const int ret, Error * const err, const int successCode = SQLITE_OK);
 	bool                            checkError(const int ret, Error * const err, std::vector<int> successCodes);
     void                            formatError(Error * const err, const int code);
+    void                            getColumnNames();
 
     sqlite3_stmt *                  stmt_;
+    bool                            firstStepDone_;
+    std::map<std::string, int>      columnNames_;
 };
 
 #endif // SQLITESTMT_H_INC

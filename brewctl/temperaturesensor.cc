@@ -24,18 +24,16 @@ TemperatureSensor::TemperatureSensor(const int thermistor_id, const int channel,
        || !thermistor_data.step(err))
         return;
 
-    if(thermistor_data.column(1)->asString() != "thermistor")
+    if(thermistor_data("type").asString() != "thermistor")
     {
-        formatError(err, SENSOR_INVALID_TYPE, thermistor_data.column(1)->asCString());
+        formatError(err, SENSOR_INVALID_TYPE, thermistor_data("type").asCString());
         return;
     }
 
-    name_ = thermistor_data.column(0)->asString();
+    name_ = thermistor_data("name").asString();
     
-    thermistor_ = new Thermistor(
-        thermistor_data.column(4)->asDouble(),                                  // beta
-        thermistor_data.column(3)->asDouble(),                                  // R0 (Rref)
-        Temperature(thermistor_data.column(2)->asDouble(), TEMP_UNIT_CELSIUS)); // T0
+    thermistor_ = new Thermistor(thermistor_data("beta"), thermistor_data("Rref"),
+                                 Temperature(thermistor_data("Tref_C"), TEMP_UNIT_CELSIUS));
 
     if(thermistor_ == nullptr)
     {
@@ -44,8 +42,6 @@ TemperatureSensor::TemperatureSensor(const int thermistor_id, const int channel,
     }
 
     nsamples_ = 1000;       // FIXME read from config
-    Idrive_ = 0.000147;     // FIXME read from config
-
 }
 
 
@@ -59,7 +55,7 @@ bool TemperatureSensor::sense(Temperature& T, Error * const err)
     if(!readRaw(voltage, err))
         return false;
 
-    const Temperature sample = thermistor_->T(voltage / Idrive_);
+    const Temperature sample = thermistor_->T(voltage / Registry::instance().adc().isource());
 
     // If this is the first sample, set the moving-average value to the sampled temperature in order to initialise it to
     // an approximate value.  If this is not the first sample, use the data to adjust the moving-average value.

@@ -10,9 +10,10 @@
 #include "registry.h"
 
 
-#define ADC_MAX_CHANNEL         (7)         // This ADC has channels numbered 0-7.
-#define ADC_BITS                (10)        // This ADC has 10-bit resolution.
+#define ADC_MAX_CHANNEL         (7)         // This ADC has channels numbered 0-7
+#define ADC_BITS                (10)        // This ADC has 10-bit resolution
 #define ADC_DEFAULT_REF_VOLTAGE (5.0)       // Default ADC reference voltage
+#define ADC_DEFAULT_ISOURCE_UA  (147)       // Default ADC current-source current, in microamps
 
 #define ADC_START_BIT           (1 << 0)
 #define ADC_SINGLE_MODE_BIT     (1 << 7)
@@ -36,6 +37,7 @@ ADC::ADC(GPIOPort& gpio, Config& config, Error * const err)
     : ready_(false)
 {
     vref_ = config.get("adc.ref_voltage", ADC_DEFAULT_REF_VOLTAGE);
+    isource_ = config.get("adc.isource_ua", ADC_DEFAULT_ISOURCE_UA) / 1000000.0;    // isource_ is in amps
 
     // Set ADC_nCS as an output, and de-assert it
     if(!gpio.write(GPIO_ADC_nCS, 1, err) ||

@@ -23,3 +23,7 @@ bool Sensor::readRaw(double& voltage, Error * const err)
     return Registry::instance().adc().read(channel_, voltage, err);
 }
 
+
+// createSensor() - factory method which creates sensors of the specified type
+//
+
