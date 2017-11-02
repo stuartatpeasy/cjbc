@@ -7,8 +7,13 @@
 */
 
 #include "session.h"
+#include "log.h"
 #include "registry.h"
 #include <cstdlib>      // NULL
+
+
+#define DEFAULT_TEMP_DEADZONE   (0.5)       // Temperature "dead zone", in deg C/K, within which effectors will not be
+                                            // activated to modify the session temperature
 
 
 Session::Session(const int id, Error * const err)
@@ -48,21 +53,27 @@ Session::Session(const int id, Error * const err)
 
     // Read session sensor configuration
     SQLiteStmt sensor;
-    if(!db.prepare("SELECT channel, thermistor_id FROM temperaturesensor WHERE session_id=:id", sensor, err) ||
+    if(!db.prepare("SELECT channel, thermistor_id FROM temperaturesensor "
+                   "WHERE role='vessel' AND session_id=:id", sensor, err) ||
        !sensor.bind(":id", id, err))
         return;
 
-    while(sensor.step(err))
+    if(sensor.step(err))
     {
-        auto ts = TemperatureSensor(sensor["channel"], sensor["thermistor_id"], err);
-        if(err->code())
-            return;
+        if(!err->code())
+            logWarning("Session %d has no vessel temperature sensor");
 
-        tempSensors_.push_back(ts);
+        return;
     }
 
-    if(err->code())
+    tempSensorVessel_ = new TemperatureSensor(sensor["channel"], sensor["thermistor_id"]);
+    if(tempSensorVessel_ == nullptr)
+    {
+        formatError(err, MALLOC_FAILED);
         return;
+    }
+
+    deadZone_ = Registry::instance().config().get("session.dead_zone", DEFAULT_TEMP_DEADZONE);
 }
 
 
@@ -81,15 +92,38 @@ Temperature Session::targetTemp()
     return Temperature(0, TEMP_UNIT_KELVIN);
 }
 
-/*
-bool Session::updateEffectors()
+
+bool Session::updateEffectors(Error * const err)
 {
     if(!isActive())
         return true;
 
     // Sense current temperature
+    if(tempSensorVessel_ == nullptr)
+        return false;                   // No temperature sensor available for this session
+
+    Temperature t;
+
+    if(!tempSensorVessel_->sense(t, err))
+        return false;
+
+    const double diff = t.diff(targetTemp(), TEMP_UNIT_CELSIUS);
+    if(::fabs(diff) < deadZone_)
+    {
+        // Temperature is within dead zone - deactivate all effectors
+    }
+    else if(diff > 0.0)
+    {
+        // Temperature is too high - activate cooling effectors
+    }
+    else if(diff < 0.0)
+    {
+        // Temperature is too low - activate heating effectors
+    }
+
+    return true;
 }
-*/
+
 
 // isActive() - return bool indicating whether the current session is "active", i.e. the current time is between the
 // session's start time and its end time.

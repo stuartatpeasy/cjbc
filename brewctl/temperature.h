@@ -8,8 +8,11 @@
     Part of brewctl
 */
 
+#include <cmath>        // ::fabs()
 #include <string>
 
+
+#define TEMP_TOLERANCE  (0.0001)        // Tolerance for comparing temperatures
 
 typedef enum TemperatureUnit
 {
@@ -23,17 +26,75 @@ typedef enum TemperatureUnit
 class Temperature
 {
 public:
-                                Temperature();
-                                Temperature(const double value, const TemperatureUnit_t unit);
+                                Temperature() noexcept;
+                                Temperature(const double value, const TemperatureUnit_t unit) noexcept;
 
-    bool                        set(const double value, const TemperatureUnit_t unit);
+    double                      get(const TemperatureUnit_t unit) const noexcept;
+    bool                        set(const double value, const TemperatureUnit_t unit) noexcept;
 
-    double                      C() const;
-    double                      F() const;
-    double                      K() const;
+    double                      C() const noexcept;
+    double                      F() const noexcept;
+    double                      K() const noexcept;
 
-    static bool                 fromString(const std::string& s, Temperature& t);
-    static TemperatureUnit_t    unitFromChar(const char c);
+    static bool                 fromString(const std::string& s, Temperature& t) noexcept;
+    static TemperatureUnit_t    unitFromChar(const char c) noexcept;
+
+    double                      diff(const Temperature& rhs, const TemperatureUnit_t unit) const noexcept;
+
+    bool                        operator==(const Temperature& rhs) const noexcept
+                                {
+                                    return ::fabs(valKelvin_ - rhs.valKelvin_) < TEMP_TOLERANCE;
+                                };
+
+    bool                        operator!=(const Temperature& rhs) const noexcept
+                                {
+                                    return ::fabs(valKelvin_ - rhs.valKelvin_) >= TEMP_TOLERANCE;
+                                };
+
+    bool                        operator<(const Temperature& rhs) const noexcept
+                                {
+                                    return (rhs.valKelvin_ - valKelvin_) >= TEMP_TOLERANCE;
+                                };
+
+    bool                        operator<=(const Temperature& rhs) const noexcept
+                                {
+                                    return operator<(rhs) || operator==(rhs);
+                                };
+
+    bool                        operator>(const Temperature& rhs) const noexcept
+                                {
+                                    return (valKelvin_ - rhs.valKelvin_) >= TEMP_TOLERANCE;
+                                };
+
+    bool                        operator>=(const Temperature& rhs) const noexcept
+                                {
+                                    return operator>(rhs) || operator==(rhs);
+                                };
+
+    Temperature                 operator+(const Temperature& rhs) const noexcept
+                                {
+                                    return Temperature(valKelvin_ + rhs.valKelvin_, TEMP_UNIT_KELVIN);
+                                };
+
+    Temperature&                operator+=(const Temperature& rhs) noexcept
+                                {
+                                    valKelvin_ += rhs.valKelvin_;
+                                    return *this;
+                                };
+
+    Temperature                 operator-(const Temperature& rhs) const noexcept
+                                {
+                                    return Temperature(((*this > rhs) ? (valKelvin_ - rhs.valKelvin_) : 0.0),
+                                                       TEMP_UNIT_KELVIN);
+                                };
+
+    Temperature&                operator-=(const Temperature& rhs) noexcept
+                                {
+                                    valKelvin_ -= rhs.valKelvin_;
+                                    if(valKelvin_ < 0.0)
+                                        valKelvin_ = 0.0;
+                                    return *this;
+                                };
 
 protected:
     double                      valKelvin_;

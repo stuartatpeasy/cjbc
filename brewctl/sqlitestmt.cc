@@ -203,7 +203,13 @@ bool SQLiteStmt::reset(Error * const err)
 //
 SQLiteColumn SQLiteStmt::column(const int index)
 {
-    return SQLiteColumn(*this, ((index < 0) || (index >= numCols())) ? -1 : index);
+    if((index < 0) || (index >= numCols()))
+    {
+        logError("SQLiteStmt: stmt {%x}: requested out-of-range column %d; returning NULL column", id(), index);
+        return SQLiteColumn(*this, -1);
+    }
+
+    return SQLiteColumn(*this, index);
 }
 
 
@@ -213,8 +219,13 @@ SQLiteColumn SQLiteStmt::column(const int index)
 SQLiteColumn SQLiteStmt::column(const string& name)
 {
     const auto n = columnNames_.find(name);
-    
-    return column((n == columnNames_.end()) ? -1 : n->second);
+    if(n == columnNames_.end())
+    {
+        logError("SQLiteStmt: stmt {%x}: requested unknown column '%s'; returning NULL column", id(), name.c_str());
+        return SQLiteColumn(*this, -1);
+    }
+
+    return SQLiteColumn(*this, n->second);
 }
 
 

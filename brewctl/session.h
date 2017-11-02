@@ -28,13 +28,16 @@ public:
     bool                            isActive() const;
 
 private:
+    bool                            updateEffectors(Error * const err);
+
     const int                       id_;
     std::string                     gyle_;
     int                             profile_;
     time_t                          start_ts_;
     time_t                          end_ts_;
+    double                          deadZone_;
     SessionStages_t                 stages_;
-    std::vector<TemperatureSensor>  tempSensors_;
+    TemperatureSensor *             tempSensorVessel_;
 };
 
 #endif // SESSION_H_INC

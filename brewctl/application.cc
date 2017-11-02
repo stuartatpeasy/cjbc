@@ -29,6 +29,7 @@ static ConfigData_t defaultConfig =
     {"log.method",                  "syslog"},
     {"log.level",                   "debug"},
     {"sensor.average_len",          "1000"},            // Length of moving-average for sensor readings
+    {"session.dead_zone",           "0.5C"},            // "Dead zone" for session temperature control
     {"spi.dev",                     "/dev/spidev0.0"},
     {"spi.mode",                    "0"},
     {"spi.max_clock",               "500000"},
