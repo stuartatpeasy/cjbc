@@ -10,9 +10,6 @@
 #include "registry.h"
 #include <cstdlib>      // NULL
 
-#include <iostream>     // FIXME remove
-using namespace std;    // FIXME remove
-
 
 Session::Session(const int id, Error * const err)
     : id_(id), start_ts_(0)
@@ -28,9 +25,9 @@ Session::Session(const int id, Error * const err)
        !session.step(err))
         return;
 
-    gyle_ = session("gyle").asString();
-    profile_ = session("profile_id");
-    start_ts_ = session("start_ts");
+    gyle_ = session["gyle"].asString();
+    profile_ = session["profile_id"];
+    start_ts_ = session["start_ts"];
 
     // Read session temperature-stage information
     if(!db.prepare("SELECT stage, duration_hours, temperature FROM profilestage "
@@ -41,20 +38,13 @@ Session::Session(const int id, Error * const err)
     time_t offset = start_ts_;
     while(session.step(err))
     {
-        const time_t duration = session("duration_hours").asInt() * 3600;
+        const time_t duration = session["duration_hours"].asInt() * 3600;
 
         offset += duration;
-        stages_.push_back(SessionStage_t(duration, session("temperature")));
-
-        cout << "Session stage: duration " << duration / 3600 << "h, temp " << session("temperature").asDouble() << endl;
+        stages_.push_back(SessionStage_t(duration, session["temperature"]));
     }
 
     end_ts_ = offset;
-
-    if(isActive())
-        cout << "Session is active; current temp should be " << targetTemp().C() << "deg C" << endl;
-    else
-        cout << "Session is not active" << endl;
 
     // Read session sensor configuration
     SQLiteStmt sensor;
@@ -64,7 +54,7 @@ Session::Session(const int id, Error * const err)
 
     while(sensor.step(err))
     {
-        auto ts = TemperatureSensor(sensor("channel"), sensor("thermistor_id"), err);
+        auto ts = TemperatureSensor(sensor["channel"], sensor["thermistor_id"], err);
         if(err->code())
             return;
 

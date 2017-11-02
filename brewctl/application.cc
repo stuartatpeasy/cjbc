@@ -28,6 +28,7 @@ static ConfigData_t defaultConfig =
     {"database",                    "brewery.db"},      // FIXME - should be under /var/lib/brewctl
     {"log.method",                  "syslog"},
     {"log.level",                   "debug"},
+    {"sensor.average_len",          "1000"},            // Length of moving-average for sensor readings
     {"spi.dev",                     "/dev/spidev0.0"},
     {"spi.mode",                    "0"},
     {"spi.max_clock",               "500000"},

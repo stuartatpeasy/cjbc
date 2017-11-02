@@ -15,10 +15,10 @@
 class Thermistor
 {
 public:
-                        Thermistor(const double beta, const double R0, const Temperature& T0);
+                        Thermistor(const double beta, const double R0, const Temperature& T0) noexcept;
 
-    Temperature         T(const double R) const;
-    double              R(const Temperature& T) const;
+    Temperature         T(const double R) const noexcept;
+    double              R(const Temperature& T) const noexcept;
 
 protected:
     const double        beta_;

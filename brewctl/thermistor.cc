@@ -9,7 +9,7 @@
 #include "thermistor.h"
 
 
-Thermistor::Thermistor(const double beta, const double R0, const Temperature& T0)
+Thermistor::Thermistor(const double beta, const double R0, const Temperature& T0) noexcept
     : beta_(beta), R0_(R0), T0_(T0)
 {
     // TODO: ensure T0 != 0.0
@@ -20,7 +20,7 @@ Thermistor::Thermistor(const double beta, const double R0, const Temperature& T0
 
 // T() - return the temperature corresponding to the resistance R, given in ohms.
 //
-Temperature Thermistor::T(const double R) const
+Temperature Thermistor::T(const double R) const noexcept
 {
     return Temperature(beta_ / (log(R / Rinf_)), TEMP_UNIT_KELVIN);
 }
@@ -28,7 +28,7 @@ Temperature Thermistor::T(const double R) const
 
 // R() - return the resistance corresponding to the temperature T.
 //
-double Thermistor::R(const Temperature& T) const
+double Thermistor::R(const Temperature& T) const noexcept
 {
     return Rinf_ * exp(beta_ / T.K());
 }

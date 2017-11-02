@@ -25,7 +25,6 @@ public:
     bool            sense(Temperature& T, Error * const err = nullptr);
 
 protected:
-    const int       thermistor_id_;
     std::string     name_;
     Thermistor *    thermistor_;
 

@@ -33,7 +33,7 @@ typedef enum ADCPin
 // normally read from the registry.  This is because the ADC is normally init'ed from within the Registry ctor, hence
 // we wouldn't be able to obtain a registry instance here.
 //
-ADC::ADC(GPIOPort& gpio, Config& config, Error * const err)
+ADC::ADC(GPIOPort& gpio, Config& config, Error * const err) noexcept
     : ready_(false)
 {
     vref_ = config.get("adc.ref_voltage", ADC_DEFAULT_REF_VOLTAGE);
@@ -51,7 +51,7 @@ ADC::ADC(GPIOPort& gpio, Config& config, Error * const err)
 
 // read() - read a sample from ADC channel <channel>; return the detected voltage through <voltage>.
 //
-bool ADC::read(const unsigned int channel, double& voltage, Error * const err)
+bool ADC::read(const unsigned int channel, double& voltage, Error * const err) noexcept
 {
     Registry& r = Registry::instance();
     uint8_t tx_data[ADC_PACKET_LEN], rx_data[ADC_PACKET_LEN];

@@ -15,11 +15,11 @@
 class ADC
 {
 public:
-                    ADC(GPIOPort& gpio, Config& config, Error * const err = nullptr);
+                    ADC(GPIOPort& gpio, Config& config, Error * const err = nullptr) noexcept;
 
-    bool            read(const unsigned int channel, double& voltage, Error * const err = nullptr);
-    double          vref() const { return vref_; };
-    double          isource() const { return isource_; };
+    bool            read(const unsigned int channel, double& voltage, Error * const err = nullptr) noexcept;
+    double          vref() const noexcept { return vref_; };
+    double          isource() const noexcept { return isource_; };
 
 protected:
     double          vref_;

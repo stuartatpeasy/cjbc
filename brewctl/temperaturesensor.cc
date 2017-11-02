@@ -12,8 +12,11 @@
 #include "sqlitestmt.h"
 
 
+#define DEFAULT_MOVING_AVERAGE_LEN      (1000)  // Default length of moving average for sensor readings
+
+
 TemperatureSensor::TemperatureSensor(const int thermistor_id, const int channel, Error * const err)
-    : Sensor(channel), thermistor_id_(thermistor_id), thermistor_(nullptr), tempKelvin_(0.0), sampleTaken_(false)
+    : Sensor(channel), thermistor_(nullptr), tempKelvin_(0.0), sampleTaken_(false)
 {
     // Initialise: read sensor data from the database
     SQLite& db = Registry::instance().db();
@@ -21,19 +24,20 @@ TemperatureSensor::TemperatureSensor(const int thermistor_id, const int channel,
 
     if(!db.prepare("SELECT name, type, Tref_C, Rref, beta, range_min, range_max "
                    "FROM thermistor WHERE id=:id", thermistor_data, err)
+       || !thermistor_data.bind(":id", thermistor_id)
        || !thermistor_data.step(err))
         return;
 
-    if(thermistor_data("type").asString() != "thermistor")
+    if(thermistor_data["type"].asString() != "thermistor")
     {
-        formatError(err, SENSOR_INVALID_TYPE, thermistor_data("type").asCString());
+        formatError(err, SENSOR_INVALID_TYPE, thermistor_data["type"].asCString());
         return;
     }
 
-    name_ = thermistor_data("name").asString();
+    name_ = thermistor_data["name"].asString();
     
-    thermistor_ = new Thermistor(thermistor_data("beta"), thermistor_data("Rref"),
-                                 Temperature(thermistor_data("Tref_C"), TEMP_UNIT_CELSIUS));
+    thermistor_ = new Thermistor(thermistor_data["beta"], thermistor_data["Rref"],
+                                 Temperature(thermistor_data["Tref_C"], TEMP_UNIT_CELSIUS));
 
     if(thermistor_ == nullptr)
     {
@@ -41,7 +45,7 @@ TemperatureSensor::TemperatureSensor(const int thermistor_id, const int channel,
         return;
     }
 
-    nsamples_ = 1000;       // FIXME read from config
+    nsamples_ = Registry::instance().config().get("sensor.average_len", DEFAULT_MOVING_AVERAGE_LEN);
 }
 
 
