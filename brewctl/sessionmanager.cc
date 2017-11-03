@@ -49,7 +49,7 @@ void SessionManager::run()
     TempSensor sensor1(thermistor, 0, 0.000147),
                sensor2(thermistor, 1, 0.000147);
 
-    ShiftReg sr;
+    ShiftReg& sr = r.sr();
     Temperature T1, T2;
     LCD& lcd = r.lcd();
 

@@ -9,6 +9,7 @@
 */
 
 #include "error.h"
+#include "effector.h"
 #include "temperature.h"
 #include "temperaturesensor.h"
 #include <ctime>        // ::time()
@@ -38,6 +39,8 @@ private:
     double                          deadZone_;
     SessionStages_t                 stages_;
     TemperatureSensor *             tempSensorVessel_;
+    Effector *                      effectorHeater_;
+    Effector *                      effectorCooler_;
 };
 
 #endif // SESSION_H_INC

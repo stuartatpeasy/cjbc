@@ -20,7 +20,7 @@ Session::Session(const int id, Error * const err)
     : id_(id), start_ts_(0)
 {
     // Read basic session information
-    SQLite& db = Registry::instance().db();
+    auto& db = Registry::instance().db();
     SQLiteStmt session;
 
     if(!db.prepare("SELECT gyle, profile_id, CAST((JULIANDAY(date_start) - 2440587.5) * 86400.0 AS INT) AS start_ts "
@@ -62,8 +62,8 @@ Session::Session(const int id, Error * const err)
     {
         if(!err->code())
             logWarning("Session %d has no vessel temperature sensor");
-
-        return;
+        else
+            return;
     }
 
     tempSensorVessel_ = new TemperatureSensor(sensor["channel"], sensor["thermistor_id"]);
@@ -72,6 +72,15 @@ Session::Session(const int id, Error * const err)
         formatError(err, MALLOC_FAILED);
         return;
     }
+
+    // Read session effector configuration
+    effectorHeater_ = Effector::getSessionHeater(id_, err);
+    if(effectorHeater_ == nullptr)
+        return;
+
+    effectorCooler_ = Effector::getSessionCooler(id_, err);
+    if(effectorCooler_ == nullptr)
+        return;
 
     deadZone_ = Registry::instance().config().get("session.dead_zone", DEFAULT_TEMP_DEADZONE);
 }
@@ -108,20 +117,31 @@ bool Session::updateEffectors(Error * const err)
         return false;
 
     const double diff = t.diff(targetTemp(), TEMP_UNIT_CELSIUS);
+    bool ok = true;
+
     if(::fabs(diff) < deadZone_)
     {
         // Temperature is within dead zone - deactivate all effectors
+        if(effectorHeater_ != nullptr)
+            ok &= effectorHeater_->activate(false, err);
+
+        if(effectorCooler_ != nullptr)
+            ok &= effectorCooler_->activate(false, err);
     }
     else if(diff > 0.0)
     {
         // Temperature is too high - activate cooling effectors
+        if(effectorCooler_ != nullptr)
+            ok &= effectorCooler_->activate(true, err);
     }
     else if(diff < 0.0)
     {
         // Temperature is too low - activate heating effectors
+        if(effectorCooler_ != nullptr)
+            ok &= effectorCooler_->activate(true, err);
     }
 
-    return true;
+    return ok;
 }
 
 

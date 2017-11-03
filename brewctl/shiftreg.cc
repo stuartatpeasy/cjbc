@@ -29,26 +29,39 @@ typedef enum ShiftRegPin
 
 // ctor - configure GPIO port pins and set the shift register output value to 0.
 //
-ShiftReg::ShiftReg(Error * const err)
-    : ready_(false), currentVal_(0)
+ShiftReg::ShiftReg(GPIOPort& gpio, Error * const err) noexcept
+    : ready_(false)
 {
-    auto& r = Registry::instance();
-
     // Force the register-clock signal to be an output, and de-assert it
-    if(!r.gpio().write(GPIO_SR_RCLK, 0, err) ||
-       !r.gpio().setMode(GPIO_SR_RCLK, PIN_OUTPUT, err))
+    if(!gpio.write(GPIO_SR_RCLK, 0, err) ||
+       !gpio.setMode(GPIO_SR_RCLK, PIN_OUTPUT, err))
         return;
+}
+
+
+// init() - initialise the shift register by forcing all output bits to 0 and setting currentVal_ to 0.  Returns true on
+// success; false otherwise.  The shift register is not unusable until this function has been called successfully.
+//
+bool ShiftReg::init(Error * const err) noexcept
+{
+    auto& spi = Registry::instance().spi();
 
     // Force all shift-register outputs to zero.
-    if(r.spi().transmitByte(0, err) && r.spi().transmitByte(0, err) && strobeRegClk(err))
+    if(spi.transmitByte(0, err) && spi.transmitByte(0, err) && strobeRegClk(err))
+    {
         ready_ = true;
+        currentVal_ = 0;
+        return true;
+    }
+
+    return false;
 }
 
 
 // strobeRegClk() - strobe the RCLK pin of the 74xx595.  This has the effect of transferring to the output pins the last
 // eight bits received in the register.
 //
-bool ShiftReg::strobeRegClk(Error * const err)
+bool ShiftReg::strobeRegClk(Error * const err) noexcept
 {
     auto& gpio = Registry::instance().gpio();
 
@@ -66,7 +79,7 @@ bool ShiftReg::strobeRegClk(Error * const err)
 
 // write() - write the value in <val> to the shift register.  Returns true on success; on failure, returns false.
 //
-bool ShiftReg::write(const uint16_t val, Error * const err)
+bool ShiftReg::write(const uint16_t val, Error * const err) noexcept
 {
     auto& r = Registry::instance();
     uint16_t valLocal = val;
@@ -95,7 +108,7 @@ bool ShiftReg::write(const uint16_t val, Error * const err)
 // operator|=() - OR the current shift register value with the value in <rhs> and update the shift register.  Returns
 // true on success, false otherwise.
 //
-uint16_t ShiftReg::operator|=(const uint16_t rhs)
+uint16_t ShiftReg::operator|=(const uint16_t rhs) noexcept
 {
     write(currentVal_ | rhs);
 
@@ -109,7 +122,7 @@ uint16_t ShiftReg::operator|=(const uint16_t rhs)
 // operator&=() - AND the current shift register value with the value in <rhs> and update the shift register.  Returns
 // true on success, false otherwise.
 //
-uint16_t ShiftReg::operator&=(const uint16_t rhs)
+uint16_t ShiftReg::operator&=(const uint16_t rhs) noexcept
 {
     write(currentVal_ & rhs);
 
@@ -123,7 +136,7 @@ uint16_t ShiftReg::operator&=(const uint16_t rhs)
 // operator^=() - exclusive-OR the current shift register value with the value in <rhs> and update the shift register.
 // Returns true on success, false otherwise.
 //
-uint16_t ShiftReg::operator^=(const uint16_t rhs)
+uint16_t ShiftReg::operator^=(const uint16_t rhs) noexcept
 {
     write(currentVal_ ^ rhs);
 
@@ -136,7 +149,7 @@ uint16_t ShiftReg::operator^=(const uint16_t rhs)
 
 // set() - set bit <bit>.  Returns true on success; false if the set operation failed, or if <bit> is out of range.
 //
-bool ShiftReg::set(const unsigned int bit, Error * const err)
+bool ShiftReg::set(const unsigned int bit, Error * const err) noexcept
 {
     if(bit >= SR_LEN_BITS)
     {
@@ -151,7 +164,7 @@ bool ShiftReg::set(const unsigned int bit, Error * const err)
 // clear() - clear bit <bit>.  Returns true on success; false if the clear operation failed, or if <bit> is out of
 // range.
 //
-bool ShiftReg::clear(const unsigned int bit, Error * const err)
+bool ShiftReg::clear(const unsigned int bit, Error * const err) noexcept
 {
     if(bit >= SR_LEN_BITS)
     {
@@ -166,7 +179,7 @@ bool ShiftReg::clear(const unsigned int bit, Error * const err)
 // toggle() - toggle the value of bit <bit>.  Returns true on success; false if the toggle operation failed, or if <bit>
 // is out of range.
 //
-bool ShiftReg::toggle(const unsigned int bit, Error * const err)
+bool ShiftReg::toggle(const unsigned int bit, Error * const err) noexcept
 {
     if(bit >= SR_LEN_BITS)
     {
@@ -180,7 +193,7 @@ bool ShiftReg::toggle(const unsigned int bit, Error * const err)
 
 // isSet() - return true if bit <bit> is set (1); false otherwise.  Returns false if <bit> is out of range.
 //
-bool ShiftReg::isSet(const unsigned int bit, Error * const err)
+bool ShiftReg::isSet(const unsigned int bit, Error * const err) noexcept
 {
     if(bit >= SR_LEN_BITS)
     {

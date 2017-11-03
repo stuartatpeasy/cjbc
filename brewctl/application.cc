@@ -43,7 +43,6 @@ Application::Application(int argc, char **argv, Error * const err)
 {
     appName_ = argc ? argv[0] : "<NoAppName>";
 
-    // FIXME use Config obj in registry; don't store as a separate member
     config_.add(defaultConfig);             // add default values to config
     config_.add("/etc/brewctl.conf");       // default config file location
 
@@ -55,7 +54,6 @@ Application::Application(int argc, char **argv, Error * const err)
     logSetLevel(config_("log.level"));
 
     if(!Registry::init(config_, err) ||             // Initialise registry
-       !Registry::instance().lcd().init(err) ||     // Initialise LCD
        !sessionManager_.init(err))                  // Initialise session manager
         return;
 

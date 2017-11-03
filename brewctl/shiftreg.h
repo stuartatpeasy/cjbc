@@ -9,6 +9,7 @@
 */
 
 #include "error.h"
+#include "gpioport.h"
 #include <cstddef>
 #include <cstdint>
 
@@ -16,23 +17,24 @@
 class ShiftReg
 {
 public:
-                            ShiftReg(Error * const err = nullptr);
+                            ShiftReg(GPIOPort& gpio, Error * const err = nullptr) noexcept;
 
-    bool                    write(uint16_t val, Error * const err = nullptr);
-    uint16_t                read() const { return currentVal_; };
+    bool                    init(Error * const err = nullptr) noexcept;
+    bool                    write(uint16_t val, Error * const err = nullptr) noexcept;
+    uint16_t                read() const noexcept { return currentVal_; };
 
-    uint16_t                operator|=(const uint16_t rhs);
-    uint16_t                operator&=(const uint16_t rhs);
-    uint16_t                operator^=(const uint16_t rhs);
-                            operator uint16_t() const { return currentVal_; };
+    uint16_t                operator|=(const uint16_t rhs) noexcept;
+    uint16_t                operator&=(const uint16_t rhs) noexcept;
+    uint16_t                operator^=(const uint16_t rhs) noexcept;
+                            operator uint16_t() const noexcept { return currentVal_; };
 
-    bool                    set(const unsigned int bit, Error * const err = nullptr);
-    bool                    clear(const unsigned int bit, Error * const err = nullptr);
-    bool                    toggle(const unsigned int bit, Error * const err = nullptr);
-    bool                    isSet(const unsigned int bit, Error * const err = nullptr);
+    bool                    set(const unsigned int bit, Error * const err = nullptr) noexcept;
+    bool                    clear(const unsigned int bit, Error * const err = nullptr) noexcept;
+    bool                    toggle(const unsigned int bit, Error * const err = nullptr) noexcept;
+    bool                    isSet(const unsigned int bit, Error * const err = nullptr) noexcept;
 
 protected:
-    bool                    strobeRegClk(Error * const err = nullptr);
+    bool                    strobeRegClk(Error * const err = nullptr) noexcept;
 
     bool                    ready_;
     uint16_t                currentVal_;

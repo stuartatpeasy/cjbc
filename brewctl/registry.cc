@@ -20,6 +20,7 @@ Registry::Registry(Config& config, Error * const err)
     : config_(config),
       gpio_(err),
       spi_(gpio_, config_, err),
+      sr_(gpio_, err),
       adc_(gpio_, config_, err),
       lcd_(gpio_, err)
 {
@@ -43,9 +44,17 @@ bool Registry::init(Config& config, Error * const err)
     if(instance_ == nullptr)
     {
         instance_ = new Registry(config, err);
+        if(instance_ == nullptr)
+        {
+            formatError(err, MALLOC_FAILED);
+            return false;
+        }
+
         return !err->code();
     }
 
-    return true;
+    // Initialise objects within the registry
+    return instance_->sr().init(err) &&
+           instance_->lcd().init(err);
 }
 

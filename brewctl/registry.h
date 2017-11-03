@@ -13,6 +13,7 @@
 #include "error.h"
 #include "gpioport.h"
 #include "lcd.h"
+#include "shiftreg.h"
 #include "spiport.h"
 #include "sqlite.h"
 
@@ -30,6 +31,7 @@ public:
     GPIOPort&           gpio()      { return gpio_;   };
     LCD&                lcd()       { return lcd_;    };
     SPIPort&            spi()       { return spi_;    };
+    ShiftReg&           sr()        { return sr_;     };
 
 private:
                         Registry(Config& config, Error * const err);
@@ -40,6 +42,7 @@ private:
     Config&             config_;
     GPIOPort            gpio_;
     SPIPort             spi_;
+    ShiftReg            sr_;
     ADC                 adc_;
     LCD                 lcd_;
 };
