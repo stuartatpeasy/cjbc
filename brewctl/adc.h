@@ -17,7 +17,7 @@ class ADC
 public:
                     ADC(GPIOPort& gpio, Config& config, Error * const err = nullptr) noexcept;
 
-    bool            read(const unsigned int channel, double& voltage, Error * const err = nullptr) noexcept;
+    double          read(const unsigned int channel, Error * const err = nullptr) noexcept;
     double          vref() const noexcept { return vref_; };
     double          isource() const noexcept { return isource_; };
 

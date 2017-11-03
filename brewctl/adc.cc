@@ -49,9 +49,9 @@ ADC::ADC(GPIOPort& gpio, Config& config, Error * const err) noexcept
 }
 
 
-// read() - read a sample from ADC channel <channel>; return the detected voltage through <voltage>.
+// read() - read a sample from ADC channel <channel>; return the detected voltage or -1.0 in case of error.
 //
-bool ADC::read(const unsigned int channel, double& voltage, Error * const err) noexcept
+double ADC::read(const unsigned int channel, Error * const err) noexcept
 {
     Registry& r = Registry::instance();
     uint8_t tx_data[ADC_PACKET_LEN], rx_data[ADC_PACKET_LEN];
@@ -60,13 +60,13 @@ bool ADC::read(const unsigned int channel, double& voltage, Error * const err) n
     if(!ready_)
     {
         formatError(err, ADC_NOT_READY);
-        return false;
+        return -1.0;
     }
 
     if(channel > ADC_MAX_CHANNEL)
     {
         formatError(err, ADC_INVALID_CHANNEL);
-        return false;
+        return -1.0;
     }
 
     r.gpio().write(GPIO_ADC_nCS, 0);      // Assert the ADC's nCS line
@@ -78,13 +78,10 @@ bool ADC::read(const unsigned int channel, double& voltage, Error * const err) n
     const bool ret = r.spi().transmitAndReceive(tx_data, rx_data, ADC_PACKET_LEN, err);
 
     r.gpio().write(GPIO_ADC_nCS, 1);      // Negate the ADC's nCS line
+    if(!ret)
+        return -1.0;
 
-    if(ret)
-    {
-        val = ((rx_data[1] & 0x03) << 8) + rx_data[2];                      // Calculate raw value
-        voltage = (double) val * vref_ / (double) ((1 << ADC_BITS) - 1);    // Convert to voltage
-    }
-
-    return ret;
+    val = ((rx_data[1] & 0x03) << 8) + rx_data[2];                      // Calculate raw value
+    return (double) val * vref_ / (double) ((1 << ADC_BITS) - 1);       // Convert to voltage and return
 }
 

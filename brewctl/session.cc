@@ -7,8 +7,10 @@
 */
 
 #include "session.h"
+#include "effector.h"
 #include "log.h"
 #include "registry.h"
+#include "tempsensor.h"
 #include <cstdlib>      // NULL
 
 
@@ -16,8 +18,8 @@
                                             // activated to modify the session temperature
 
 
-Session::Session(const int id, Error * const err)
-    : id_(id), start_ts_(0)
+Session::Session(const int id, Error * const err) noexcept
+    : id_(id), start_ts_(0), effectorHeater_(nullptr), effectorCooler_(nullptr)
 {
     // Read basic session information
     auto& db = Registry::instance().db();
@@ -26,9 +28,16 @@ Session::Session(const int id, Error * const err)
     if(!db.prepare("SELECT gyle, profile_id, CAST((JULIANDAY(date_start) - 2440587.5) * 86400.0 AS INT) AS start_ts "
                    "FROM session "
                    "WHERE id=:id", session, err) ||
-       !session.bind(":id", id, err) ||
-       !session.step(err))
+       !session.bind(":id", id, err))
         return;
+
+    if(!session.step(err))
+    {
+        if(!err->code())
+            formatError(err, NO_SUCH_SESSION, id);
+
+        return;
+    }
 
     gyle_ = session["gyle"].asString();
     profile_ = session["profile_id"];
@@ -51,44 +60,34 @@ Session::Session(const int id, Error * const err)
 
     end_ts_ = offset;
 
-    // Read session sensor configuration
-    SQLiteStmt sensor;
-    if(!db.prepare("SELECT channel, thermistor_id FROM temperaturesensor "
-                   "WHERE role='vessel' AND session_id=:id", sensor, err) ||
-       !sensor.bind(":id", id, err))
-        return;
-
-    if(sensor.step(err))
-    {
-        if(!err->code())
-            logWarning("Session %d has no vessel temperature sensor");
-        else
-            return;
-    }
-
-    tempSensorVessel_ = new TemperatureSensor(sensor["channel"], sensor["thermistor_id"]);
-    if(tempSensorVessel_ == nullptr)
-    {
-        formatError(err, MALLOC_FAILED);
-        return;
-    }
-
-    // Read session effector configuration
-    effectorHeater_ = Effector::getSessionHeater(id_, err);
-    if(effectorHeater_ == nullptr)
-        return;
-
-    effectorCooler_ = Effector::getSessionCooler(id_, err);
-    if(effectorCooler_ == nullptr)
+    // Create session sensor and effector objects
+    if(((tempSensorVessel_ = TempSensor::getSessionVesselTempSensor(id, err)) == nullptr) ||
+       ((effectorHeater_ = Effector::getSessionHeater(id_, err)) == nullptr) ||
+       ((effectorCooler_ = Effector::getSessionCooler(id_, err)) == nullptr))
         return;
 
     deadZone_ = Registry::instance().config().get("session.dead_zone", DEFAULT_TEMP_DEADZONE);
 }
 
 
+// dtor - free allocated resources
+//
+Session::~Session() noexcept
+{
+    if(tempSensorVessel_ != nullptr)
+        delete tempSensorVessel_;
+
+    if(effectorHeater_ != nullptr)
+        delete effectorHeater_;
+
+    if(effectorCooler_ != nullptr)
+        delete effectorCooler_;
+}
+
+
 // targetTemp() - return the current target temperature for this session.
 //
-Temperature Session::targetTemp()
+Temperature Session::targetTemp() noexcept
 {
     const time_t now = ::time(NULL);
     time_t offset = start_ts_;
@@ -97,61 +96,69 @@ Temperature Session::targetTemp()
         if((offset + it->first) > now)
             return Temperature(it->second, TEMP_UNIT_CELSIUS);
 
-    // Session is not active
-    return Temperature(0, TEMP_UNIT_KELVIN);
+    // Session is not active; return absolute zero.
+    return Temperature();
 }
 
 
-bool Session::updateEffectors(Error * const err)
+// currentTemp() - return the current temperature of this session's vessel.  If there is no temperature sensor attached
+// to the vessel, return a Temperature object indicating absolute zero.
+//
+Temperature Session::currentTemp() noexcept
+{
+    return tempSensorVessel_->sense();
+}
+
+
+// updateEffectors() - switch on (or off) the session's heater/cooler as required, in order to steer the session
+// temperature towards the target temperature.
+//
+bool Session::updateEffectors(Error * const err) noexcept
 {
     if(!isActive())
         return true;
 
-    // Sense current temperature
-    if(tempSensorVessel_ == nullptr)
-        return false;                   // No temperature sensor available for this session
-
-    Temperature t;
-
-    if(!tempSensorVessel_->sense(t, err))
-        return false;
+    Temperature t = tempSensorVessel_->sense(err);
+    if(!t)
+        return false;                   // Failed to sense temperature, or no sensor attached
 
     const double diff = t.diff(targetTemp(), TEMP_UNIT_CELSIUS);
-    bool ok = true;
 
     if(::fabs(diff) < deadZone_)
     {
         // Temperature is within dead zone - deactivate all effectors
-        if(effectorHeater_ != nullptr)
-            ok &= effectorHeater_->activate(false, err);
-
-        if(effectorCooler_ != nullptr)
-            ok &= effectorCooler_->activate(false, err);
+        return effectorHeater_->activate(false, err) && effectorCooler_->activate(false, err);
     }
     else if(diff > 0.0)
     {
         // Temperature is too high - activate cooling effectors
-        if(effectorCooler_ != nullptr)
-            ok &= effectorCooler_->activate(true, err);
+        return effectorCooler_->activate(true, err);
     }
     else if(diff < 0.0)
     {
         // Temperature is too low - activate heating effectors
-        if(effectorCooler_ != nullptr)
-            ok &= effectorCooler_->activate(true, err);
+        return effectorCooler_->activate(true, err);
     }
 
-    return ok;
+    return true;
 }
 
 
 // isActive() - return bool indicating whether the current session is "active", i.e. the current time is between the
 // session's start time and its end time.
 //
-bool Session::isActive() const
+bool Session::isActive() const noexcept
 {
     const time_t now = ::time(NULL);
 
     return (now >= start_ts_) && (now < end_ts_);
+}
+
+
+// main() - entry-point for session management.  This method will be called in a loop by SessionManager::run()
+//
+void Session::main() noexcept
+{
+//    if(tempSensorVessel_ != nullptr)
 }
 

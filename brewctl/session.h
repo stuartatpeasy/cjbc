@@ -9,9 +9,9 @@
 */
 
 #include "error.h"
-#include "effector.h"
+#include "effectorinterface.h"
 #include "temperature.h"
-#include "temperaturesensor.h"
+#include "tempsensorinterface.h"
 #include <ctime>        // ::time()
 #include <map>
 #include <string>
@@ -24,23 +24,27 @@ typedef std::vector<SessionStage_t> SessionStages_t;
 class Session
 {
 public:
-                                    Session(const int id, Error * const err);
-    Temperature                     targetTemp();
-    bool                            isActive() const;
+                            Session(const int id, Error * const err) noexcept;
+                            ~Session() noexcept;
+
+    Temperature             targetTemp() noexcept;
+    Temperature             currentTemp() noexcept;
+    bool                    isActive() const noexcept;
+    void                    main() noexcept;
 
 private:
-    bool                            updateEffectors(Error * const err);
+    bool                    updateEffectors(Error * const err) noexcept;
 
-    const int                       id_;
-    std::string                     gyle_;
-    int                             profile_;
-    time_t                          start_ts_;
-    time_t                          end_ts_;
-    double                          deadZone_;
-    SessionStages_t                 stages_;
-    TemperatureSensor *             tempSensorVessel_;
-    Effector *                      effectorHeater_;
-    Effector *                      effectorCooler_;
+    const int               id_;
+    std::string             gyle_;
+    int                     profile_;
+    time_t                  start_ts_;
+    time_t                  end_ts_;
+    double                  deadZone_;
+    SessionStages_t         stages_;
+    TempSensorInterface *   tempSensorVessel_;
+    EffectorInterface *     effectorHeater_;
+    EffectorInterface *     effectorCooler_;
 };
 
 #endif // SESSION_H_INC

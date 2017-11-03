@@ -1,35 +1,38 @@
 #ifndef TEMPSENSOR_H_INC
 #define TEMPSENSOR_H_INC
 /*
-    tempsensor.h: models a temperature sensor based on a NTC thermistor driven by a constant-current source, and an ADC
-    channel.
+    tempsensor.h: models a temperature sensor (i.e. a thermistor) attached to an ADC channel.  Assumes that there is a
+    constant current flowing through the sensor and developing a voltage across it.
 
-    Stuart Wallace <stuartw@atom.net>, September 2017.
+    Stuart Wallace <stuartw@atom.net>, October 2017.
 
     Part of brewctl
 */
 
+#include "sqlite.h"
+#include "error.h"
+#include "tempsensorinterface.h"
 #include "thermistor.h"
-#include "temperature.h"
+#include <memory>
 
 
-class TempSensor
+class TempSensor : public TempSensorInterface
 {
 public:
-                            TempSensor(Thermistor& thermistor, const int channel, const double Idrive);
+                                    TempSensor(const int thermistor_id, const int channel, Error * const err = nullptr)
+                                        noexcept;
 
-    bool                    sense(Temperature& T);
-    TempSensor&             setMovingAvgLen(const unsigned int len);
-    unsigned int            getMovingAvgLen() const { return nsamples_; };
+    Temperature                     sense(Error * const err = nullptr) noexcept;
+
+    static TempSensorInterface *    getSessionVesselTempSensor(const int sessionId, Error * const err = nullptr)
+                                        noexcept;
 
 protected:
-    Thermistor&             thermistor_;
-    int                     channel_;
-    double                  Idrive_;
+    Thermistor *                    thermistor_;
 
-    unsigned int            nsamples_;      // Length of moving average of samples
-    double                  tempKelvin_;    // Current moving average val of temp in K
-    bool                    sampleTaken_;   // Set once one sample has been taken
+    int                             nsamples_;
+    double                          Idrive_;
+    bool                            sampleTaken_;
 };
 
 #endif // TEMPSENSOR_H_INC

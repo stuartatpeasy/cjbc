@@ -44,6 +44,7 @@ static map<ErrorCode_t, string> errorMessages =
     {ADC_INVALID_CHANNEL,       "Invalid channel number for ADC conversion"},
     {LCD_INVALID_CURSOR_POS,    "Invalid LCD cursor position requested"},
     {SENSOR_INVALID_TYPE,       "Invalid sensor type '%s'"},
+    {NO_SUCH_THERMISTOR,        "Thermistor id %d does not exist"},
     {UNKNOWN_ERROR,             "Unknown error"},
 };
 

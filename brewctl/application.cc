@@ -23,19 +23,17 @@ using std::queue;
 // Default values for configuration keys
 static ConfigData_t defaultConfig =
 {
-    {"adc.ref_voltage",             "5.0"},
-    {"adc.isource_ua",              "147"},             // ADC current-source current in microamps
-    {"database",                    "brewery.db"},      // FIXME - should be under /var/lib/brewctl
-    {"log.method",                  "syslog"},
-    {"log.level",                   "debug"},
-    {"sensor.average_len",          "1000"},            // Length of moving-average for sensor readings
-    {"session.dead_zone",           "0.5C"},            // "Dead zone" for session temperature control
-    {"spi.dev",                     "/dev/spidev0.0"},
-    {"spi.mode",                    "0"},
-    {"spi.max_clock",               "500000"},
-    {"thermistor.beta",             "3980"},
-    {"thermistor.ref_temp",         "25C"},
-    {"thermistor.ref_resistance",   "4700"},
+    {"adc.ref_voltage",                     "5.0"},
+    {"adc.isource_ua",                      "147"},             // ADC current-source current in microamps
+    {"database",                            "brewery.db"},      // FIXME - should be under /var/lib/brewctl
+    {"log.method",                          "syslog"},
+    {"log.level",                           "debug"},
+    {"sensor.average_len",                  "1000"},            // Length of moving-average for sensor readings
+    {"session.dead_zone",                   "0.5C"},            // "Dead zone" for session temperature control
+    {"session.effector_update_interval_s",  "10"},
+    {"spi.dev",                             "/dev/spidev0.0"},
+    {"spi.mode",                            "0"},
+    {"spi.max_clock",                       "500000"},
 };
 
 
