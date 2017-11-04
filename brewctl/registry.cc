@@ -7,6 +7,7 @@
 */
 
 #include "registry.h"
+#include "log.h"
 #include <memory>
 
 
@@ -50,11 +51,14 @@ bool Registry::init(Config& config, Error * const err)
             return false;
         }
 
-        return !err->code();
+        if(err->code())
+            return false;
+
+        // Initialise objects within the registry
+        return instance_->sr().init(err) &&
+               instance_->lcd().init(err);
     }
 
-    // Initialise objects within the registry
-    return instance_->sr().init(err) &&
-           instance_->lcd().init(err);
+    return true;
 }
 

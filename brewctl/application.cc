@@ -37,7 +37,7 @@ static ConfigData_t defaultConfig =
 };
 
 
-Application::Application(int argc, char **argv, Error * const err)
+Application::Application(int argc, char **argv, Error * const err) noexcept
 {
     appName_ = argc ? argv[0] : "<NoAppName>";
 
@@ -54,14 +54,12 @@ Application::Application(int argc, char **argv, Error * const err)
     if(!Registry::init(config_, err) ||             // Initialise registry
        !sessionManager_.init(err))                  // Initialise session manager
         return;
-
-    sessionManager_.run();
 }
 
 
 // parseArgs() - parse command-line arguments; populate <err> if any errors are found.
 //
-bool Application::parseArgs(int argc, char **argv, Error * const err)
+bool Application::parseArgs(int argc, char **argv, Error * const err) noexcept
 {
     queue<string> args;
     for(int i = 1; i < argc; ++i)
@@ -102,3 +100,12 @@ bool Application::parseArgs(int argc, char **argv, Error * const err)
     return true;
 }
 
+
+// run() - start application
+//
+bool Application::run() noexcept
+{
+    sessionManager_.run();
+
+    return true;
+}

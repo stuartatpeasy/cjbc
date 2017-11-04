@@ -59,8 +59,47 @@ TempSensor::TempSensor(const int thermistor_id, const int channel, Error * const
 }
 
 
-TempSensor::~TempSensor()
+// move ctor
+//
+TempSensor::TempSensor(TempSensor&& rhs) noexcept
 {
+    move(rhs);
+}
+
+
+TempSensor::~TempSensor() noexcept
+{
+}
+
+
+// move-assignment operator
+//
+TempSensor& TempSensor::operator=(TempSensor&& rhs) noexcept
+{
+    move(rhs);
+    return *this;
+}
+
+
+// move() - helper method used by move ctor and move-assignment operator
+//
+void TempSensor::move(TempSensor& rhs) noexcept
+{
+    channel_ = rhs.channel_;
+    thermistor_ = rhs.thermistor_;
+    nsamples_ = rhs.nsamples_;
+    Idrive_ = rhs.Idrive_;
+    sampleTaken_ = rhs.sampleTaken_;
+    tempKelvin_ = rhs.tempKelvin_;
+    name_ = rhs.name_;
+
+    rhs.channel_ = -1;
+    rhs.thermistor_ = nullptr;
+    rhs.nsamples_ = 0;
+    rhs.Idrive_ = 0.0;
+    rhs.sampleTaken_ = false;
+    rhs.tempKelvin_ = 0.0;
+    rhs.name_ = "";
 }
 
 
@@ -119,7 +158,7 @@ TempSensor* TempSensor::getSessionVesselTempSensor(const int sessionId, Error * 
 
 // readRaw() - read the raw voltage on our ADC channel; return it as a double.
 //
-double TempSensor::readRaw(Error * const err)
+double TempSensor::readRaw(Error * const err) noexcept
 {
     return Registry::instance().adc().read(channel_, err);
 }

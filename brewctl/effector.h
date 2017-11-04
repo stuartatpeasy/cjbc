@@ -45,8 +45,6 @@ protected:
     double                      powerConsumption_;
     std::string                 name_;
     bool                        state_;
-
-private:
 };
 
 #endif // EFFECTOR_H_INC

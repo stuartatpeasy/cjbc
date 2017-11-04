@@ -54,6 +54,8 @@ int main(int argc, char **argv)
     if(err.code())
         ::error(err.code(), 0, err.message().c_str());
 
+    app.run();
+
     return 0;
 }
 

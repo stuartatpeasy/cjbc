@@ -23,15 +23,22 @@ public:
                         TempSensor(const int thermistor_id, const int channel, Error * const err = nullptr) noexcept;
     virtual             ~TempSensor() noexcept;
 
+                        TempSensor(const TempSensor& rhs) = delete;
+                        TempSensor(TempSensor&& rhs) noexcept;
+
+    TempSensor&         operator=(const TempSensor& rhs) = delete;
+    TempSensor&         operator=(TempSensor&& rhs) noexcept;
+
     virtual Temperature sense(Error * const err = nullptr) noexcept;
     virtual std::string name() const noexcept { return name_; };
 
     static TempSensor * getSessionVesselTempSensor(const int sessionId, Error * const err = nullptr) noexcept;
 
 protected:
-    double              readRaw(Error * const err = nullptr);
+    double              readRaw(Error * const err = nullptr) noexcept;
+    void                move(TempSensor& rhs) noexcept;
 
-    const int           channel_;
+    int                 channel_;
     Thermistor *        thermistor_;
     int                 nsamples_;
     double              Idrive_;

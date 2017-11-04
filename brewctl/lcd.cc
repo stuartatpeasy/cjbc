@@ -7,6 +7,7 @@
 */
 
 #include "lcd.h"
+#include "log.h"
 #include "registry.h"
 #include <cstdint>
 #include <cstdio>
@@ -161,6 +162,8 @@ typedef enum LCDPin
 
 // Minimum width of each state of the "E" clock, in microseconds
 #define LCD_E_CLK_STATE_TIME_US (50)        // 50 microseconds
+
+#define LCD_BACKLIGHT_SR_BIT    (0)         // Shift-register bit which controls the backlight
 
 
 // ctor - note that we can't use Registry members here; instead we must take explicit args for objects which are
@@ -358,5 +361,16 @@ bool LCD::putAt(const int x, const int y, const char c, Error * const err)
     ::usleep(500);
 
     return true;
+}
+
+
+// backlight() - switch on or off the backlight, according to the value of <state>.  Returns true on success, false
+// otherwise.
+//
+bool LCD::backlight(const bool state) noexcept
+{
+    auto& sr = Registry::instance().sr();
+
+    return state ? sr.set(LCD_BACKLIGHT_SR_BIT) : sr.clear(LCD_BACKLIGHT_SR_BIT);
 }
 

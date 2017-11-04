@@ -56,19 +56,7 @@ void SessionManager::run() noexcept
     Registry& r = Registry::instance();
     LCD& lcd = r.lcd();
 
-    // Iterate every 10ms or so
-
-    while(1)
-    {
-        for(auto it : sessions_)
-        {
-            Session& session = *it;
-
-            session.main();
-        }
-
-        ::usleep(10 * 1000);
-    }
+    lcd.backlight(true);
 
     for(int i = 0; i < 2; ++i)
     {
@@ -83,6 +71,9 @@ void SessionManager::run() noexcept
 
     for(int i = 0;; ++i)
     {
+        for(auto session : sessions_)
+            session->main();
+
         Temperature t = sessions_[0]->currentTemp();
 
         if(!(i % 100))
@@ -95,7 +86,7 @@ void SessionManager::run() noexcept
             lcd.putAt(3, 0, LCD_CH_ARROW_2DOWN);
         }
 
-        ::usleep(500 + (::rand() & 0x3ff));
+        ::usleep(10 * 1000);
     }
 }
 

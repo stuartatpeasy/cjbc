@@ -31,6 +31,7 @@ public:
     bool            putAt(const int x, const int y, const char c, Error * const err = nullptr);
     bool            setCursorPos(const int x, const int , Error * const err = nullptr);
     bool            init(Error * const err = nullptr);
+    bool            backlight(const bool state) noexcept;
 
 protected:
     bool            writeCommand(uint8_t cmd, Error * const err = nullptr);

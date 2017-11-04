@@ -29,10 +29,11 @@ class Application
     } ExitCode_t;
 
 public:
-                                Application(int argc, char **argv, Error * const err);
+                                Application(int argc, char **argv, Error * const err) noexcept;
+    bool                        run() noexcept;
 
 protected:
-    bool                        parseArgs(int argc, char **argv, Error * const err);
+    bool                        parseArgs(int argc, char **argv, Error * const err) noexcept;
 
     Config                      config_;
     std::string                 appName_;
