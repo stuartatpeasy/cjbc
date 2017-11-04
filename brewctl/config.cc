@@ -76,8 +76,8 @@ void Config::add(const string& filename)
 //
 void Config::add(const ConfigData_t data)
 {
-    for(auto it = data.begin(); it != data.end(); ++it)
-        data_[it->first] = it->second;
+    for(auto it : data)
+        data_[it.first] = it.second;
 }
 
 
@@ -181,7 +181,7 @@ double Config::get(const string& key, const double defaultVal)
 //
 void Config::dump(ostream& oss) const
 {
-    for(auto it = data_.begin(); it != data_.end(); ++it)
-        oss << it->first << "=" << it->second << endl;
+    for(auto it : data_)
+        oss << it.first << "=" << it.second << endl;
 }
 

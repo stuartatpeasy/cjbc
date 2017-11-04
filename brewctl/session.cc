@@ -12,16 +12,20 @@
 #include "registry.h"
 #include "tempsensor.h"
 #include <cstdlib>      // NULL
+#include <ctime>        // ::time()
 
 
-#define DEFAULT_TEMP_DEADZONE   (0.5)       // Temperature "dead zone", in deg C/K, within which effectors will not be
-                                            // activated to modify the session temperature
+#define DEFAULT_TEMP_DEADZONE               (0.5)   // Temperature "dead zone", in deg C/K, within which effectors will
+                                                    // not be activated to modify the session temperature
+#define DEFAULT_EFFECTOR_UPDATE_INTERVAL_S  (10)    // Default interval between effector updates, in seconds
 
 
 Session::Session(const int id, Error * const err) noexcept
-    : id_(id), start_ts_(0), effectorHeater_(nullptr), effectorCooler_(nullptr)
+    : id_(id), start_ts_(0), tempSensorVessel_(nullptr), effectorHeater_(nullptr), effectorCooler_(nullptr),
+      lastEffectorUpdate_(0)
 {
     // Read basic session information
+    auto& cfg = Registry::instance().config();
     auto& db = Registry::instance().db();
     SQLiteStmt session;
 
@@ -66,7 +70,8 @@ Session::Session(const int id, Error * const err) noexcept
        ((effectorCooler_ = Effector::getSessionCooler(id_, err)) == nullptr))
         return;
 
-    deadZone_ = Registry::instance().config().get("session.dead_zone", DEFAULT_TEMP_DEADZONE);
+    deadZone_ = cfg.get("session.dead_zone", DEFAULT_TEMP_DEADZONE);
+    effectorUpdateInterval_ = cfg.get("session.effector_update_interval_s", DEFAULT_EFFECTOR_UPDATE_INTERVAL_S);
 }
 
 
@@ -92,9 +97,9 @@ Temperature Session::targetTemp() noexcept
     const time_t now = ::time(NULL);
     time_t offset = start_ts_;
 
-    for(auto it = stages_.begin(); it != stages_.end(); ++it)
-        if((offset + it->first) > now)
-            return Temperature(it->second, TEMP_UNIT_CELSIUS);
+    for(auto it : stages_)
+        if((offset + it.first) > now)
+            return Temperature(it.second, TEMP_UNIT_CELSIUS);
 
     // Session is not active; return absolute zero.
     return Temperature();
@@ -127,16 +132,19 @@ bool Session::updateEffectors(Error * const err) noexcept
     if(::fabs(diff) < deadZone_)
     {
         // Temperature is within dead zone - deactivate all effectors
+        logDebug("Session %d: temperature is within range", id_);
         return effectorHeater_->activate(false, err) && effectorCooler_->activate(false, err);
     }
     else if(diff > 0.0)
     {
         // Temperature is too high - activate cooling effectors
+        logDebug("Session %d: temperature is too high; cooling", id_);
         return effectorCooler_->activate(true, err);
     }
     else if(diff < 0.0)
     {
         // Temperature is too low - activate heating effectors
+        logDebug("Session %d: temperature is too low; heating", id_);
         return effectorCooler_->activate(true, err);
     }
 
@@ -159,6 +167,13 @@ bool Session::isActive() const noexcept
 //
 void Session::main() noexcept
 {
-//    if(tempSensorVessel_ != nullptr)
+    const time_t now = ::time(NULL);
+    currentTemp();      // Always sense the current temperature: oversampling maintains the moving average
+
+    if((now - lastEffectorUpdate_) >= effectorUpdateInterval_)
+    {
+        updateEffectors();
+        lastEffectorUpdate_ = now;
+    }
 }
 

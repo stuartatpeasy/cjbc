@@ -18,9 +18,16 @@ extern "C"
 }
 
 
+SessionManager::~SessionManager() noexcept
+{
+    for(auto it : sessions_)
+        delete it;
+}
+
+
 // init() - read active sessions from the database and build a vector of them in <sessions_>.
 //
-bool SessionManager::init(Error * const err)
+bool SessionManager::init(Error * const err) noexcept
 {
     SQLite& db = Registry::instance().db();
     SQLiteStmt sessions;
@@ -33,7 +40,7 @@ bool SessionManager::init(Error * const err)
 
     while(sessions.step(err))
     {
-        sessions_.push_back(Session(sessions["id"], err));
+        sessions_.push_back(new Session(sessions["id"], err));
         if(err->code())
             return false;
     }
@@ -44,15 +51,16 @@ bool SessionManager::init(Error * const err)
 
 // run() - main loop.
 //
-void SessionManager::run()
+void SessionManager::run() noexcept
 {
     Registry& r = Registry::instance();
     LCD& lcd = r.lcd();
 
     // Iterate every 10ms or so
+
     while(1)
     {
-        for(auto it = sessions_.begin(); it != sessions_.end(); ++it)
+        for(auto it : sessions_)
         {
             Session& session = *it;
 
@@ -75,7 +83,7 @@ void SessionManager::run()
 
     for(int i = 0;; ++i)
     {
-        Temperature t = sessions_[0].currentTemp();
+        Temperature t = sessions_[0]->currentTemp();
 
         if(!(i % 100))
         {

@@ -11,9 +11,9 @@ endif
 APPNAME := brewctl
 
 SOURCES := \
-    adc.cc application.cc config.cc effector.cc error.cc effectorinterface.cc gpioport.cc lcd.cc log.cc main.cc        \
-    nulleffector.cc nulltempsensor.cc registry.cc session.cc sessionmanager.cc shiftreg.cc spiport.cc sqlite.cc        \
-    sqlitecolumn.cc sqlitestmt.cc temperature.cc tempsensor.cc tempsensorinterface.cc thermistor.cc
+    adc.cc application.cc config.cc effector.cc error.cc gpioport.cc lcd.cc log.cc main.cc nulleffector.cc             \
+    nulltempsensor.cc registry.cc session.cc sessionmanager.cc shiftreg.cc spiport.cc sqlite.cc sqlitecolumn.cc        \
+    sqlitestmt.cc temperature.cc tempsensor.cc thermistor.cc
 
 CFLAGS := -g -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17
 

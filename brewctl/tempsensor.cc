@@ -1,5 +1,5 @@
 /*
-    tempersensor.cc: models a temperature sensor (i.e. a thermistor) attached to an ADC channel.  Assumes that there
+    tempsensor.cc: models a temperature sensor (i.e. a thermistor) attached to an ADC channel.  Assumes that there
     is a constant current flowing through the sensor and developing a voltage across it.
 
     Stuart Wallace <stuartw@atom.net>, October 2017.
@@ -8,6 +8,7 @@
 */
 
 #include "tempsensor.h"
+#include "log.h"
 #include "nulltempsensor.h"
 #include "registry.h"
 #include "sqlitestmt.h"
@@ -17,7 +18,7 @@
 
 
 TempSensor::TempSensor(const int thermistor_id, const int channel, Error * const err) noexcept
-    : TempSensorInterface(channel), thermistor_(nullptr), sampleTaken_(false)
+    : channel_(channel), thermistor_(nullptr), sampleTaken_(false)
 {
     // Initialise: read sensor data from the database
     SQLite& db = Registry::instance().db();
@@ -58,6 +59,11 @@ TempSensor::TempSensor(const int thermistor_id, const int channel, Error * const
 }
 
 
+TempSensor::~TempSensor()
+{
+}
+
+
 // sense() - take a temperature reading from the temperature sensor, update the moving average, and return the
 // moving-average value through <T>.  Return the current moving-average temperature value on success, or a temperature
 // value representing absolute zero on error.
@@ -91,9 +97,10 @@ Temperature TempSensor::sense(Error * const err) noexcept
 
 // getSessionVesselTempSensor() - factory for TempSensor objects.  Returns a TempSensor object representing the sensor
 // reading the vessel temperature for session <sessionId>.  If no such sensor exists in the database, returns a
-// NullTempSensor() object instead.  If the database lookup fails, nullptr is returned.
+// base TempSensorInterface() object instead; this acts as "null" sensor, always safely returning a temperature of
+// absolute zero.  If the database lookup fails, nullptr is returned.
 //
-TempSensorInterface* TempSensor::getSessionVesselTempSensor(const int sessionId, Error * const err) noexcept
+TempSensor* TempSensor::getSessionVesselTempSensor(const int sessionId, Error * const err) noexcept
 {
     auto& db = Registry::instance().db();
     SQLiteStmt tempSensor;
@@ -106,7 +113,15 @@ TempSensorInterface* TempSensor::getSessionVesselTempSensor(const int sessionId,
     if(!tempSensor.step())
         return err->code() ? nullptr : new NullTempSensor();
 
-    return new TempSensor(tempSensor["thermistor_id"], tempSensor["channel"]);
+    return new TempSensor(tempSensor["thermistor_id"], tempSensor["channel"], err);
+}
+
+
+// readRaw() - read the raw voltage on our ADC channel; return it as a double.
+//
+double TempSensor::readRaw(Error * const err)
+{
+    return Registry::instance().adc().read(channel_, err);
 }
 
 

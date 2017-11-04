@@ -18,11 +18,13 @@
 class SessionManager
 {
 public:
-    bool                    init(Error * const err = nullptr);
-    void                    run();
+                            ~SessionManager() noexcept;
+
+    bool                    init(Error * const err = nullptr) noexcept;
+    void                    run() noexcept;
 
 private:
-    std::vector<Session>    sessions_;
+    std::vector<Session *>  sessions_;
 };
 
 #endif // SESSIONMANAGER_H_INC

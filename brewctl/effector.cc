@@ -8,7 +8,6 @@
 */
 
 #include "effector.h"
-#include "effectorinterface.h"
 #include "nulleffector.h"
 #include "registry.h"
 #include "sqlite.h"
@@ -21,8 +20,46 @@ using std::string;
 
 
 Effector::Effector(const int channel, const double powerConsumption, const string& name) noexcept
-    : EffectorInterface(channel, powerConsumption, name)
+    : channel_(channel), powerConsumption_(powerConsumption), name_(name), state_(false)
 {
+}
+
+
+Effector::~Effector() noexcept
+{
+}
+
+
+// move ctor
+//
+Effector::Effector(Effector&& rhs) noexcept
+{
+    move(rhs);
+}
+
+
+// move-assignment operator
+//
+Effector& Effector::operator=(Effector&& rhs) noexcept
+{
+    move(rhs);
+    return *this;
+}
+
+
+// move() - helper method used by move ctor / move-assignment operator
+//
+void Effector::move(Effector& rhs) noexcept
+{
+    channel_ = rhs.channel_;
+    powerConsumption_ = rhs.powerConsumption_;
+    name_ = rhs.name_;
+    state_ = rhs.state_;
+
+    rhs.channel_ = -1;
+    rhs.powerConsumption_ = 0.0;
+    rhs.name_ = "";
+    rhs.state_ = false;
 }
 
 
@@ -46,7 +83,7 @@ bool Effector::activate(const bool state, Error * const err) noexcept
 // given session.  If there is no matching effector in the database, return a new NullEffector.  If the database lookup
 // fails, a nullptr is returned.
 //
-EffectorInterface* Effector::getSessionEffectorByType(const int sessionId, const std::string& type, Error * const err)
+Effector* Effector::getSessionEffectorByType(const int sessionId, const std::string& type, Error * const err)
     noexcept
 {
     auto& db = Registry::instance().db();
@@ -70,7 +107,7 @@ EffectorInterface* Effector::getSessionEffectorByType(const int sessionId, const
 // getSessionHeater() - factory for Effector objects of type "heater".  Instantiates an Effector of the "heater" type
 // for the given session.
 //
-EffectorInterface* Effector::getSessionHeater(const int sessionId, Error * const err) noexcept
+Effector* Effector::getSessionHeater(const int sessionId, Error * const err) noexcept
 {
     return getSessionEffectorByType(sessionId, "heater", err);
 }
@@ -79,7 +116,7 @@ EffectorInterface* Effector::getSessionHeater(const int sessionId, Error * const
 // getSessionCooler() - factory for Effector objects of type "cooler".  Instantiates an Effector of the "cooler" type
 // for the given session.
 //
-EffectorInterface* Effector::getSessionCooler(const int sessionId, Error * const err) noexcept
+Effector* Effector::getSessionCooler(const int sessionId, Error * const err) noexcept
 {
     return getSessionEffectorByType(sessionId, "cooler", err);
 }

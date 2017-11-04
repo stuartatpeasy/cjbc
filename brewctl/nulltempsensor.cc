@@ -1,25 +1,34 @@
 /*
-    nulltempsensor.cc: represents the absence of a temperature sensor; operations performed on objects of this type have
-    no effect, and the "sensor" will always return a temperature of absolute zero.  Used in cases where ptrs/refs to a
-    TempSensorInterface-derived object are required, but a real sensor may not be present.
+    nulltempsensor.cc: representation of the absence of a temperature sensor.  Any temperature measurements taken
+    through objects of this type will return absolute zero.  Useful in cases where a ref/ptr to a TempSensor is
+    required, but no sensor actually exists.
 
-    Stuart Wallace <stuartw@atom.net>, November 2017.
+    Stuart Wallace <stuartw@atom.net>, October 2017.
 
     Part of brewctl
 */
 
 #include "nulltempsensor.h"
+#include "log.h"
+#include "registry.h"
 
 
-NullTempSensor::NullTempSensor() noexcept
-    : TempSensorInterface(-1)
+NullTempSensor::NullTempSensor(const int channel) noexcept
+    : TempSensor(-1, channel)
 {
 }
 
 
+NullTempSensor::~NullTempSensor() noexcept
+{
+}
+
+
+// sense() - always return a temperature corresponding to absolute zero.
+//
 Temperature NullTempSensor::sense(Error * const err) noexcept
 {
-    (void) err;         // Suppress warning about unused arg
+    (void) err;     // Suppress "unused arg" warning
     return Temperature();
 }
 

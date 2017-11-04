@@ -1,25 +1,29 @@
 #ifndef NULLTEMPSENSOR_H_INC
 #define NULLTEMPSENSOR_H_INC
 /*
-    nulltempsensor.h: represents the absence of a temperature sensor; operations performed on objects of this type have
-    no effect, and the "sensor" will always return a temperature of absolute zero.  Used in cases where ptrs/refs to a
-    TempSensorInterface-derived object are required, but a real sensor may not be present.
+    nulltempsensor.h: representation of the absence of a temperature sensor.  Any temperature measurements taken
+    through objects of this type will return absolute zero.  Useful in cases where a ref/ptr to a TempSensor is
+    required, but no sensor actually exists.
 
-    Stuart Wallace <stuartw@atom.net>, November 2017.
+    Stuart Wallace <stuartw@atom.net>, October 2017.
 
     Part of brewctl
 */
 
+#include "error.h"
 #include "temperature.h"
-#include "tempsensorinterface.h"
+#include "tempsensor.h"
+#include <memory>
+#include <string>
 
 
-class NullTempSensor : public TempSensorInterface
+class NullTempSensor : public TempSensor
 {
 public:
-                NullTempSensor() noexcept;
+                        NullTempSensor(const int channel = -1) noexcept;
+    virtual             ~NullTempSensor() noexcept;
 
-    Temperature sense(Error * const err = nullptr) noexcept;
+    virtual Temperature sense(Error * const err = nullptr) noexcept;
 };
 
 #endif // NULLTEMPSENSOR_H_INC

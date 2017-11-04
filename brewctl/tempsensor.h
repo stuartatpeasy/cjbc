@@ -11,28 +11,33 @@
 
 #include "sqlite.h"
 #include "error.h"
-#include "tempsensorinterface.h"
+#include "temperature.h"
 #include "thermistor.h"
 #include <memory>
+#include <string>
 
 
-class TempSensor : public TempSensorInterface
+class TempSensor
 {
 public:
-                                    TempSensor(const int thermistor_id, const int channel, Error * const err = nullptr)
-                                        noexcept;
+                        TempSensor(const int thermistor_id, const int channel, Error * const err = nullptr) noexcept;
+    virtual             ~TempSensor() noexcept;
 
-    Temperature                     sense(Error * const err = nullptr) noexcept;
+    virtual Temperature sense(Error * const err = nullptr) noexcept;
+    virtual std::string name() const noexcept { return name_; };
 
-    static TempSensorInterface *    getSessionVesselTempSensor(const int sessionId, Error * const err = nullptr)
-                                        noexcept;
+    static TempSensor * getSessionVesselTempSensor(const int sessionId, Error * const err = nullptr) noexcept;
 
 protected:
-    Thermistor *                    thermistor_;
+    double              readRaw(Error * const err = nullptr);
 
-    int                             nsamples_;
-    double                          Idrive_;
-    bool                            sampleTaken_;
+    const int           channel_;
+    Thermistor *        thermistor_;
+    int                 nsamples_;
+    double              Idrive_;
+    bool                sampleTaken_;
+    double              tempKelvin_;
+    std::string         name_;
 };
 
 #endif // TEMPSENSOR_H_INC

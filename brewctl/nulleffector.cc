@@ -11,8 +11,13 @@
 #include "nulleffector.h"
 
 
-NullEffector::NullEffector() noexcept
-    : EffectorInterface(-1, 0.0, "NullEffector")
+NullEffector::NullEffector(const int channel) noexcept
+    : Effector(channel, 0.0, "NullEffector")
+{
+}
+
+
+NullEffector::~NullEffector()
 {
 }
 
