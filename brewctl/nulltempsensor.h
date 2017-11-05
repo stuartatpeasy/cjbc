@@ -24,6 +24,7 @@ public:
     virtual             ~NullTempSensor() noexcept;
 
     virtual Temperature sense(Error * const err = nullptr) noexcept;
+    virtual bool        inRange() const noexcept { return false; };
 };
 
 #endif // NULLTEMPSENSOR_H_INC

@@ -14,6 +14,30 @@ extern "C"
 #include <unistd.h>     // usleep()
 }
 
+/*
+    Shift register bit assignments
+
+    +-----+---------------+
+    | bit |      function |
+    +-----+---------------+
+    |   0 | LCD backlight |
+    |   1 |        unused |
+    |   2 |        unused |
+    |   3 |        unused |
+    |   4 |        unused |
+    |   5 |        unused |
+    |   6 |        unused |
+    |   7 |        unused |
+    |   8 |    Effector 0 |
+    |   9 |    Effector 1 |
+    |  10 |    Effector 2 |
+    |  11 |    Effector 3 |
+    |  12 |    Effector 4 |
+    |  13 |    Effector 5 |
+    |  14 |    Effector 6 |
+    |  15 |    Effector 7 |
+    +-----+---------------+
+*/
 
 //
 // Mapping of GPIO pin names to wiringPi pin numbers for shift-register pins

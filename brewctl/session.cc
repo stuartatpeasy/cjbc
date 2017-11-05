@@ -115,17 +115,38 @@ Temperature Session::currentTemp() noexcept
 }
 
 
+// vesselTempSensorInRange() - returns bool indicating whether the FV/CV temp sensor reading is within the sensor's
+// valid measurement range.
+//
+bool Session::vesselTempSensorInRange() const noexcept
+{
+    return tempSensorVessel_->inRange();
+}
+
+
 // updateEffectors() - switch on (or off) the session's heater/cooler as required, in order to steer the session
 // temperature towards the target temperature.
 //
 bool Session::updateEffectors(Error * const err) noexcept
 {
     if(!isActive())
+    {
+        // Session is inactive; ensure that its effectors are deactivated.
+        effectorHeater_->activate(false);
+        effectorCooler_->activate(false);
+
         return true;
+    }
 
     Temperature t = tempSensorVessel_->sense(err);
     if(!t)
-        return false;                   // Failed to sense temperature, or no sensor attached
+    {
+        // Failed to sense temperature, or no sensor attached.  Deactivate effectors and return failure.
+        effectorHeater_->activate(false);
+        effectorCooler_->activate(false);
+
+        return false;
+    }
 
     const double diff = t.diff(targetTemp(), TEMP_UNIT_CELSIUS);
 
@@ -145,7 +166,7 @@ bool Session::updateEffectors(Error * const err) noexcept
     {
         // Temperature is too low - activate heating effectors
         logDebug("Session %d: temperature is too low; heating", id_);
-        return effectorCooler_->activate(true, err);
+        return effectorHeater_->activate(true, err);
     }
 
     return true;

@@ -30,6 +30,7 @@ public:
     TempSensor&         operator=(TempSensor&& rhs) noexcept;
 
     virtual Temperature sense(Error * const err = nullptr) noexcept;
+    virtual bool        inRange() const noexcept;
     virtual std::string name() const noexcept { return name_; };
 
     static TempSensor * getSessionVesselTempSensor(const int sessionId, Error * const err = nullptr) noexcept;
@@ -45,6 +46,8 @@ protected:
     bool                sampleTaken_;
     double              tempKelvin_;
     std::string         name_;
+    double              rangeMax_;
+    double              rangeMin_;
 };
 
 #endif // TEMPSENSOR_H_INC

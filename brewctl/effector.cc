@@ -8,6 +8,7 @@
 */
 
 #include "effector.h"
+#include "log.h"
 #include "nulleffector.h"
 #include "registry.h"
 #include "sqlite.h"
@@ -22,6 +23,7 @@ using std::string;
 Effector::Effector(const int channel, const double powerConsumption, const string& name) noexcept
     : channel_(channel), powerConsumption_(powerConsumption), name_(name), state_(false)
 {
+    logDebug("instantiating effector on channel %d with power consumption %f", channel, powerConsumption);
 }
 
 
@@ -70,6 +72,8 @@ bool Effector::activate(const bool state, Error * const err) noexcept
 {
     auto& sr = Registry::instance().sr();
     const int bit = EFFECTOR_BIT_OFFSET + channel_;
+
+    logDebug("activate(): channel %d -> %s", channel_, state ? "on" : "off");
 
     if(!(state ? sr.set(bit, err) : sr.clear(bit, err)))
         return false;

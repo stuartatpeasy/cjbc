@@ -29,6 +29,7 @@ public:
 
     Temperature         targetTemp() noexcept;
     Temperature         currentTemp() noexcept;
+    bool                vesselTempSensorInRange() const noexcept;
     bool                isActive() const noexcept;
     void                main() noexcept;
 

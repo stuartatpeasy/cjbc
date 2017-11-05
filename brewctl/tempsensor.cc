@@ -55,6 +55,9 @@ TempSensor::TempSensor(const int thermistor_id, const int channel, Error * const
         return;
     }
 
+    rangeMin_ = thermistor_data["range_min"];
+    rangeMax_ = thermistor_data["range_max"];
+
     nsamples_ = Registry::instance().config().get("sensor.average_len", DEFAULT_MOVING_AVERAGE_LEN);
 }
 
@@ -131,6 +134,15 @@ Temperature TempSensor::sense(Error * const err) noexcept
     }
 
     return Temperature(tempKelvin_, TEMP_UNIT_KELVIN);
+}
+
+
+// inRange() - return bool indicating whether the current sampled temperature is within the sensing range of this
+// object's thermistor.
+//
+bool TempSensor::inRange() const noexcept
+{
+    return (tempKelvin_ >= rangeMin_) && (tempKelvin_ <= rangeMax_);
 }
 
 
