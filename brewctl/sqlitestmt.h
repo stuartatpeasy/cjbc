@@ -25,48 +25,49 @@ typedef std::map<std::string, int> ColNameMap_t;
 class SQLiteStmt
 {
 public:
-                    SQLiteStmt();
-    virtual         ~SQLiteStmt();
+                    SQLiteStmt() noexcept;
+    virtual         ~SQLiteStmt() noexcept;
 
                     // Indexed bind methods
-	bool            bind(const int index, const double arg, Error * const err = nullptr);
-	bool            bind(const int index, const int arg, Error * const err = nullptr);
-	bool            bind(const int index, const long long arg, Error * const err = nullptr);
-	bool            bind(const int index, const std::string& arg, Error * const err = nullptr);
-	bool            bind(const int index, const int len, const void * const arg, Error * const err = nullptr);
-	bool            bindNull(const int index, Error * const err = nullptr);
+	bool            bind(const int index, const double arg, Error * const err = nullptr) noexcept;
+	bool            bind(const int index, const int arg, Error * const err = nullptr) noexcept;
+	bool            bind(const int index, const long long arg, Error * const err = nullptr) noexcept;
+	bool            bind(const int index, const std::string& arg, Error * const err = nullptr) noexcept;
+	bool            bind(const int index, const int len, const void * const arg, Error * const err = nullptr) noexcept;
+	bool            bindNull(const int index, Error * const err = nullptr) noexcept;
 
                     // Named-parameter bind methods
-	bool            bind(const std::string& param, const double arg, Error * const err = nullptr);
-	bool            bind(const std::string& param, const int arg, Error * const err = nullptr);
-	bool            bind(const std::string& param, const long long arg, Error * const err = nullptr);
-	bool            bind(const std::string& param, const std::string& arg, Error * const err = nullptr);
-	bool            bind(const std::string& param, const int len, const void * const arg, Error * const err = nullptr);
-	bool            bindNull(const std::string& param, Error * const err = nullptr);
+	bool            bind(const std::string& param, const double arg, Error * const err = nullptr) noexcept;
+	bool            bind(const std::string& param, const int arg, Error * const err = nullptr) noexcept;
+	bool            bind(const std::string& param, const long long arg, Error * const err = nullptr) noexcept;
+	bool            bind(const std::string& param, const std::string& arg, Error * const err = nullptr) noexcept;
+	bool            bind(const std::string& param, const int len, const void * const arg, Error * const err = nullptr)
+                        noexcept;
+	bool            bindNull(const std::string& param, Error * const err = nullptr) noexcept;
 
-	bool            clearBindings(Error * const err = nullptr);
+	bool            clearBindings(Error * const err = nullptr) noexcept;
 
-    int             numCols();
+    int             numCols() noexcept;
 
-	bool            step(Error * const err = nullptr);
-	bool            reset(Error * const err = nullptr);
-    SQLiteColumn    column(const int index);
-    SQLiteColumn    column(const std::string& name);
+	bool            step(Error * const err = nullptr) noexcept;
+	bool            reset(Error * const err = nullptr) noexcept;
+    SQLiteColumn    column(const int index) noexcept;
+    SQLiteColumn    column(const std::string& name) noexcept;
 
-                    operator sqlite3_stmt *() { return stmt_; };
-                    operator sqlite3_stmt **() { return &stmt_; };
+                    operator sqlite3_stmt *() noexcept { return stmt_; };
+                    operator sqlite3_stmt **() noexcept { return &stmt_; };
 
-    SQLiteColumn    operator[](const int index) { return column(index); };
-    SQLiteColumn    operator[](const std::string& name) { return column(name); };
+    SQLiteColumn    operator[](const int index) noexcept { return column(index); };
+    SQLiteColumn    operator[](const std::string& name) noexcept { return column(name); };
 
-    void            finalise();
-    size_t          id() const { return (size_t) stmt_; };
+    void            finalise() noexcept;
+    size_t          id() const noexcept { return (size_t) stmt_; };
 
 private:
-	bool            checkError(const int ret, Error * const err, const int successCode = SQLITE_OK);
-	bool            checkError(const int ret, Error * const err, std::vector<int> successCodes);
-    void            formatError(Error * const err, const int code);
-    void            getColumnNames();
+	bool            checkError(const int ret, Error * const err, const int successCode = SQLITE_OK) noexcept;
+	bool            checkError(const int ret, Error * const err, std::vector<int> successCodes) noexcept;
+    void            formatError(Error * const err, const int code) noexcept;
+    void            getColumnNames() noexcept;
 
     sqlite3_stmt *  stmt_;
     bool            firstStepDone_;

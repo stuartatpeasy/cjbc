@@ -50,15 +50,15 @@ typedef enum GPIOPinPullupMode
 class GPIOPort
 {
 public:
-                GPIOPort(Error * const err = nullptr);
+                GPIOPort(Error * const err = nullptr) noexcept;
 
-    bool        read(const int pin, Error * const err = nullptr);
-    bool        write(const int pin, const bool val, Error * const err = nullptr);
-    bool        setMode(const int pin, const GPIOPinMode_t mode, Error * const err = nullptr);
-    bool        setPullupMode(const int pin, const GPIOPinPullupMode_t mode, Error * const err = nullptr);
+    bool        read(const int pin, Error * const err = nullptr) noexcept;
+    bool        write(const int pin, const bool val, Error * const err = nullptr) noexcept;
+    bool        setMode(const int pin, const GPIOPinMode_t mode, Error * const err = nullptr) noexcept;
+    bool        setPullupMode(const int pin, const GPIOPinPullupMode_t mode, Error * const err = nullptr) noexcept;
 
 protected:
-    bool        preValidate(const int pin, Error * const err = nullptr);
+    bool        preValidate(const int pin, Error * const err = nullptr) noexcept;
 
     bool        ready_;
 };

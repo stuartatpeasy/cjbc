@@ -17,7 +17,7 @@ Registry * Registry::instance_ = nullptr;
 // private ctor - initialise the various members in a well-defined order, as there are dependencies.  Attempt to open
 // the database file specified in config.
 //
-Registry::Registry(Config& config, Error * const err)
+Registry::Registry(Config& config, Error * const err) noexcept
     : config_(config),
       gpio_(err),
       spi_(gpio_, config_, err),
@@ -40,7 +40,7 @@ Registry::Registry(Config& config, Error * const err)
 // init() - functions as a one-off public ctor to initialise the singleton.  Subsequent access to the object is via the
 // instance() method.
 //
-bool Registry::init(Config& config, Error * const err)
+bool Registry::init(Config& config, Error * const err) noexcept
 {
     if(instance_ == nullptr)
     {

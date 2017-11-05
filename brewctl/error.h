@@ -45,29 +45,29 @@ typedef enum
 class Error
 {
 public:
-                        Error();
-                        Error(const Error& rhs);
+                        Error() noexcept;
+                        Error(const Error& rhs) noexcept;
                         Error(Error&& rhs) noexcept;
 
-    Error&              operator=(const Error& rhs);
+    Error&              operator=(const Error& rhs) noexcept;
     Error&              operator=(Error&& rhs) noexcept;
 
-    void                format(const ErrorCode_t code, ...);
-    void                formatV(const ErrorCode_t code, va_list args);
-    void                formatV(const ErrorCode_t code, const std::string& format, va_list args);
-    static std::string  stringFromCode(const ErrorCode_t code);
-    const std::string&  message() const { return msg_; };
-    int                 code() const { return code_; };
-    void                reset();
+    void                format(const ErrorCode_t code, ...) noexcept;
+    void                formatV(const ErrorCode_t code, va_list args) noexcept;
+    void                formatV(const ErrorCode_t code, const std::string& format, va_list args) noexcept;
+    static std::string  stringFromCode(const ErrorCode_t code) noexcept;
+    const std::string&  message() const noexcept { return msg_; };
+    int                 code() const noexcept { return code_; };
+    void                reset() noexcept;
 
 private:
-    Error&              init(const Error& rhs);
+    Error&              init(const Error& rhs) noexcept;
 
     std::string         msg_;
     int                 code_;
 };
 
-void formatError(Error * const err, const ErrorCode_t code, ...);
+void formatError(Error * const err, const ErrorCode_t code, ...) noexcept;
 
 #endif // ERROR_H_INC
 

@@ -14,7 +14,7 @@ extern "C"
 }
 
 
-GPIOPort::GPIOPort(Error * const err)
+GPIOPort::GPIOPort(Error * const err) noexcept
     : ready_(false)
 {
     if(::wiringPiSetup() == -1)
@@ -30,7 +30,7 @@ GPIOPort::GPIOPort(Error * const err)
 // preValidate() - check ready state and supplied pin number.  Return true if the device is ready and the pin number is
 // valid; false otherwise.
 //
-bool GPIOPort::preValidate(const int pin, Error * const err)
+bool GPIOPort::preValidate(const int pin, Error * const err) noexcept
 {
     if(!ready_)
     {
@@ -52,7 +52,7 @@ bool GPIOPort::preValidate(const int pin, Error * const err)
 // port is not ready.
 // FIXME: this is not ideal - the return value is overloaded.
 //
-bool GPIOPort::read(const int pin, Error * const err)
+bool GPIOPort::read(const int pin, Error * const err) noexcept
 {
     if(!preValidate(pin, err))
         return false;
@@ -63,7 +63,7 @@ bool GPIOPort::read(const int pin, Error * const err)
 
 // write() - write the logic level <val> to pin <pin>.  Return true on success, false otherwise.
 //
-bool GPIOPort::write(const int pin, const bool val, Error * const err)
+bool GPIOPort::write(const int pin, const bool val, Error * const err) noexcept
 {
     if(!preValidate(pin, err))
         return false;
@@ -75,7 +75,7 @@ bool GPIOPort::write(const int pin, const bool val, Error * const err)
 
 // setMode() - set pin <pin>'s mode to <mode>, e.g. input / output / ...  Return true on success, false otherwise.
 //
-bool GPIOPort::setMode(const int pin, const GPIOPinMode_t mode, Error * const err)
+bool GPIOPort::setMode(const int pin, const GPIOPinMode_t mode, Error * const err) noexcept
 {
     if(!preValidate(pin, err))
         return false;
@@ -105,7 +105,7 @@ bool GPIOPort::setMode(const int pin, const GPIOPinMode_t mode, Error * const er
 
 // setPullupMode() - activate/deactivate pullup/pulldown on pin <pin>.  Return true on success, false otherwise.
 //
-bool GPIOPort::setPullupMode(const int pin, const GPIOPinPullupMode_t mode, Error * const err)
+bool GPIOPort::setPullupMode(const int pin, const GPIOPinPullupMode_t mode, Error * const err) noexcept
 {
     if(!preValidate(pin, err))
         return false;

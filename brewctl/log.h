@@ -41,14 +41,15 @@ typedef enum
 #define logErrorV(fmt, args)    doLogV(__FILE__, __LINE__, LOG_LEVEL_ERROR, fmt, args)
 
 
-bool logInit(const std::string& method);
-void logClose();
-LogLevel_t logSetLevel(const LogLevel_t newLevel);
-LogLevel_t logSetLevel(const std::string& newLevel);
-LogLevel_t logGetLevel();
+bool logInit(const std::string& method) noexcept;
+void logClose() noexcept;
+LogLevel_t logSetLevel(const LogLevel_t newLevel) noexcept;
+LogLevel_t logSetLevel(const std::string& newLevel) noexcept;
+LogLevel_t logGetLevel() noexcept;
 
-bool doLog(const char * const file, const int line, const LogLevel_t level, const std::string& fmt, ...);
-bool doLogV(const char * const file, const int line, const LogLevel_t level, const std::string& fmt, va_list args);
+bool doLog(const char * const file, const int line, const LogLevel_t level, const std::string& fmt, ...) noexcept;
+bool doLogV(const char * const file, const int line, const LogLevel_t level, const std::string& fmt, va_list args)
+        noexcept;
 
 #endif // LOG_H_INC
 

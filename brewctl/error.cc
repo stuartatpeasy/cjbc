@@ -51,14 +51,14 @@ static map<ErrorCode_t, string> errorMessages =
 
 static const int msg_buffer_len = 4096; // Length of buffer in which the error message is written
 
-Error::Error()
+Error::Error() noexcept
     : msg_(""), code_(0)
 {
 
 }
 
 
-Error::Error(const Error& rhs)
+Error::Error(const Error& rhs) noexcept
 {
     init(rhs);
 }
@@ -72,7 +72,7 @@ Error::Error(Error&& rhs) noexcept
 }
 
 
-Error& Error::operator=(const Error& rhs)
+Error& Error::operator=(const Error& rhs) noexcept
 {
     return init(rhs);
 }
@@ -91,7 +91,7 @@ Error& Error::operator=(Error&& rhs) noexcept
 // init() - helper function used by copy ctor and assignment operator to initialise this object from another Error
 // object.
 //
-Error& Error::init(const Error& rhs)
+Error& Error::init(const Error& rhs) noexcept
 {
     msg_ = rhs.msg_;
     code_ = rhs.code_;
@@ -102,7 +102,7 @@ Error& Error::init(const Error& rhs)
 
 // format() - format and store the error message identified by <code>.
 //
-void Error::format(const ErrorCode_t code, ...)
+void Error::format(const ErrorCode_t code, ...) noexcept
 {
     va_list args;
     va_start(args, code);
@@ -113,7 +113,7 @@ void Error::format(const ErrorCode_t code, ...)
 
 // formatV() - format and store the error message identified by <code>. 
 //
-void Error::formatV(const ErrorCode_t code, va_list args)
+void Error::formatV(const ErrorCode_t code, va_list args) noexcept
 {
     const auto& msg = errorMessages.find(code);
     string fmtstr;
@@ -133,7 +133,7 @@ void Error::formatV(const ErrorCode_t code, va_list args)
 
 // formatV() - [private] use <args> to fill in the format string <format>, and store it; store <code>.
 //
-void Error::formatV(const ErrorCode_t code, const string& format, va_list args)
+void Error::formatV(const ErrorCode_t code, const string& format, va_list args) noexcept
 {
     char buffer[msg_buffer_len];
 
@@ -148,7 +148,7 @@ void Error::formatV(const ErrorCode_t code, const string& format, va_list args)
 
 // stringFromCode() - return an error string corresponding to the error code in <code>.
 //
-string Error::stringFromCode(const ErrorCode_t code)
+string Error::stringFromCode(const ErrorCode_t code) noexcept
 {
     auto it = errorMessages.find(code);
 
@@ -166,7 +166,7 @@ string Error::stringFromCode(const ErrorCode_t code)
 
 // reset() - reset the error object to a "no error" state
 //
-void Error::reset()
+void Error::reset() noexcept
 {
     format(NO_ERROR);
 }
@@ -175,7 +175,7 @@ void Error::reset()
 // formatError() - global error-formatter function.  If <err> is non-null, populate it with an error message according
 // to <code> and <...>. If <err> is null, take no action.
 //
-void formatError(Error * const err, const ErrorCode_t code, ...)
+void formatError(Error * const err, const ErrorCode_t code, ...) noexcept
 {
     if(err != nullptr)
     {

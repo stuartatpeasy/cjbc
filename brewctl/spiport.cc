@@ -54,7 +54,7 @@ typedef enum SPIPin
 // normally read from the registry.  This is because the SPI port is normally init'ed from within the Registry ctor,
 // hence we wouldn't be able to obtain a registry instance here.
 //
-SPIPort::SPIPort(GPIOPort& gpio, Config& config, Error * const err)
+SPIPort::SPIPort(GPIOPort& gpio, Config& config, Error * const err) noexcept
     : fd_(0), mode_(0), bpw_(0), maxClock_(0), ready_(false)
 {
     for(auto pin : {GPIO_MOSI, GPIO_MISO, GPIO_SCLK})
@@ -86,7 +86,7 @@ SPIPort::SPIPort(GPIOPort& gpio, Config& config, Error * const err)
 
 // dtor - close the SPI port file descriptor, if it is open.
 //
-SPIPort::~SPIPort()
+SPIPort::~SPIPort() noexcept
 {
     if(fd_ > 0)
         ::close(fd_);
@@ -95,7 +95,7 @@ SPIPort::~SPIPort()
 
 // doIoctl() - do an ioctl with a void * arg on our fd.  Return true on success, false otherwise.
 //
-bool SPIPort::doIoctl(const unsigned long type, void *val, Error * const err)
+bool SPIPort::doIoctl(const unsigned long type, void *val, Error * const err) noexcept
 {
     if(::ioctl(fd_, type, val) < 0)
     {
@@ -109,7 +109,7 @@ bool SPIPort::doIoctl(const unsigned long type, void *val, Error * const err)
 
 // setMode() - set the SPI mode (0..3) for the port.  Return true on success, false otherwise.
 //
-bool SPIPort::setMode(const uint8_t mode, Error * const err)
+bool SPIPort::setMode(const uint8_t mode, Error * const err) noexcept
 {
     uint8_t mode_local = mode;
     
@@ -126,7 +126,7 @@ bool SPIPort::setMode(const uint8_t mode, Error * const err)
 // setBitsPerWord() - set the number of bits in each word transmitted or received on the SPI port.  Return true on
 // success, false otherwise.
 //
-bool SPIPort::setBitsPerWord(const uint8_t bpw, Error * const err)
+bool SPIPort::setBitsPerWord(const uint8_t bpw, Error * const err) noexcept
 {
     uint8_t bpw_local = bpw;
 
@@ -144,7 +144,7 @@ bool SPIPort::setBitsPerWord(const uint8_t bpw, Error * const err)
 // setMaxSpeed() - set the highest allowable clock speed for the port to <hz> Hz.  Note that the actual clock speed used
 // by the port may be lower.  Return true on success, false otherwise.
 //
-bool SPIPort::setMaxSpeed(const uint32_t hz, Error * const err)
+bool SPIPort::setMaxSpeed(const uint32_t hz, Error * const err) noexcept
 {
     uint32_t hz_local = hz;
 
@@ -162,8 +162,8 @@ bool SPIPort::setMaxSpeed(const uint32_t hz, Error * const err)
 // transmitAndReceive() - do a simultaneous transmit/receive of len bytes of data.  Return true on success, false
 // otherwise.
 //
-bool SPIPort::transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data, const unsigned int len,
-                                 Error * const err)
+bool SPIPort::transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data, const unsigned int len, Error * const err)
+    noexcept
 {
     uint8_t *rx_data_local;
     const uint8_t *tx_data_local;
@@ -229,7 +229,7 @@ bool SPIPort::transmitAndReceive(const uint8_t *tx_data, uint8_t *rx_data, const
 
 // transmitByte() - transmit the byte in <data> to the SPI port.  Return true on success, false otherwise.
 //
-bool SPIPort::transmitByte(const uint8_t data, Error * const err)
+bool SPIPort::transmitByte(const uint8_t data, Error * const err) noexcept
 {
     return transmitAndReceive(&data, NULL, 1, err);
 }
@@ -237,7 +237,7 @@ bool SPIPort::transmitByte(const uint8_t data, Error * const err)
 
 // receiveByte() - receive a byte from the SPI port into <data>.  Return true on success, false otherwise.
 //
-bool SPIPort::receiveByte(uint8_t& data, Error * const err)
+bool SPIPort::receiveByte(uint8_t& data, Error * const err) noexcept
 {
     return transmitAndReceive(NULL, &data, 1, err);
 }

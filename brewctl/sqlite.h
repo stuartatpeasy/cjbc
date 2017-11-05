@@ -22,18 +22,18 @@ extern "C"
 class SQLite
 {
 public:
-                    SQLite();
-    virtual         ~SQLite();
+                    SQLite() noexcept;
+    virtual         ~SQLite() noexcept;
 
     bool            open(const std::string& filename, const int flags = SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE,
-                         Error * const err = nullptr);
-    bool            close(Error * const err = nullptr);
-    bool            isOpen() const { return db_ != nullptr; };
-    bool            prepare(const std::string& sql, SQLiteStmt& stmt, Error * const err = nullptr);
-    bool            prepareAndStep(const std::string& sql, SQLiteStmt& stmt, Error * const err = nullptr);
+                         Error * const err = nullptr) noexcept;
+    bool            close(Error * const err = nullptr) noexcept;
+    bool            isOpen() const noexcept { return db_ != nullptr; };
+    bool            prepare(const std::string& sql, SQLiteStmt& stmt, Error * const err = nullptr) noexcept;
+    bool            prepareAndStep(const std::string& sql, SQLiteStmt& stmt, Error * const err = nullptr) noexcept;
 
 private:
-    void            formatError(Error * const err, const int code);
+    void            formatError(Error * const err, const int code) noexcept;
     sqlite3 *       db_;
     std::string     path_;
 };

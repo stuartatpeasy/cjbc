@@ -46,7 +46,7 @@ extern "C"
 
 // main() - application entry point
 //
-int main(int argc, char **argv)
+int main(int argc, char **argv) noexcept
 {
     Error err;
     Application app(argc, argv, &err);

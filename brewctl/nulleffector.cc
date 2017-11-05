@@ -17,7 +17,7 @@ NullEffector::NullEffector(const int channel) noexcept
 }
 
 
-NullEffector::~NullEffector()
+NullEffector::~NullEffector() noexcept
 {
 }
 

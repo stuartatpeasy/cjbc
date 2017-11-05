@@ -27,17 +27,17 @@ using std::ostringstream;
 static FILE *logFp = NULL;
 static LogMethod_t logMethod = LOG_METHOD_NONE;
 
-static string logLevelStr(const LogLevel_t level);
-static bool logWrite(const LogLevel_t level, const string& str);
-static int logLevelToSyslogLevel(const LogLevel_t level);
-LogLevel_t logLevelFromStr(const string& level);
+static string logLevelStr(const LogLevel_t level) noexcept;
+static bool logWrite(const LogLevel_t level, const string& str) noexcept;
+static int logLevelToSyslogLevel(const LogLevel_t level) noexcept;
+LogLevel_t logLevelFromStr(const string& level) noexcept;
 
 static LogLevel_t logLevel = LOG_LEVEL_DEBUG;
 
 
 // logInit() - initialise the logging system according to the method string in <method>
 //
-bool logInit(const string& method)
+bool logInit(const string& method) noexcept
 {
     if(method == "syslog")
     {
@@ -69,7 +69,7 @@ bool logInit(const string& method)
 
 // logClose() - close the log, and set logMethod to LOG_METHOD_NONE.
 //
-void logClose()
+void logClose() noexcept
 {
     switch(logMethod)
     {
@@ -95,7 +95,7 @@ void logClose()
 
 // logSetLevel() - set the current logging level
 //
-LogLevel_t logSetLevel(const LogLevel_t newLevel)
+LogLevel_t logSetLevel(const LogLevel_t newLevel) noexcept
 {
     const LogLevel_t oldLevel = logLevel;
 
@@ -108,7 +108,7 @@ LogLevel_t logSetLevel(const LogLevel_t newLevel)
 
 // logSetLevel() - set the current logging level using the level string in <newLevel>.
 //
-LogLevel_t logSetLevel(const string& newLevel)
+LogLevel_t logSetLevel(const string& newLevel) noexcept
 {
     return logSetLevel(logLevelFromStr(newLevel));
 }
@@ -116,7 +116,7 @@ LogLevel_t logSetLevel(const string& newLevel)
 
 // logGetLevel() - get the current logging level
 //
-LogLevel_t logGetLevel()
+LogLevel_t logGetLevel() noexcept
 {
     return logLevel;
 }
@@ -124,7 +124,7 @@ LogLevel_t logGetLevel()
 
 // logWrite() - write the contents of <str> to the current log destination.
 //
-static bool logWrite(const LogLevel_t level, const string& str)
+static bool logWrite(const LogLevel_t level, const string& str) noexcept
 {
     switch(logMethod)
     {
@@ -144,7 +144,7 @@ static bool logWrite(const LogLevel_t level, const string& str)
 
 // logLevelStr() - return a ptr to a string describing the log level specified in <level>.
 //
-static string logLevelStr(const LogLevel_t level)
+static string logLevelStr(const LogLevel_t level) noexcept
 {
     switch(level)
     {
@@ -160,7 +160,7 @@ static string logLevelStr(const LogLevel_t level)
 
 // logLevelFromStr() - return a LogLevel_t corresponding to the string in <level>.  Uses case-insensitive comparison.
 //
-LogLevel_t logLevelFromStr(const string& level)
+LogLevel_t logLevelFromStr(const string& level) noexcept
 {
          if(boost::iequals(level, "DEBUG"))     return LOG_LEVEL_DEBUG;
     else if(boost::iequals(level, "INFO"))      return LOG_LEVEL_INFO;
@@ -174,7 +174,7 @@ LogLevel_t logLevelFromStr(const string& level)
 // logLevelToSyslogLevel() - given a LogLevel_t in <level>, return a corresponding value for the <level> argument to
 // ::syslog().
 //
-static int logLevelToSyslogLevel(const LogLevel_t level)
+static int logLevelToSyslogLevel(const LogLevel_t level) noexcept
 {
     switch(level)
     {
@@ -190,7 +190,7 @@ static int logLevelToSyslogLevel(const LogLevel_t level)
 
 // doLog() - called by the log*() macros, this function does the actual logging.
 //
-bool doLog(const char * const file, const int line, const LogLevel_t level, const std::string& fmt, ...)
+bool doLog(const char * const file, const int line, const LogLevel_t level, const std::string& fmt, ...) noexcept
 {
     if(level < logLevel)
         return true;
@@ -205,6 +205,7 @@ bool doLog(const char * const file, const int line, const LogLevel_t level, cons
 // doLogV() - called by the log*V() macros, this function does the actual logging.
 //
 bool doLogV(const char * const file, const int line, const LogLevel_t level, const std::string& fmt, va_list args)
+        noexcept
 {
     char logBuf[LOG_BUF_SIZE];
     ostringstream msg;

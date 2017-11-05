@@ -21,20 +21,20 @@
 class Registry
 {
 public:
-    static bool         init(Config& config, Error * const err);
+    static bool         init(Config& config, Error * const err) noexcept;
 
-    static Registry&    instance()  { return *instance_; };
+    static Registry&    instance()  noexcept { return *instance_; };
 
-    ADC&                adc()       { return adc_;    };
-    Config&             config()    { return config_; };
-    SQLite&             db()        { return db_;     };
-    GPIOPort&           gpio()      { return gpio_;   };
-    LCD&                lcd()       { return lcd_;    };
-    SPIPort&            spi()       { return spi_;    };
-    ShiftReg&           sr()        { return sr_;     };
+    ADC&                adc()       noexcept { return adc_;     };
+    Config&             config()    noexcept { return config_;  };
+    SQLite&             db()        noexcept { return db_;      };
+    GPIOPort&           gpio()      noexcept { return gpio_;    };
+    LCD&                lcd()       noexcept { return lcd_;     };
+    SPIPort&            spi()       noexcept { return spi_;     };
+    ShiftReg&           sr()        noexcept { return sr_;      };
 
 private:
-                        Registry(Config& config, Error * const err);
+                        Registry(Config& config, Error * const err) noexcept;
 
     static Registry *   instance_;
 

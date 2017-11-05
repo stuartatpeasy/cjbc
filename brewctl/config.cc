@@ -28,7 +28,7 @@ using boost::algorithm::trim;
 // add() - read the supplied input stream <is> (whose "name", e.g. a filename) is given in <name>, and add the key/value
 // pairs found in the stream to the configuration store.
 //
-void Config::add(istream& is, const string& name)
+void Config::add(istream& is, const string& name) noexcept
 {
     string line;
     int linenum;
@@ -64,7 +64,7 @@ void Config::add(istream& is, const string& name)
 // add() - open the file <filename>, and pass it as an input stream to another overload of the add() method in order to
 // add the contents of the file to the configuration store.
 //
-void Config::add(const string& filename)
+void Config::add(const string& filename) noexcept
 {
     ifstream file(filename);
 
@@ -74,7 +74,7 @@ void Config::add(const string& filename)
 
 // add() - add a collection of values from a ConfigData_t object to the configuration store.
 //
-void Config::add(const ConfigData_t data)
+void Config::add(const ConfigData_t data) noexcept
 {
     for(auto it : data)
         data_[it.first] = it.second;
@@ -83,7 +83,7 @@ void Config::add(const ConfigData_t data)
 
 // addItem() - add item named <key> with value <value> to the configuration store
 //
-void Config::add(const string& key, const string& value)
+void Config::add(const string& key, const string& value) noexcept
 {
     data_[key] = value;
 }
@@ -91,7 +91,7 @@ void Config::add(const string& key, const string& value)
 
 // reset() - erase all configuration values
 //
-void Config::reset()
+void Config::reset() noexcept
 {
     data_.clear();
 }
@@ -99,7 +99,7 @@ void Config::reset()
 
 // exists() - return true if a key named <key> exists; false otherwise.
 //
-bool Config::exists(const std::string& key) const
+bool Config::exists(const std::string& key) const noexcept
 {
     return data_.find(key) != data_.end();
 }
@@ -107,7 +107,7 @@ bool Config::exists(const std::string& key) const
 
 // operator() - return the value of the key identified by the argument; return an empty string if no such key exists.
 //
-string Config::operator()(const string& key)
+string Config::operator()(const string& key) noexcept
 {
     return get(key.c_str(), "");
 }
@@ -115,7 +115,7 @@ string Config::operator()(const string& key)
 
 // get() - if key <key> exists, return its value as a string; otherwise return <defaultVal>.
 //
-string Config::get(const string& key, const string& defaultVal)
+string Config::get(const string& key, const string& defaultVal) noexcept
 {
     return exists(key) ? data_[key] : defaultVal;
 }
@@ -123,7 +123,7 @@ string Config::get(const string& key, const string& defaultVal)
 
 // get() - if key <key> exists, return its value converted to an int; otherwise return <defaultVal>.
 //
-int Config::get(const string& key, const int defaultVal)
+int Config::get(const string& key, const int defaultVal) noexcept
 {
     return exists(key) ? std::stoi(data_[key]) : defaultVal;
 }
@@ -131,7 +131,7 @@ int Config::get(const string& key, const int defaultVal)
 
 // get() - if key <key> exists, return its value converted to a long; otherwise return <defaultVal>.
 //
-long Config::get(const string& key, const long defaultVal)
+long Config::get(const string& key, const long defaultVal) noexcept
 {
     return exists(key) ? std::stol(data_[key]) : defaultVal;
 }
@@ -139,7 +139,7 @@ long Config::get(const string& key, const long defaultVal)
 
 // get() - if key <key> exists, return its value converted to a long long; otherwise return <defaultVal>.
 //
-long long Config::get(const string& key, const long long defaultVal)
+long long Config::get(const string& key, const long long defaultVal) noexcept
 {
     return exists(key) ? std::stoll(data_[key]) : defaultVal;
 }
@@ -147,7 +147,7 @@ long long Config::get(const string& key, const long long defaultVal)
 
 // get() - if key <key> exists, return its value converted to an unsigned long; otherwise return <defaultVal>.
 //
-unsigned long Config::get(const string& key, const unsigned long defaultVal)
+unsigned long Config::get(const string& key, const unsigned long defaultVal) noexcept
 {
     return exists(key) ? std::stoul(data_[key]) : defaultVal;
 }
@@ -155,7 +155,7 @@ unsigned long Config::get(const string& key, const unsigned long defaultVal)
 
 // get() - if key <key> exists, return its value converted to an unsigned long long; otherwise return <defaultVal>.
 //
-unsigned long long Config::get(const string& key, const unsigned long long defaultVal)
+unsigned long long Config::get(const string& key, const unsigned long long defaultVal) noexcept
 {
     return exists(key) ? std::stoull(data_[key]) : defaultVal;
 }
@@ -163,7 +163,7 @@ unsigned long long Config::get(const string& key, const unsigned long long defau
 
 // get() - if key <key> exists, return its value converted to a float; otherwise return <defaultVal>.
 //
-float Config::get(const string& key, const float defaultVal)
+float Config::get(const string& key, const float defaultVal) noexcept
 {
     return exists(key) ? std::stof(data_[key]) : defaultVal;
 }
@@ -171,7 +171,7 @@ float Config::get(const string& key, const float defaultVal)
 
 // get() - if key <key> exists, return its value converted to a double; otherwise return <defaultVal>.
 //
-double Config::get(const string& key, const double defaultVal)
+double Config::get(const string& key, const double defaultVal) noexcept
 {
     return exists(key) ? std::stod(data_[key]) : defaultVal;
 }
@@ -179,7 +179,7 @@ double Config::get(const string& key, const double defaultVal)
 
 // dump() - write all known configuration key/value pairs into the supplied ostream.
 //
-void Config::dump(ostream& oss) const
+void Config::dump(ostream& oss) const noexcept
 {
     for(auto it : data_)
         oss << it.first << "=" << it.second << endl;

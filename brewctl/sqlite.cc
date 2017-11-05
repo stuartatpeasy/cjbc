@@ -14,13 +14,13 @@
 using std::string;
 
 
-SQLite::SQLite()
+SQLite::SQLite() noexcept
     : db_(nullptr)
 {
 }
 
 
-SQLite::~SQLite()
+SQLite::~SQLite() noexcept
 {
     close();
 }
@@ -28,7 +28,7 @@ SQLite::~SQLite()
 
 // open() - attempt to open a new database session using the database file <filename>.
 //
-bool SQLite::open(const string& filename, const int flags, Error * const err)
+bool SQLite::open(const string& filename, const int flags, Error * const err) noexcept
 {
     if(!close(err))
         return false;
@@ -51,7 +51,7 @@ bool SQLite::open(const string& filename, const int flags, Error * const err)
 // close() - attempt to close the currently-open database session.  Returns true on success, or if there is no
 // currently-open session; false otherwise.
 //
-bool SQLite::close(Error * const err)
+bool SQLite::close(Error * const err) noexcept
 {
     if(db_ == nullptr)
         return true;        // Database not open - return success
@@ -73,7 +73,7 @@ bool SQLite::close(Error * const err)
 // prepare() - prepare the SQL statement <sql> for execution; on success, return a statement object through <stmt>.
 // Return the SQLite retval in all cases.
 //
-bool SQLite::prepare(const string& sql, SQLiteStmt& stmt, Error * const err)
+bool SQLite::prepare(const string& sql, SQLiteStmt& stmt, Error * const err) noexcept
 {
     int ret;
 
@@ -104,7 +104,7 @@ bool SQLite::prepare(const string& sql, SQLiteStmt& stmt, Error * const err)
 // order to execute the query and generate the first resulting record.  This method is intended for use with queries in
 //which the result-set is not required.
 //
-bool SQLite::prepareAndStep(const std::string& sql, SQLiteStmt& stmt, Error * const err)
+bool SQLite::prepareAndStep(const std::string& sql, SQLiteStmt& stmt, Error * const err) noexcept
 {
     logDebug("SQLite: prepare-and-step stmt: %s", sql.c_str());
     if(!prepare(sql, stmt, err))
@@ -122,7 +122,7 @@ bool SQLite::prepareAndStep(const std::string& sql, SQLiteStmt& stmt, Error * co
 // formatError() - populate Error object err (if non-null) with the supplied error code and an appropriate
 // human-readable error message.
 //
-void SQLite::formatError(Error * const err, const int code)
+void SQLite::formatError(Error * const err, const int code) noexcept
 {
     logWarning("SQLite error %d: %s", code, ::sqlite3_errstr(code));
     ::formatError(err, DB_SQLITE_ERROR, ::sqlite3_errstr(code), code);
