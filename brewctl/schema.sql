@@ -98,7 +98,7 @@ CREATE UNIQUE INDEX temperature_date_create_sensor_id
 DROP TABLE IF EXISTS "temperaturesensor";
 CREATE TABLE "temperaturesensor"(
     role                CHAR(16) NOT NULL,
-    session_id          INT UNSIGNED DEFAULT NULL,
+    session_id          INT UNSIGNED NOT NULL,
     channel             INT UNSIGNED NOT NULL,
     thermistor_id       INT UNSIGNED NOT NULL);
 
@@ -173,6 +173,6 @@ INSERT INTO sessioneffector(session_id, effectortype_id, channel) VALUES
 
 DELETE FROM temperaturesensor;
 INSERT INTO temperaturesensor(role, session_id, channel, thermistor_id) VALUES
-    ("vessel",     1, 0, 1),
-    ("ambient", NULL, 7, 1);
+    ("vessel",  1, 0, 1),
+    ("ambient", 0, 7, 1);
 

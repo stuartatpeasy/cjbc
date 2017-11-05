@@ -33,7 +33,10 @@ public:
     virtual bool        inRange() const noexcept;
     virtual std::string name() const noexcept { return name_; };
 
+    static TempSensor * getTempSensor(const int sessionId, const std::string& role, Error * const err = nullptr)
+                            noexcept;
     static TempSensor * getSessionVesselTempSensor(const int sessionId, Error * const err = nullptr) noexcept;
+    static TempSensor * getAmbientTempSensor(Error * const err = nullptr) noexcept;
 
 protected:
     double              readRaw(Error * const err = nullptr) noexcept;

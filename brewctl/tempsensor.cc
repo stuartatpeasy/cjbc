@@ -12,6 +12,9 @@
 #include "nulltempsensor.h"
 #include "registry.h"
 #include "sqlitestmt.h"
+#include <string>
+
+using std::string;
 
 
 #define DEFAULT_MOVING_AVERAGE_LEN      (1000)  // Default length of moving average for sensor readings
@@ -146,25 +149,44 @@ bool TempSensor::inRange() const noexcept
 }
 
 
-// getSessionVesselTempSensor() - factory for TempSensor objects.  Returns a TempSensor object representing the sensor
-// reading the vessel temperature for session <sessionId>.  If no such sensor exists in the database, returns a
-// base TempSensorInterface() object instead; this acts as "null" sensor, always safely returning a temperature of
-// absolute zero.  If the database lookup fails, nullptr is returned.
+// getTempSensor() - factory for TempSensor objects.  Returns a TempSensor object representing the sensor specified by
+// <session_id> and <role>.  If no such sensor exists in the database, a NullTempSensor() object is returned; this acts
+// as a "null" sensor, always safely returning a temperature of absolute zero.  If the database lookup fails, nullptr is
+// returned.
 //
-TempSensor* TempSensor::getSessionVesselTempSensor(const int sessionId, Error * const err) noexcept
+TempSensor* TempSensor::getTempSensor(const int sessionId, const string& role, Error * const err) noexcept
 {
     auto& db = Registry::instance().db();
     SQLiteStmt tempSensor;
 
     if(!db.prepare("SELECT channel, thermistor_id FROM temperaturesensor "
-                   "WHERE role='vessel' AND session_id=:id", tempSensor, err) ||
-       !tempSensor.bind(":id", sessionId, err))
+                   "WHERE role=:role AND session_id=:session_id", tempSensor, err) ||
+       !tempSensor.bind(":role", role) ||
+       !tempSensor.bind(":session_id", sessionId))
         return nullptr;
 
-    if(!tempSensor.step())
+    if(!tempSensor.step(err))
         return err->code() ? nullptr : new NullTempSensor();
 
     return new TempSensor(tempSensor["thermistor_id"], tempSensor["channel"], err);
+}
+
+
+// getSessionVesselTempSensor() - obtain a TempSensor object representing the sensor measuring the vessel temperature in
+// the session specified by <sessionId>.
+//
+TempSensor* TempSensor::getSessionVesselTempSensor(const int sessionId, Error * const err) noexcept
+{
+    return getTempSensor(sessionId, "vessel", err);
+}
+
+
+// getAmbientTempSensor() - obtain a TempSensor object representing the sensor measuring brewhouse ambient temperature,
+// if such a sensor is present.
+//
+TempSensor* TempSensor::getAmbientTempSensor(Error * const err) noexcept
+{
+    return getTempSensor(0, "ambient", err);
 }
 
 

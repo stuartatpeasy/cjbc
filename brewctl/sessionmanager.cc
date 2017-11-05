@@ -18,6 +18,12 @@ extern "C"
 }
 
 
+SessionManager::SessionManager(Error * const err) noexcept
+{
+    tempSensorAmbient_ = TempSensor::getAmbientTempSensor(err);
+}
+
+
 SessionManager::~SessionManager() noexcept
 {
     for(auto it : sessions_)

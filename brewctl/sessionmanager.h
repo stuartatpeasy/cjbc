@@ -11,6 +11,7 @@
 #include "error.h"
 #include "registry.h"
 #include "session.h"
+#include "tempsensor.h"
 #include <cstddef>
 #include <vector>
 
@@ -18,6 +19,7 @@
 class SessionManager
 {
 public:
+                            SessionManager(Error * const err = nullptr) noexcept;
                             ~SessionManager() noexcept;
 
     bool                    init(Error * const err = nullptr) noexcept;
@@ -25,6 +27,7 @@ public:
 
 private:
     std::vector<Session *>  sessions_;
+    TempSensor *            tempSensorAmbient_;
 };
 
 #endif // SESSIONMANAGER_H_INC
