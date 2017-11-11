@@ -29,6 +29,7 @@ static ConfigData_t defaultConfig =
     {"log.method",                          "syslog"},
     {"log.level",                           "debug"},
     {"sensor.average_len",                  "1000"},            // Length of moving-average for sensor readings
+    {"sensor.log_interval_s",               "10"},              // Interval between sensor readings
     {"session.dead_zone",                   "0.5C"},            // "Dead zone" for session temperature control
     {"session.effector_update_interval_s",  "10"},
     {"spi.dev",                             "/dev/spidev0.0"},

@@ -19,8 +19,13 @@
 class SessionManager
 {
 public:
-                            SessionManager(Error * const err = nullptr) noexcept;
+                            SessionManager() = default;
+                            SessionManager(const SessionManager& rhs) = delete;
+                            SessionManager(SessionManager&& rhs) = delete;
                             ~SessionManager() noexcept;
+
+    SessionManager&         operator=(const SessionManager& rhs) = delete;
+    SessionManager&         operator=(SessionManager&& rhs) = delete;
 
     bool                    init(Error * const err = nullptr) noexcept;
     void                    run() noexcept;

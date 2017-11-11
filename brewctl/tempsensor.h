@@ -13,6 +13,7 @@
 #include "error.h"
 #include "temperature.h"
 #include "thermistor.h"
+#include <ctime>
 #include <memory>
 #include <string>
 
@@ -41,16 +42,19 @@ public:
 protected:
     double              readRaw(Error * const err = nullptr) noexcept;
     void                move(TempSensor& rhs) noexcept;
+    void                writeTempLog();
 
     int                 channel_;
     Thermistor *        thermistor_;
     int                 nsamples_;
     double              Idrive_;
     bool                sampleTaken_;
-    double              tempKelvin_;
     std::string         name_;
-    double              rangeMax_;
-    double              rangeMin_;
+    Temperature         currentTemp_;
+    Temperature         rangeMin_;
+    Temperature         rangeMax_;
+    time_t              lastLogWriteTime_;
+    int                 logInterval_;
 };
 
 #endif // TEMPSENSOR_H_INC

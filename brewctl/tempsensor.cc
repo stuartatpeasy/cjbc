@@ -18,10 +18,12 @@ using std::string;
 
 
 #define DEFAULT_MOVING_AVERAGE_LEN      (1000)  // Default length of moving average for sensor readings
+#define DEFAULT_LOG_INTERVAL_S          (10)    // Default interval between temp-sensor log writes, in seconds
 
 
 TempSensor::TempSensor(const int thermistor_id, const int channel, Error * const err) noexcept
-    : channel_(channel), thermistor_(nullptr), sampleTaken_(false)
+    : channel_(channel), thermistor_(nullptr), sampleTaken_(false), currentTemp_(0.0, TEMP_UNIT_CELSIUS),
+      rangeMin_(0.0, TEMP_UNIT_KELVIN), rangeMax_(1000.0, TEMP_UNIT_KELVIN), lastLogWriteTime_(0), logInterval_(0)
 {
     // Initialise: read sensor data from the database
     SQLite& db = Registry::instance().db();
@@ -58,10 +60,25 @@ TempSensor::TempSensor(const int thermistor_id, const int channel, Error * const
         return;
     }
 
-    rangeMin_ = thermistor_data["range_min"];
-    rangeMax_ = thermistor_data["range_max"];
+    rangeMin_.set(thermistor_data["range_min"], TEMP_UNIT_CELSIUS);
+    rangeMax_.set(thermistor_data["range_max"], TEMP_UNIT_CELSIUS);
 
-    nsamples_ = Registry::instance().config().get("sensor.average_len", DEFAULT_MOVING_AVERAGE_LEN);
+    auto& config = Registry::instance().config();
+
+    nsamples_ = config.get("sensor.average_len", DEFAULT_MOVING_AVERAGE_LEN);
+    if(nsamples_ < 1)
+    {
+        logWarning("Invalid value (%d) for sensor.average_len; using sensor.average_len=1 instead", nsamples_);
+        nsamples_ = 1;
+    }
+
+    logInterval_ = config.get("sensor.log_interval_s", DEFAULT_LOG_INTERVAL_S);
+    if(logInterval_ < 0)
+    {
+        logWarning("Invalid value (%d) for sensor.log_interval_s; disabling temperature logging for channel %d",
+                    logInterval_, channel_);
+        logInterval_ = 0;
+    }
 }
 
 
@@ -91,21 +108,29 @@ TempSensor& TempSensor::operator=(TempSensor&& rhs) noexcept
 //
 void TempSensor::move(TempSensor& rhs) noexcept
 {
-    channel_ = rhs.channel_;
-    thermistor_ = rhs.thermistor_;
-    nsamples_ = rhs.nsamples_;
-    Idrive_ = rhs.Idrive_;
-    sampleTaken_ = rhs.sampleTaken_;
-    tempKelvin_ = rhs.tempKelvin_;
-    name_ = rhs.name_;
+    channel_            = rhs.channel_;
+    thermistor_         = rhs.thermistor_;
+    nsamples_           = rhs.nsamples_;
+    Idrive_             = rhs.Idrive_;
+    sampleTaken_        = rhs.sampleTaken_;
+    name_               = rhs.name_;
+    currentTemp_        = rhs.currentTemp_;
+    rangeMin_           = rhs.rangeMin_;
+    rangeMax_           = rhs.rangeMax_;
+    lastLogWriteTime_   = rhs.lastLogWriteTime_;
+    logInterval_        = rhs.logInterval_;
 
-    rhs.channel_ = -1;
-    rhs.thermistor_ = nullptr;
-    rhs.nsamples_ = 0;
-    rhs.Idrive_ = 0.0;
-    rhs.sampleTaken_ = false;
-    rhs.tempKelvin_ = 0.0;
-    rhs.name_ = "";
+    rhs.channel_            = -1;
+    rhs.thermistor_         = nullptr;
+    rhs.nsamples_           = 0;
+    rhs.Idrive_             = 0.0;
+    rhs.sampleTaken_        = false;
+    rhs.name_               = "";
+    rhs.currentTemp_        = Temperature(0.0, TEMP_UNIT_KELVIN);
+    rhs.rangeMin_           = Temperature(0.0, TEMP_UNIT_KELVIN);
+    rhs.rangeMax_           = Temperature(0.0, TEMP_UNIT_KELVIN);
+    rhs.lastLogWriteTime_   = 0;
+    rhs.logInterval_        = 0;
 }
 
 
@@ -125,18 +150,24 @@ Temperature TempSensor::sense(Error * const err) noexcept
     // an approximate value.  If this is not the first sample, use the data to adjust the moving-average value.
     if(sampleTaken_)
     {
+        double tempKelvin = currentTemp_.K();
+
         // At least one sample has already been taken
-        tempKelvin_ -= tempKelvin_ / nsamples_;
-        tempKelvin_ += sample.K() / nsamples_;
+        tempKelvin -= tempKelvin / nsamples_;
+        tempKelvin += sample.K() / nsamples_;
+
+        currentTemp_.set(tempKelvin, TEMP_UNIT_KELVIN);
     }
     else
     {
         // This is the first sample
-        tempKelvin_ = sample.K();
+        currentTemp_ = sample;
         sampleTaken_ = true;
     }
 
-    return Temperature(tempKelvin_, TEMP_UNIT_KELVIN);
+    writeTempLog();
+
+    return currentTemp_;
 }
 
 
@@ -145,7 +176,7 @@ Temperature TempSensor::sense(Error * const err) noexcept
 //
 bool TempSensor::inRange() const noexcept
 {
-    return (tempKelvin_ >= rangeMin_) && (tempKelvin_ <= rangeMax_);
+    return (currentTemp_ >= rangeMin_) && (currentTemp_ <= rangeMax_);
 }
 
 
@@ -197,4 +228,25 @@ double TempSensor::readRaw(Error * const err) noexcept
     return Registry::instance().adc().read(channel_, err);
 }
 
+
+// writeTempLog() - if enough time has passed since the last temperature reading was written to the temperature log,
+// write the current reading to the log.  Swallow any errors that occur.
+//
+void TempSensor::writeTempLog()
+{
+    const time_t now = ::time(NULL);
+
+    if(logInterval_ && ((now - lastLogWriteTime_) > logInterval_))
+    {
+        SQLiteStmt logStmt;
+
+        Registry::instance().db().prepare("INSERT INTO temperature(date_create, sensor_id, temperature) "
+                                          "VALUES(CURRENT_TIMESTAMP, :sensor_id, :temperature)", logStmt)
+        && logStmt.bind(":sensor_id", channel_)
+        && logStmt.bind(":temperature", currentTemp_.C())
+        && logStmt.step();
+
+        lastLogWriteTime_ = now;
+    }
+}
 

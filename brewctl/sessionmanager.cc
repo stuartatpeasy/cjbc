@@ -18,12 +18,6 @@ extern "C"
 }
 
 
-SessionManager::SessionManager(Error * const err) noexcept
-{
-    tempSensorAmbient_ = TempSensor::getAmbientTempSensor(err);
-}
-
-
 SessionManager::~SessionManager() noexcept
 {
     for(auto it : sessions_)
@@ -37,6 +31,8 @@ bool SessionManager::init(Error * const err) noexcept
 {
     SQLite& db = Registry::instance().db();
     SQLiteStmt sessions;
+
+    tempSensorAmbient_ = TempSensor::getAmbientTempSensor(err);
 
     if(!db.prepare("SELECT id "
                    "FROM session "
@@ -77,6 +73,8 @@ void SessionManager::run() noexcept
 
     for(int i = 0;; ++i)
     {
+        tempSensorAmbient_->sense();
+
         for(auto session : sessions_)
             session->main();
 
