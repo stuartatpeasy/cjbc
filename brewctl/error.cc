@@ -27,6 +27,7 @@ static map<ErrorCode_t, string> errorMessages =
     {MALLOC_FAILED,             "Memory allocation failed"},
     {LIBWIRINGPI_INIT_FAILED,   "Failed to initialise libWiringPi"},
     {NO_SUCH_SESSION,           "Session %d does not exist"},
+    {NO_SUCH_PROFILE,           "Profile %d does not exist"},
     {DB_OPEN_FAILED,            "Failed to create or open database file '%s': %s (%d)"},
     {DB_TOO_FEW_COLUMNS,        "Query returned too few columns"},
     {DB_SQLITE_ERROR,           "SQLite error: %s (%d)"},
@@ -52,7 +53,8 @@ static map<ErrorCode_t, string> errorMessages =
 static const int msg_buffer_len = 4096; // Length of buffer in which the error message is written
 
 Error::Error() noexcept
-    : msg_(""), code_(0)
+    : msg_(""),
+      code_(0)
 {
 
 }

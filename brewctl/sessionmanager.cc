@@ -10,6 +10,7 @@
 #include "log.h"
 #include "shiftreg.h"
 #include "temperature.h"
+#include "tempsensor.h"
 #include <cstdlib>          // ::rand(), NULL
 
 extern "C"

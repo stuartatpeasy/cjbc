@@ -9,7 +9,6 @@
 
 #include "effector.h"
 #include "log.h"
-#include "nulleffector.h"
 #include "registry.h"
 #include "sqlite.h"
 #include "sqlitestmt.h"
@@ -21,7 +20,9 @@ using std::string;
 
 
 Effector::Effector(const int channel, const double powerConsumption, const string& name) noexcept
-    : channel_(channel), powerConsumption_(powerConsumption), name_(name), state_(false)
+    : DefaultEffector(channel, name),
+      powerConsumption_(powerConsumption),
+      state_(false)
 {
     logDebug("instantiating effector on channel %d with power consumption %f", channel, powerConsumption);
 }
@@ -87,31 +88,29 @@ bool Effector::activate(const bool state, Error * const err) noexcept
 // given session.  If there is no matching effector in the database, return a new NullEffector.  If the database lookup
 // fails, a nullptr is returned.
 //
-Effector* Effector::getSessionEffectorByType(const int sessionId, const std::string& type, Error * const err)
-    noexcept
+DefaultEffector_uptr_t Effector::getSessionEffectorByType(const int sessionId, const std::string& type,
+                                                          Error * const err) noexcept
 {
     auto& db = Registry::instance().db();
     SQLiteStmt eff;
 
     if(!db.prepare("SELECT channel, name, powerconsumption FROM sessioneffector "
                    "LEFT JOIN effectortype ON sessioneffector.effectortype_id=effectortype.id "
-                   "WHERE session_id=:sessionId AND type=:type", eff, err) ||
-       !eff.bind(":sessionId", sessionId, err) ||
-       !eff.bind(":type", type, err))
-        return nullptr;
-
-    if(!eff.step(err))
-        return err->code() ? nullptr : new NullEffector();
+                   "WHERE session_id=:sessionId AND type=:type", eff, err)
+       || !eff.bind(":sessionId", sessionId, err)
+       || !eff.bind(":type", type, err)
+       || !eff.step(err))
+        return DefaultEffector_uptr_t(new DefaultEffector());
 
     // FIXME - verify that channel is in bounds
-    return new Effector(eff["channel"], eff["powerconsumption"], eff["name"].asString());
+    return DefaultEffector_uptr_t(new Effector(eff["channel"], eff["powerconsumption"], eff["name"].asString()));
 }
 
 
 // getSessionHeater() - factory for Effector objects of type "heater".  Instantiates an Effector of the "heater" type
 // for the given session.
 //
-Effector* Effector::getSessionHeater(const int sessionId, Error * const err) noexcept
+DefaultEffector_uptr_t Effector::getSessionHeater(const int sessionId, Error * const err) noexcept
 {
     return getSessionEffectorByType(sessionId, "heater", err);
 }
@@ -120,7 +119,7 @@ Effector* Effector::getSessionHeater(const int sessionId, Error * const err) noe
 // getSessionCooler() - factory for Effector objects of type "cooler".  Instantiates an Effector of the "cooler" type
 // for the given session.
 //
-Effector* Effector::getSessionCooler(const int sessionId, Error * const err) noexcept
+DefaultEffector_uptr_t Effector::getSessionCooler(const int sessionId, Error * const err) noexcept
 {
     return getSessionEffectorByType(sessionId, "cooler", err);
 }

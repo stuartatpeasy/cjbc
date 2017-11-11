@@ -56,6 +56,11 @@ public:
                                     return valKelvin_ == 0.0;
                                 };
 
+                                operator bool() const noexcept
+                                {
+                                    return valKelvin_ != 0.0;
+                                };
+
     bool                        operator<(const Temperature& rhs) const noexcept
                                 {
                                     return (rhs.valKelvin_ - valKelvin_) >= TEMP_TOLERANCE;

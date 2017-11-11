@@ -8,12 +8,13 @@
     Part of brewctl
 */
 
-#include "effector.h"
+#include "defaulteffector.h"
+#include "defaulttempsensor.h"
 #include "error.h"
 #include "temperature.h"
-#include "tempsensor.h"
 #include <ctime>        // ::time()
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -24,31 +25,31 @@ typedef std::vector<SessionStage_t> SessionStages_t;
 class Session
 {
 public:
-                        Session(const int id, Error * const err = nullptr) noexcept;
-                        ~Session() noexcept;
+                                Session(const int id, Error * const err = nullptr) noexcept;
+    virtual                     ~Session() = default;
 
-    Temperature         targetTemp() noexcept;
-    Temperature         currentTemp() noexcept;
-    bool                vesselTempSensorInRange() const noexcept;
-    bool                isActive() const noexcept;
-    void                main() noexcept;
+    Temperature                 targetTemp() noexcept;
+    Temperature                 currentTemp() noexcept;
+    bool                        vesselTempSensorInRange() const noexcept;
+    bool                        isActive() const noexcept;
+    void                        main() noexcept;
 
 private:
-    bool                updateEffectors(Error * const err = nullptr) noexcept;
+    bool                        updateEffectors(Error * const err = nullptr) noexcept;
 
-    const int           id_;
-    std::string         gyle_;
-    int                 profile_;
-    time_t              start_ts_;
-    time_t              end_ts_;
-    double              deadZone_;
-    SessionStages_t     stages_;
-    TempSensor *        tempSensorVessel_;
-    Effector *          effectorHeater_;
-    Effector *          effectorCooler_;
+    const int                   id_;
+    std::string                 gyle_;
+    int                         profile_;
+    time_t                      start_ts_;
+    time_t                      end_ts_;
+    double                      deadZone_;
+    time_t                      effectorUpdateInterval_;
+    time_t                      lastEffectorUpdate_;
+    SessionStages_t             stages_;
+    DefaultTempSensor_uptr_t    tempSensorVessel_;
+    DefaultEffector_uptr_t      effectorHeater_;
+    DefaultEffector_uptr_t      effectorCooler_;
 
-    time_t              effectorUpdateInterval_;
-    time_t              lastEffectorUpdate_;
 };
 
 #endif // SESSION_H_INC

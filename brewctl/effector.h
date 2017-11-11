@@ -9,42 +9,40 @@
     Part of brewctl
 */
 
+#include "defaulteffector.h"
 #include "error.h"
 #include <memory>
 #include <string>
 
 
-class Effector
+class Effector : public DefaultEffector
 {
 public:
-                                Effector(const int channel, const double powerConsumption, const std::string& name)
-                                    noexcept;
-    virtual                     ~Effector() noexcept;
+                                    Effector(const int channel, const double powerConsumption, const std::string& name)
+                                        noexcept;
+    virtual                         ~Effector() noexcept;
 
-                                Effector(const Effector& rhs) = delete;
-                                Effector(Effector&& rhs) noexcept;
+                                    Effector(const Effector& rhs) = delete;
+                                    Effector(Effector&& rhs) noexcept;
 
-    Effector&                   operator=(const Effector& rhs) = delete;
-    Effector&                   operator=(Effector&& rhs) noexcept;
+    Effector&                       operator=(const Effector& rhs) = delete;
+    Effector&                       operator=(Effector&& rhs) noexcept;
 
-    virtual bool                activate(const bool state, Error * const err = nullptr) noexcept;
+    virtual bool                    activate(const bool state, Error * const err = nullptr) noexcept;
 
-    virtual bool                state() const noexcept { return state_; };
-    virtual double              powerConsumption() const noexcept { return powerConsumption_; };
-    virtual const std::string&  name() const noexcept { return name_; };
+    virtual bool                    state() const noexcept { return state_; };
+    virtual double                  powerConsumption() const noexcept { return powerConsumption_; };
 
-    static Effector*            getSessionEffectorByType(const int sessionId, const std::string& type,
-                                                         Error * const err = nullptr) noexcept;
-    static Effector*            getSessionHeater(const int sessionId, Error * const err = nullptr) noexcept;
-    static Effector*            getSessionCooler(const int sessionId, Error * const err = nullptr) noexcept;
+    static DefaultEffector_uptr_t   getSessionHeater(const int sessionId, Error * const err = nullptr) noexcept;
+    static DefaultEffector_uptr_t   getSessionCooler(const int sessionId, Error * const err = nullptr) noexcept;
 
 protected:
-    void                        move(Effector& rhs) noexcept;
+    static DefaultEffector_uptr_t   getSessionEffectorByType(const int sessionId, const std::string& type,
+                                                             Error * const err = nullptr) noexcept;
+    void                            move(Effector& rhs) noexcept;
 
-    int                         channel_;
-    double                      powerConsumption_;
-    std::string                 name_;
-    bool                        state_;
+    double                          powerConsumption_;
+    bool                            state_;
 };
 
 #endif // EFFECTOR_H_INC

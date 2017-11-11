@@ -17,7 +17,8 @@ using std::vector;
 
 
 SQLiteStmt::SQLiteStmt() noexcept
-    : stmt_(NULL), firstStepDone_(false)
+    : stmt_(NULL),
+      firstStepDone_(false)
 {
 }
 

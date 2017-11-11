@@ -21,8 +21,16 @@
 
 
 Session::Session(const int id, Error * const err) noexcept
-    : id_(id), start_ts_(0), tempSensorVessel_(nullptr), effectorHeater_(nullptr), effectorCooler_(nullptr),
-      lastEffectorUpdate_(0)
+    : id_(id),
+      profile_(0),
+      start_ts_(0),
+      end_ts_(0),
+      deadZone_(0.0),
+      effectorUpdateInterval_(0),
+      lastEffectorUpdate_(0),
+      tempSensorVessel_(TempSensor::getSessionVesselTempSensor(id, err)),
+      effectorHeater_(Effector::getSessionHeater(id, err)),
+      effectorCooler_(Effector::getSessionCooler(id, err))
 {
     // Read basic session information
     auto& cfg = Registry::instance().config();
@@ -61,32 +69,20 @@ Session::Session(const int id, Error * const err) noexcept
         offset += duration;
         stages_.push_back(SessionStage_t(duration, session["temperature"]));
     }
+    
+    if(stages_.empty())
+    {
+        formatError(err, NO_SUCH_PROFILE, profile_);
+        return;
+    }
 
     end_ts_ = offset;
 
-    // Create session sensor and effector objects
-    if(((tempSensorVessel_ = TempSensor::getSessionVesselTempSensor(id, err)) == nullptr) ||
-       ((effectorHeater_ = Effector::getSessionHeater(id_, err)) == nullptr) ||
-       ((effectorCooler_ = Effector::getSessionCooler(id_, err)) == nullptr))
-        return;
-
     deadZone_ = cfg.get("session.dead_zone", DEFAULT_TEMP_DEADZONE);
     effectorUpdateInterval_ = cfg.get("session.effector_update_interval_s", DEFAULT_EFFECTOR_UPDATE_INTERVAL_S);
-}
 
-
-// dtor - free allocated resources
-//
-Session::~Session() noexcept
-{
-    if(tempSensorVessel_ != nullptr)
-        delete tempSensorVessel_;
-
-    if(effectorHeater_ != nullptr)
-        delete effectorHeater_;
-
-    if(effectorCooler_ != nullptr)
-        delete effectorCooler_;
+    effectorHeater_->activate(false);
+    effectorCooler_->activate(false);
 }
 
 

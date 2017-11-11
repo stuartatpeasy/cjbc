@@ -55,7 +55,11 @@ typedef enum SPIPin
 // hence we wouldn't be able to obtain a registry instance here.
 //
 SPIPort::SPIPort(GPIOPort& gpio, Config& config, Error * const err) noexcept
-    : fd_(0), mode_(0), bpw_(0), maxClock_(0), ready_(false)
+    : fd_(0),
+      mode_(0),
+      bpw_(0),
+      maxClock_(0),
+      ready_(false)
 {
     for(auto pin : {GPIO_MOSI, GPIO_MISO, GPIO_SCLK})
         if(!gpio.setMode(pin, PIN_ALT0, err))

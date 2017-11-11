@@ -13,7 +13,9 @@
 
 
 SQLiteColumn::SQLiteColumn(SQLiteStmt &stmt, const int index) noexcept
-    : index_(index), data_(nullptr), len_(0)
+    : index_(index),
+      data_(nullptr),
+      len_(0)
 {
     sqlite3_stmt * const stmtRaw = (sqlite3_stmt *) stmt;
 

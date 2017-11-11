@@ -20,6 +20,7 @@ typedef enum
     MALLOC_FAILED               = 0x0004,
     LIBWIRINGPI_INIT_FAILED     = 0x0005,
     NO_SUCH_SESSION             = 0x0006,
+    NO_SUCH_PROFILE             = 0x0007,
     DB_OPEN_FAILED              = 0x1100,
     DB_TOO_FEW_COLUMNS          = 0x1101,
     DB_SQLITE_ERROR             = 0x1102,

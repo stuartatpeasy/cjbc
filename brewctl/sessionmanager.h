@@ -11,7 +11,7 @@
 #include "error.h"
 #include "registry.h"
 #include "session.h"
-#include "tempsensor.h"
+#include "defaulttempsensor.h"
 #include <cstddef>
 #include <vector>
 
@@ -32,7 +32,7 @@ public:
 
 private:
     std::vector<Session *>  sessions_;
-    TempSensor *            tempSensorAmbient_;
+    std::unique_ptr<DefaultTempSensor>       tempSensorAmbient_;
 };
 
 #endif // SESSIONMANAGER_H_INC

@@ -9,7 +9,6 @@
 
 #include "tempsensor.h"
 #include "log.h"
-#include "nulltempsensor.h"
 #include "registry.h"
 #include "sqlitestmt.h"
 #include <string>
@@ -22,8 +21,14 @@ using std::string;
 
 
 TempSensor::TempSensor(const int thermistor_id, const int channel, Error * const err) noexcept
-    : channel_(channel), thermistor_(nullptr), sampleTaken_(false), currentTemp_(0.0, TEMP_UNIT_CELSIUS),
-      rangeMin_(0.0, TEMP_UNIT_KELVIN), rangeMax_(1000.0, TEMP_UNIT_KELVIN), lastLogWriteTime_(0), logInterval_(0)
+    : DefaultTempSensor(channel, "TempSensor"),
+      thermistor_(nullptr),
+      sampleTaken_(false),
+      currentTemp_(0.0, TEMP_UNIT_CELSIUS),
+      rangeMin_(0.0, TEMP_UNIT_KELVIN),
+      rangeMax_(1000.0, TEMP_UNIT_KELVIN),
+      lastLogWriteTime_(0),
+      logInterval_(0)
 {
     // Initialise: read sensor data from the database
     SQLite& db = Registry::instance().db();
@@ -182,31 +187,30 @@ bool TempSensor::inRange() const noexcept
 
 // getTempSensor() - factory for TempSensor objects.  Returns a TempSensor object representing the sensor specified by
 // <session_id> and <role>.  If no such sensor exists in the database, a NullTempSensor() object is returned; this acts
-// as a "null" sensor, always safely returning a temperature of absolute zero.  If the database lookup fails, nullptr is
-// returned.
+// as a "null" sensor, always safely returning a temperature of absolute zero.  If any database lookup step fails,
+// a NullTempSensor object is returned and <err> is set accordingly.
 //
-TempSensor* TempSensor::getTempSensor(const int sessionId, const string& role, Error * const err) noexcept
+DefaultTempSensor_uptr_t TempSensor::getTempSensor(const int sessionId, const string& role, Error * const err)
+    noexcept
 {
-    auto& db = Registry::instance().db();
     SQLiteStmt tempSensor;
 
-    if(!db.prepare("SELECT channel, thermistor_id FROM temperaturesensor "
-                   "WHERE role=:role AND session_id=:session_id", tempSensor, err) ||
-       !tempSensor.bind(":role", role) ||
-       !tempSensor.bind(":session_id", sessionId))
-        return nullptr;
+    if(!Registry::instance().db().prepare("SELECT channel, thermistor_id FROM temperaturesensor "
+                                          "WHERE role=:role AND session_id=:session_id", tempSensor, err)
+       || !tempSensor.bind(":role", role, err)
+       || !tempSensor.bind(":session_id", sessionId, err)
+       || !tempSensor.step(err))
+        return DefaultTempSensor_uptr_t(new DefaultTempSensor());
 
-    if(!tempSensor.step(err))
-        return err->code() ? nullptr : new NullTempSensor();
-
-    return new TempSensor(tempSensor["thermistor_id"], tempSensor["channel"], err);
+    logDebug("returning TempSensor for role %s on channel %d", role.c_str(), tempSensor["channel"].asInt());
+    return DefaultTempSensor_uptr_t(new TempSensor(tempSensor["thermistor_id"], tempSensor["channel"], err));
 }
 
 
 // getSessionVesselTempSensor() - obtain a TempSensor object representing the sensor measuring the vessel temperature in
 // the session specified by <sessionId>.
 //
-TempSensor* TempSensor::getSessionVesselTempSensor(const int sessionId, Error * const err) noexcept
+DefaultTempSensor_uptr_t TempSensor::getSessionVesselTempSensor(const int sessionId, Error * const err) noexcept
 {
     return getTempSensor(sessionId, "vessel", err);
 }
@@ -215,7 +219,7 @@ TempSensor* TempSensor::getSessionVesselTempSensor(const int sessionId, Error * 
 // getAmbientTempSensor() - obtain a TempSensor object representing the sensor measuring brewhouse ambient temperature,
 // if such a sensor is present.
 //
-TempSensor* TempSensor::getAmbientTempSensor(Error * const err) noexcept
+DefaultTempSensor_uptr_t TempSensor::getAmbientTempSensor(Error * const err) noexcept
 {
     return getTempSensor(0, "ambient", err);
 }
