@@ -194,16 +194,22 @@ DefaultTempSensor_uptr_t TempSensor::getTempSensor(const int sessionId, const st
     noexcept
 {
     SQLiteStmt tempSensor;
+    DefaultTempSensor* ret;
 
     if(!Registry::instance().db().prepare("SELECT channel, thermistor_id FROM temperaturesensor "
                                           "WHERE role=:role AND session_id=:session_id", tempSensor, err)
        || !tempSensor.bind(":role", role, err)
        || !tempSensor.bind(":session_id", sessionId, err)
        || !tempSensor.step(err))
-        return DefaultTempSensor_uptr_t(new DefaultTempSensor());
+        ret = new DefaultTempSensor();
 
     logDebug("returning TempSensor for role %s on channel %d", role.c_str(), tempSensor["channel"].asInt());
-    return DefaultTempSensor_uptr_t(new TempSensor(tempSensor["thermistor_id"], tempSensor["channel"], err));
+    ret = new TempSensor(tempSensor["thermistor_id"], tempSensor["channel"], err);
+
+    if(ret == nullptr)
+        formatError(err, MALLOC_FAILED);
+
+    return DefaultTempSensor_uptr_t(ret);
 }
 
 

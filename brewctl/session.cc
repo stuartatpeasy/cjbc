@@ -32,6 +32,9 @@ Session::Session(const int id, Error * const err) noexcept
       effectorHeater_(Effector::getSessionHeater(id, err)),
       effectorCooler_(Effector::getSessionCooler(id, err))
 {
+    if(err->code())
+        return;         // Stop if initialisation of any member variable failed
+
     // Read basic session information
     auto& cfg = Registry::instance().config();
     auto& db = Registry::instance().db();

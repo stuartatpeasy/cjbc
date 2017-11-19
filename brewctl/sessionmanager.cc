@@ -34,6 +34,8 @@ bool SessionManager::init(Error * const err) noexcept
     SQLiteStmt sessions;
 
     tempSensorAmbient_ = TempSensor::getAmbientTempSensor(err);
+    if(err->code())
+        return false;
 
     if(!db.prepare("SELECT id "
                    "FROM session "
@@ -43,12 +45,14 @@ bool SessionManager::init(Error * const err) noexcept
 
     while(sessions.step(err))
     {
-        sessions_.push_back(new Session(sessions["id"], err));
+        Session * const s = new Session(sessions["id"], err);
         if(err->code())
             return false;
+
+        sessions_.push_back(s);
     }
 
-    return !err->code();
+    return true;
 }
 
 

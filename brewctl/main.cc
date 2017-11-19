@@ -25,11 +25,11 @@ extern "C"
 |  LCD_RS |  7 | GPIO7  |   IO | 7  8 | ALT5 |    TXD | 15 | -       |
 |         |    | GND    |      | 9  10| ALT5 |    RXD | 16 | -       |
 | SR_RCLK |  0 | GPIO0  |   IO |11  12| IO   |  GPIO1 |  1 | ADC_nCS |
-|       - |  2 | GPIO2  |   IO |13  14|      |    GND |    |         |
-|       - |  3 | GPIO3  |   IO |15  16| IO   |  GPIO4 |  4 | -       |
-|         |    | 3V3    |      |17  18| IO   |  GPIO5 |  5 | -       |
+|  SW_BTM |  2 | GPIO2  |   IO |13  14|      |    GND |    |         |
+|  SW_TOP |  3 | GPIO3  |   IO |15  16| IO   |  GPIO4 |  4 | ROT_CW  |
+|         |    | 3V3    |      |17  18| IO   |  GPIO5 |  5 | ROT_CCW |
 |    MOSI | 12 | MOSI   | ALT0 |19  20|      |    GND |    |         |
-|    MISO | 13 | MISO   | ALT0 |21  22| IO   |  GPIO6 |  6 | -       |
+|    MISO | 13 | MISO   | ALT0 |21  22| IO   |  GPIO6 |  6 | ROT_BTN |
 |    SCLK | 14 | SCLK   | ALT0 |23  24| O    |    CE0 | 10 | -       |
 |         |    | GND    |      |25  26| O    |    CE1 | 11 | -       |
 |       - | 30 | SDA0   |   IO |27  28| IO   |   SCL0 | 31 | -       |
