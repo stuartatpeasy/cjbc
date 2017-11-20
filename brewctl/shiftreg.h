@@ -34,7 +34,7 @@ public:
     bool                    isSet(const unsigned int bit, Error * const err = nullptr) noexcept;
 
 protected:
-    bool                    strobeRegClk(Error * const err = nullptr) noexcept;
+    void                    strobeRegClk() noexcept;
 
     bool                    ready_;
     uint16_t                currentVal_;

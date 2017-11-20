@@ -40,8 +40,10 @@ ADC::ADC(GPIOPort& gpio, Config& config, Error * const err) noexcept
     isource_ = config.get("adc.isource_ua", ADC_DEFAULT_ISOURCE_UA) / 1000000.0;    // isource_ is in amps
 
     // Set ADC_nCS as an output, and de-assert it
-    if(!gpio.write(GPIO_ADC_nCS, 1, err) ||
-       !gpio.setMode(GPIO_ADC_nCS, PIN_OUTPUT, err))
+    auto nCS = gpio.pin(GPIO_ADC_nCS);
+
+    nCS.write(true);
+    if(!nCS.setMode(PIN_OUTPUT, err))
         return;
 
     if(vref_ > 0.0)
@@ -56,6 +58,7 @@ double ADC::read(const unsigned int channel, Error * const err) noexcept
     Registry& r = Registry::instance();
     uint8_t tx_data[ADC_PACKET_LEN], rx_data[ADC_PACKET_LEN];
     unsigned short val;
+    auto nCS = r.gpio().pin(GPIO_ADC_nCS);
 
     if(!ready_)
     {
@@ -69,7 +72,7 @@ double ADC::read(const unsigned int channel, Error * const err) noexcept
         return -1.0;
     }
 
-    r.gpio().write(GPIO_ADC_nCS, 0);      // Assert the ADC's nCS line
+    nCS.write(false);   // Assert the ADC's nCS line
 
     tx_data[0] = ADC_START_BIT;
     tx_data[1] = ADC_SINGLE_MODE_BIT | (channel << ADC_CHANNEL_SHIFT);
@@ -77,7 +80,7 @@ double ADC::read(const unsigned int channel, Error * const err) noexcept
 
     const bool ret = r.spi().transmitAndReceive(tx_data, rx_data, ADC_PACKET_LEN, err);
 
-    r.gpio().write(GPIO_ADC_nCS, 1);      // Negate the ADC's nCS line
+    nCS.write(true);    // Negate the ADC's nCS line
     if(!ret)
         return -1.0;
 

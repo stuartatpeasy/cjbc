@@ -172,13 +172,13 @@ typedef enum LCDPin
 //
 LCD::LCD(GPIOPort& gpio, Error * const err) noexcept
 {
-    for(auto pin : {GPIO_LCD_RS, GPIO_LCD_E, GPIO_LCD_D0, GPIO_LCD_D1, GPIO_LCD_D2, GPIO_LCD_D3, GPIO_LCD_D4,
-                    GPIO_LCD_D5, GPIO_LCD_D6, GPIO_LCD_D7})
+    for(auto pin_id : {GPIO_LCD_RS, GPIO_LCD_E, GPIO_LCD_D0, GPIO_LCD_D1, GPIO_LCD_D2, GPIO_LCD_D3, GPIO_LCD_D4,
+                       GPIO_LCD_D5, GPIO_LCD_D6, GPIO_LCD_D7})
     {
-        if(!gpio.write(pin, 0, err))
-            return;
+        auto pin = gpio.pin(pin_id);
 
-        if(!gpio.setMode(pin, PIN_OUTPUT, err))
+        pin.write(false);
+        if(!pin.setMode(PIN_OUTPUT, err))
             return;
     }
 }
@@ -187,13 +187,11 @@ LCD::LCD(GPIOPort& gpio, Error * const err) noexcept
 // init() - initialise the LCD by sending the reset command sequence followed by the initialisation sequence.  Returns
 // true on success, false otherwise.
 //
-bool LCD::init(Error * const err) noexcept
+void LCD::init() noexcept
 {
     for(auto i = 0; i < 3; ++i)
     {
-        if(!writeCommand(LCD_CMD_FUNCTION_SET | LCD_ARG_DATA_LEN, err))
-            return false;
-
+        writeCommand(LCD_CMD_FUNCTION_SET | LCD_ARG_DATA_LEN);
         ::usleep(i ? 500 : 10000);
     }
 
@@ -204,93 +202,74 @@ bool LCD::init(Error * const err) noexcept
                     LCD_CMD_SET_DDRAM_ADDR,
                     LCD_CMD_DISPLAY_CONTROL | LCD_ARG_DISP_ENABLE})
     {
-        if(!writeCommand(cmd, err))
-            return false;
-
+        writeCommand(cmd);
         ::usleep(1000);
     }
 
-    if(!writeCommand(LCD_CMD_HOME, err))
-        return false;
-
+    writeCommand(LCD_CMD_HOME);
     ::usleep(2000);
 
-    if(!writeCommand(LCD_CMD_SET_CGRAM_ADDR, err))
-        return false;
+    writeCommand(LCD_CMD_SET_CGRAM_ADDR);
 
     ::usleep(1000);
     for(size_t i = 0; i < (sizeof(charData) / sizeof(charData[0])); ++i)
     {
-        if(!writeData(charData[i], err))
-            return false;
-
+        writeData(charData[i]);
         ::usleep(1000);
     }
-
-    return true;
 }
 
 
 // toggleEClock() - toggle (high -> low) the LCD's "E" (enable) clock.  Returns true on success, false otherwise.
 //
-bool LCD::toggleEClock(Error * const err) noexcept
+void LCD::toggleEClock() noexcept
 {
-    auto& gpio = Registry::instance().gpio();
     for(auto i: {1, 0})
     {
-        if(!gpio.write(GPIO_LCD_E, i, err))
-            return false;
-
+        Registry::instance().gpio().pin(GPIO_LCD_E).write(i);
         ::usleep(LCD_E_CLK_STATE_TIME_US);
     }
-
-    return true;
 }
 
 
 // writeCommand() - write the command <cmd> to the LCD.  Returns true on success, false otherwise.
 //
-bool LCD::writeCommand(uint8_t cmd, Error * const err) noexcept
+void LCD::writeCommand(uint8_t cmd) noexcept
 {
     auto& gpio = Registry::instance().gpio();
 
-    // Set RS=0
-    if(!gpio.write(GPIO_LCD_RS, 0, err))
-        return false;
+    gpio.pin(GPIO_LCD_RS).write(false);     // De-assert RS
 
     // Place command on data bus
     for(int i = GPIO_LCD_D0; i <= GPIO_LCD_D7; ++i, cmd >>= 1)
-        if(!gpio.write(i, cmd & 1, err))
-            return false;
+        gpio.pin(i).write(cmd & 1);
 
-    return toggleEClock();
+    toggleEClock();
 }
 
 
 // writeData() - write the data byte <data> to the LCD.  Returns true on success, false otherwise.
 //
-bool LCD::writeData(uint8_t data, Error * const err) noexcept
+void LCD::writeData(uint8_t data) noexcept
 {
     auto& gpio = Registry::instance().gpio();
 
     // Set RS=1
-    if(!gpio.write(GPIO_LCD_RS, 1, err))
-        return false;
+    gpio.pin(GPIO_LCD_RS).write(true);
 
     // Place data on data bus
     for(int i = GPIO_LCD_D0; i <= GPIO_LCD_D7; ++i, data >>= 1)
-        if(!gpio.write(i, data & 1, err))
-            return false;
+        gpio.pin(i).write(data & 1);
 
-    return toggleEClock();
+    toggleEClock();
 }
 
 
 // clear() - erase all content from the LCD screen.  Returns true on success, false otherwise.
 //
-bool LCD::clear(Error * const err) noexcept
+void LCD::clear() noexcept
 {
-    return writeCommand(LCD_CMD_CLEAR, err);
+    writeCommand(LCD_CMD_CLEAR);
 }
 
 
@@ -313,9 +292,7 @@ bool LCD::setCursorPos(const int x, const int y, Error * const err) noexcept
     if(y & 1)
         pos += 0x40;
 
-    if(!writeCommand(LCD_CMD_SET_DDRAM_ADDR | pos, err))
-        return false;
-
+    writeCommand(LCD_CMD_SET_DDRAM_ADDR | pos);
     ::usleep(400);
 
     return true;
@@ -355,9 +332,7 @@ bool LCD::putAt(const int x, const int y, const char c, Error * const err) noexc
     if(!setCursorPos(x, y, err))
         return false;
 
-    if(!writeData(c, err))
-        return false;
-
+    writeData(c);
     ::usleep(500);
 
     return true;

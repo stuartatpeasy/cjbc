@@ -55,8 +55,14 @@ bool Registry::init(Config& config, Error * const err) noexcept
             return false;
 
         // Initialise objects within the registry
-        return instance_->sr().init(err) &&
-               instance_->lcd().init(err);
+        auto ret = instance_->sr().init(err);
+
+        if(ret)
+        {
+            instance_->lcd().init();
+        }
+
+        return ret;
     }
 
     return true;

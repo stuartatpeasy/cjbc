@@ -26,17 +26,17 @@ class LCD
 public:
                     LCD(GPIOPort& gpio, Error * const err = nullptr) noexcept;
 
-    bool            clear(Error * const err = nullptr) noexcept;
+    void            clear() noexcept;
     int             printAt(const int x, const int y, const std::string& format, ...) noexcept;
     bool            putAt(const int x, const int y, const char c, Error * const err = nullptr) noexcept;
     bool            setCursorPos(const int x, const int , Error * const err = nullptr) noexcept;
-    bool            init(Error * const err = nullptr) noexcept;
+    void            init() noexcept;
     bool            backlight(const bool state) noexcept;
 
 protected:
-    bool            writeCommand(uint8_t cmd, Error * const err = nullptr) noexcept;
-    bool            writeData(uint8_t cmd, Error * const err = nullptr) noexcept;
-    bool            toggleEClock(Error * const err = nullptr) noexcept;
+    void            writeCommand(uint8_t cmd) noexcept;
+    void            writeData(uint8_t cmd) noexcept;
+    void            toggleEClock() noexcept;
 };
 
 #endif // LCD_H_INC

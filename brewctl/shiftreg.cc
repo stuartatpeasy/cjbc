@@ -57,8 +57,10 @@ ShiftReg::ShiftReg(GPIOPort& gpio, Error * const err) noexcept
     : ready_(false)
 {
     // Force the register-clock signal to be an output, and de-assert it
-    if(!gpio.write(GPIO_SR_RCLK, 0, err) ||
-       !gpio.setMode(GPIO_SR_RCLK, PIN_OUTPUT, err))
+    auto RClk = gpio.pin(GPIO_SR_RCLK);
+
+    RClk.write(0);
+    if(!RClk.setMode(PIN_OUTPUT, err))
         return;
 }
 
@@ -71,8 +73,9 @@ bool ShiftReg::init(Error * const err) noexcept
     auto& spi = Registry::instance().spi();
 
     // Force all shift-register outputs to zero.
-    if(spi.transmitByte(0, err) && spi.transmitByte(0, err) && strobeRegClk(err))
+    if(spi.transmitByte(0, err) && spi.transmitByte(0, err))
     {
+        strobeRegClk();
         ready_ = true;
         currentVal_ = 0;
         return true;
@@ -85,19 +88,13 @@ bool ShiftReg::init(Error * const err) noexcept
 // strobeRegClk() - strobe the RCLK pin of the 74xx595.  This has the effect of transferring to the output pins the last
 // eight bits received in the register.
 //
-bool ShiftReg::strobeRegClk(Error * const err) noexcept
+void ShiftReg::strobeRegClk() noexcept
 {
-    auto& gpio = Registry::instance().gpio();
+    auto RClk = Registry::instance().gpio().pin(GPIO_SR_RCLK);
 
-    if(!gpio.write(GPIO_SR_RCLK, 1, err))
-        return false;
-
+    RClk.write(true);
     ::usleep(SR_CLOCK_MIN_US);
-    
-    if(!gpio.write(GPIO_SR_RCLK, 0, err))
-        return false;
-
-    return true;
+    RClk.write(false);
 }
 
 
@@ -115,7 +112,7 @@ bool ShiftReg::write(const uint16_t val, Error * const err) noexcept
     }
 
     // Force the register clock low
-    r.gpio().write(GPIO_SR_RCLK, 0);
+    r.gpio().pin(GPIO_SR_RCLK).write(false);
 
     // Transmit the bytes
     for(size_t i = 0; i < sizeof(val); ++i, valLocal >>= 8)
@@ -123,7 +120,7 @@ bool ShiftReg::write(const uint16_t val, Error * const err) noexcept
             return false;
 
     currentVal_ = val;
-    strobeRegClk(err);
+    strobeRegClk();
 
     return true;
 }
