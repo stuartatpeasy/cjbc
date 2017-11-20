@@ -31,13 +31,18 @@ public:
     Temperature                 targetTemp() noexcept;
     Temperature                 currentTemp() noexcept;
     bool                        vesselTempSensorInRange() const noexcept;
+    bool                        isNotStartedYet() const noexcept;
     bool                        isActive() const noexcept;
+    bool                        isComplete() const noexcept;
     void                        main() noexcept;
+    int                         gyleId() const noexcept { return gyle_id_; };
+    std::string                 gyleName() const noexcept { return gyle_; };
 
 private:
     bool                        updateEffectors(Error * const err = nullptr) noexcept;
 
     const int                   id_;
+    int                         gyle_id_;
     std::string                 gyle_;
     int                         profile_;
     time_t                      start_ts_;

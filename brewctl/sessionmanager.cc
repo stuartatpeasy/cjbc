@@ -12,6 +12,7 @@
 #include "temperature.h"
 #include "tempsensor.h"
 #include <cstdlib>          // ::rand(), NULL
+#include <ctime>            // ::strftime(), ::localtime(), ::time()
 
 extern "C"
 {
@@ -65,16 +66,13 @@ void SessionManager::run() noexcept
 
     lcd.backlight(true);
 
-    for(int i = 0; i < 2; ++i)
+    for(int i = 2; i < 4; ++i)
     {
         lcd.printAt(0, i, "F%d", i + 1);
-        lcd.printAt(0, i + 2, "C%d", i + 1);
     }
 
-    lcd.printAt(10, 0, "10d18h");
-    lcd.printAt(4, 1, "--.-");
-    lcd.printAt(4, 2, "--.-");
-    lcd.printAt(4, 3, "--.-");
+    lcd.printAt(14, 2, "10d18h");
+    lcd.printAt(18, 0, "\xdf""C");
 
     for(int i = 0;; ++i)
     {
@@ -87,12 +85,27 @@ void SessionManager::run() noexcept
 
         if(!(i % 100))
         {
-            if(t.C() > -5.0)
-                lcd.printAt(4, 0, "%4.1lf\xdf", t.C() + 0.05);
-            else
-                lcd.printAt(4, 0, "--.- ");
+            char buffer[16];
+            time_t tm;
 
-            lcd.putAt(3, 0, LCD_CH_ARROW_2DOWN);
+            ::time(&tm);
+            ::strftime(buffer, sizeof(buffer), "%H:%M", ::localtime(&tm));
+
+            lcd.printAt(0, 0, buffer);
+            // FIXME - detect in-range for ambient sensor
+            lcd.printAt(16, 0, "%2d", (int) tempSensorAmbient_->sense().C());
+
+            for(auto session : sessions_)
+            {
+                lcd.printAt(0, 2, "G%-3d F ", session->gyleId());
+                lcd.printAt(0, 3, "%.20s", session->gyleName().c_str());
+
+                lcd.putAt(7, 2, LCD_CH_ARROW_2DOWN);
+                if(session->vesselTempSensorInRange())
+                    lcd.printAt(8, 2, "%4.1lf\xdf", t.C() + 0.05);
+                else
+                    lcd.printAt(8, 2, "--.-\xdf");
+            }
         }
 
         ::usleep(10 * 1000);

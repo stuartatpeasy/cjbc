@@ -22,6 +22,7 @@
 
 Session::Session(const int id, Error * const err) noexcept
     : id_(id),
+      gyle_id_(0),
       profile_(0),
       start_ts_(0),
       end_ts_(0),
@@ -40,7 +41,7 @@ Session::Session(const int id, Error * const err) noexcept
     auto& db = Registry::instance().db();
     SQLiteStmt session;
 
-    if(!db.prepare("SELECT gyle, profile_id, CAST((JULIANDAY(date_start) - 2440587.5) * 86400.0 AS INT) AS start_ts "
+    if(!db.prepare("SELECT gyle_id, profile_id, CAST((JULIANDAY(date_start) - 2440587.5) * 86400.0 AS INT) AS start_ts "
                    "FROM session "
                    "WHERE id=:id", session, err) ||
        !session.bind(":id", id, err))
@@ -54,9 +55,25 @@ Session::Session(const int id, Error * const err) noexcept
         return;
     }
 
-    gyle_ = session["gyle"].asString();
+    gyle_id_ = session["gyle_id"];
     profile_ = session["profile_id"];
     start_ts_ = session["start_ts"];
+
+    SQLiteStmt gyle;
+
+    if(!db.prepare("SELECT name FROM gyle WHERE id=:gyle_id", gyle, err) ||
+       !gyle.bind(":gyle_id", gyle_id_, err))
+        return;
+
+    if(gyle.step(err))
+        gyle_ = gyle["name"].asString();
+    else
+    {
+        if(err->code())
+            return;
+
+        gyle_ = "<unknown gyle>";
+    }
 
     // Read session temperature-stage information
     if(!db.prepare("SELECT stage, duration_hours, temperature FROM profilestage "
@@ -172,6 +189,15 @@ bool Session::updateEffectors(Error * const err) noexcept
 }
 
 
+// isNotStartedYet() - return bool indicating whether the current session has not started yet, i.e. it is scheduled to
+// start in the future.
+//
+bool Session::isNotStartedYet() const noexcept
+{
+    return ::time(NULL) < start_ts_;
+}
+
+
 // isActive() - return bool indicating whether the current session is "active", i.e. the current time is between the
 // session's start time and its end time.
 //
@@ -180,6 +206,14 @@ bool Session::isActive() const noexcept
     const time_t now = ::time(NULL);
 
     return (now >= start_ts_) && (now < end_ts_);
+}
+
+
+// isComplete() - return bool indicating whether the current session has finished.
+//
+bool Session::isComplete() const noexcept
+{
+    return ::time(NULL) >= end_ts_;
 }
 
 

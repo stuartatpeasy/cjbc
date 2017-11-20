@@ -56,7 +56,7 @@ CREATE TABLE "sensortype"(
 DROP TABLE IF EXISTS "session";
 CREATE TABLE "session"(
     id                  INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    gyle                VARCHAR(255) NOT NULL,
+    gyle_id             INT UNSIGNED NOT NULL,
     profile_id          INT UNSIGNED NOT NULL,
     date_create         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     date_start          DATETIME DEFAULT NULL,
@@ -162,9 +162,13 @@ INSERT INTO thermistor(id, name, type, Tref_C, Rref, beta, range_min, range_max)
     (1, "B57891M0472K000", "NTC", 25.0, 4700.0, 3980.0, -5.0, 40.0);
 
 -- remove this
+DELETE FROM gyle;
+INSERT INTO gyle(id, name, date_create) VALUES
+    (107, "Nelson Sauvin lager", CURRENT_TIMESTAMP);
+
 DELETE FROM session;
-INSERT INTO session(id, gyle, profile_id, date_create, date_start, date_finish) VALUES
-    (1, "G107", 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
+INSERT INTO session(id, gyle_id, profile_id, date_create, date_start, date_finish) VALUES
+    (1, 107, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
 
 DELETE FROM sessioneffector;
 INSERT INTO sessioneffector(session_id, effectortype_id, channel) VALUES

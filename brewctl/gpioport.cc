@@ -7,6 +7,7 @@
 */
 
 #include "gpioport.h"
+#include "log.h"
 
 extern "C"
 {
@@ -53,6 +54,10 @@ bool GPIOPort::preValidate(const int pin, Error * const err) noexcept
 //
 GPIOPin GPIOPort::pin(const gpio_pin_id_t num) noexcept
 {
-    return GPIOPin(((num >= 0) && (num <= GPIO_PIN_MAX)) ? num : GPIOPin::invalid_pin);
+    if((num >= 0) && (num <= GPIO_PIN_MAX))
+        return GPIOPin(num);
+
+    logWarning("Instantiating invalid GPIO pin %d", num);
+    return GPIOPin(GPIOPin::invalid_pin);
 }
 
