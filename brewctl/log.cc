@@ -22,7 +22,7 @@ extern "C"
 using std::string;
 using std::ostringstream;
 
-#define LOG_BUF_SIZE (16384)
+static const size_t LOG_BUF_SIZE = 16384;
 
 static FILE *logFp = NULL;
 static LogMethod_t logMethod = LOG_METHOD_NONE;

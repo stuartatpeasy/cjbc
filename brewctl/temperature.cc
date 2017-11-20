@@ -12,9 +12,11 @@
 
 using std::string;
 
-const double Temperature::zeroCelsiusInKelvin = 273.15;
-const double Temperature::zeroFahrenheitInKelvin = 255.372;
-const double Temperature::kelvinPerDegreeCelsius = 1.0;
+const double Temperature::tempTolerance             = 0.0001;   // Tolerance used when comparing temperatures
+
+const double Temperature::zeroCelsiusInKelvin       = 273.15;
+const double Temperature::zeroFahrenheitInKelvin    = 255.372;
+const double Temperature::kelvinPerDegreeCelsius    = 1.0;
 const double Temperature::kelvinPerDegreeFahrenheit = 0.556;
 
 

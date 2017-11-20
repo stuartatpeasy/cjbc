@@ -19,9 +19,11 @@ using boost::iequals;
 using std::string;
 
 
-#define DEFAULT_TEMP_DEADZONE               (0.5)   // Temperature "dead zone", in deg C/K, within which effectors will
-                                                    // not be activated to modify the session temperature
-#define DEFAULT_EFFECTOR_UPDATE_INTERVAL_S  (10)    // Default interval between effector updates, in seconds
+static const double
+    DEFAULT_TEMP_DEADZONE               = 0.5;  // Temperature "dead zone", in deg C/K, within which effectors will not
+                                                // be activated to modify the session temperature
+static const time_t
+    DEFAULT_EFFECTOR_UPDATE_INTERVAL_S  = 10;   // Default interval between effector updates, in seconds
 
 
 Session::Session(const int id, Error * const err) noexcept

@@ -14,20 +14,15 @@
 #include <cstdint>
 
 
-// The highest-numbered (according to wiringPi's scheme) GPIO pin
-#define GPIO_PIN_MAX            (29)
-
-
 class GPIOPort
 {
 public:
-                GPIOPort(Error * const err = nullptr) noexcept;
-    GPIOPin     pin(const gpio_pin_id_t num) noexcept;
+                                GPIOPort(Error * const err = nullptr) noexcept;
+    GPIOPin                     pin(const gpio_pin_id_t num) noexcept;
 
 protected:
-    bool        preValidate(const int pin, Error * const err = nullptr) noexcept;
-
-    bool        ready_;
+    static const gpio_pin_id_t  GPIO_PIN_MAX;
+    bool                        ready_;
 };
 
 #endif // GPIOPORT_H_INC

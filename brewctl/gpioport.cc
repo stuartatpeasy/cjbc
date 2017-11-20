@@ -15,6 +15,10 @@ extern "C"
 }
 
 
+// The highest-numbered (according to wiringPi's scheme) GPIO pin
+const gpio_pin_id_t GPIOPort::GPIO_PIN_MAX = 29;
+
+
 GPIOPort::GPIOPort(Error * const err) noexcept
     : ready_(false)
 {
@@ -25,27 +29,6 @@ GPIOPort::GPIOPort(Error * const err) noexcept
     }
 
     ready_ = true;
-}
-
-
-// preValidate() - check ready state and supplied pin number.  Return true if the device is ready and the pin number is
-// valid; false otherwise.
-//
-bool GPIOPort::preValidate(const int pin, Error * const err) noexcept
-{
-    if(!ready_)
-    {
-        formatError(err, GPIO_NOT_READY);
-        return false;
-    }
-
-    if((pin < 0) || (pin > GPIO_PIN_MAX))
-    {
-        formatError(err, GPIO_INVALID_PIN);
-        return false;
-    }
-
-    return true;
 }
 
 

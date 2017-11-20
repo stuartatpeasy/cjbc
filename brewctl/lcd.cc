@@ -128,43 +128,59 @@ typedef enum LCDPin
 } LCDPin_t;
 
 
-#define LCD_DISP_WIDTH          (20)        // Display width in characters
-#define LCD_DISP_HEIGHT         (4)         // Display height in characters
+// Display parameters
+static const uint8_t
+    LCD_DISP_WIDTH     = 20,   // Display width in characters
+    LCD_DISP_HEIGHT    = 4;    // Display height in characters
 
 //
 // LCD controller command codes
 //
-#define LCD_CMD_CLEAR           (0x01)
-#define LCD_CMD_HOME            (0x02)
-#define LCD_CMD_ENTRY_MODE_SET  (0x04)
-#define LCD_CMD_DISPLAY_CONTROL (0x08)
-#define LCD_CMD_SHIFT           (0x10)
-#define LCD_CMD_FUNCTION_SET    (0x20)
-#define LCD_CMD_SET_CGRAM_ADDR  (0x40)
-#define LCD_CMD_SET_DDRAM_ADDR  (0x80)
+static const uint8_t
+    LCD_CMD_CLEAR              = 0x01,
+    LCD_CMD_HOME               = 0x02,
+    LCD_CMD_ENTRY_MODE_SET     = 0x04,
+    LCD_CMD_DISPLAY_CONTROL    = 0x08,
+    LCD_CMD_SHIFT              = 0x10,
+    LCD_CMD_FUNCTION_SET       = 0x20,
+    LCD_CMD_SET_CGRAM_ADDR     = 0x40,
+    LCD_CMD_SET_DDRAM_ADDR     = 0x80;
 
 //
 // LCD command args / arg masks
 //
-#define LCD_ARG_INCREMENT       (0x02)
-#define LCD_ARG_SHIFT           (0x01)
-#define LCD_ARG_DISP_ENABLE     (0x04)
-#define LCD_ARG_CURSOR_ENABLE   (0x02)
-#define LCD_ARG_CURSOR_BLINK    (0x01)
-#define LCD_ARG_SHIFT_DISPLAY   (0x08)
-#define LCD_ARG_SHIFT_RIGHT     (0x04)
-#define LCD_ARG_DATA_LEN        (0x10)
-#define LCD_ARG_NUM_LINES       (0x08)
-#define LCD_ARG_FONT            (0x04)
+static const uint8_t
+    LCD_ARG_INCREMENT          = 0x02,
+    LCD_ARG_SHIFT              = 0x01,
+    LCD_ARG_DISP_ENABLE        = 0x04,
+    LCD_ARG_CURSOR_ENABLE      = 0x02,
+    LCD_ARG_CURSOR_BLINK       = 0x01,
+    LCD_ARG_SHIFT_DISPLAY      = 0x08,
+    LCD_ARG_SHIFT_RIGHT        = 0x04,
+    LCD_ARG_DATA_LEN           = 0x10,
+    LCD_ARG_NUM_LINES          = 0x08,
+    LCD_ARG_FONT               = 0x04;
 
-#define LCD_ARG_CGRAM_ADDR_MASK (0x3f)
-#define LCD_ARG_DDRAM_ADDR_MASK (0x7f)
+// Address masks
+static const uint8_t
+    LCD_ARG_CGRAM_ADDR_MASK     = 0x3f,
+    LCD_ARG_DDRAM_ADDR_MASK     = 0x7f;
 
 // Minimum width of each state of the "E" clock, in microseconds
-#define LCD_E_CLK_STATE_TIME_US (50)        // 50 microseconds
+static const uint8_t LCD_E_CLK_STATE_TIME_US    = 50;   // 50 microseconds
 
-#define LCD_BACKLIGHT_SR_BIT    (0)         // Shift-register bit which controls the backlight
+static const uint8_t LCD_BACKLIGHT_SR_BIT       = 0;    // Shift-register bit which controls the backlight
 
+// LCD initialisation command sequence
+static const uint8_t initCommands[] =
+{
+    LCD_CMD_FUNCTION_SET | LCD_ARG_DATA_LEN | LCD_ARG_NUM_LINES,
+    LCD_CMD_DISPLAY_CONTROL,
+    LCD_CMD_CLEAR,
+    LCD_CMD_ENTRY_MODE_SET | LCD_ARG_INCREMENT,
+    LCD_CMD_SET_DDRAM_ADDR,
+    LCD_CMD_DISPLAY_CONTROL | LCD_ARG_DISP_ENABLE
+};
 
 // ctor - note that we can't use Registry members here; instead we must take explicit args for objects which are
 // normally read from the registry.  This is because the LCD is normally init'ed from within the Registry ctor, hence we
@@ -195,12 +211,7 @@ void LCD::init() noexcept
         ::usleep(i ? 500 : 10000);
     }
 
-    for(auto cmd : {LCD_CMD_FUNCTION_SET | LCD_ARG_DATA_LEN | LCD_ARG_NUM_LINES,
-                    LCD_CMD_DISPLAY_CONTROL,
-                    LCD_CMD_CLEAR,
-                    LCD_CMD_ENTRY_MODE_SET | LCD_ARG_INCREMENT,
-                    LCD_CMD_SET_DDRAM_ADDR,
-                    LCD_CMD_DISPLAY_CONTROL | LCD_ARG_DISP_ENABLE})
+    for(auto cmd: initCommands)
     {
         writeCommand(cmd);
         ::usleep(1000);

@@ -16,7 +16,7 @@
 using std::string;
 
 
-#define EFFECTOR_BIT_OFFSET     (8)     // Offset of effector bit 0 from shift register bit 0
+static const int EFFECTOR_BIT_OFFSET    = 8;    // Offset of effector bit 0 from shift register bit 0
 
 
 Effector::Effector(const int channel, const double powerConsumption, const string& name) noexcept

@@ -34,10 +34,13 @@ extern "C"
 
 using std::string;
 
-#define SPI_DEFAULT_BPW     (8)                 // Default SPI word length = 8 bits
-#define SPI_DEFAULT_CLOCK   (500000)            // Default SPI clock = 500kHz
-#define SPI_DEFAULT_MODE    (SPI_MODE_0)        // Default SPI mode = mode 0
-#define SPI_DEFAULT_DEVICE  ("/dev/spidev0.0")  // Default SPI device
+static const int
+    SPI_DEFAULT_BPW     = 8,                    // Default SPI word length = 8 bits
+    SPI_DEFAULT_CLOCK   = 500000,               // Default SPI clock = 500kHz
+    SPI_DEFAULT_MODE    = SPI_MODE_0;           // Default SPI mode = mode 0
+
+static const char * const
+    SPI_DEFAULT_DEVICE    = "/dev/spidev0.0";   // Default SPI device
 
 //
 // Mapping of GPIO pin names to wiringPi pin numbers for SPI pins

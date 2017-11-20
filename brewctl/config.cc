@@ -129,6 +129,14 @@ int Config::get(const string& key, const int defaultVal) noexcept
 }
 
 
+// get() - if key <key> exists, return its value converted to an unsigned int; otherwise return <defaultVal>.
+//
+unsigned int Config::get(const string& key, const unsigned int defaultVal) noexcept
+{
+    return exists(key) ? std::stoul(data_[key]) : defaultVal;
+}
+
+
 // get() - if key <key> exists, return its value converted to a long; otherwise return <defaultVal>.
 //
 long Config::get(const string& key, const long defaultVal) noexcept

@@ -15,7 +15,7 @@ SOURCES := \
     gpioport.cc lcd.cc log.cc main.cc registry.cc session.cc sessionmanager.cc shiftreg.cc spiport.cc sqlite.cc        \
     sqlitecolumn.cc sqlitestmt.cc temperature.cc tempsensor.cc thermistor.cc
 
-CFLAGS := -g -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17
+CFLAGS := -O3 -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17
 
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 

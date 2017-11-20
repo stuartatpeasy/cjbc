@@ -12,8 +12,6 @@
 #include <string>
 
 
-#define TEMP_TOLERANCE  (0.0001)        // Tolerance for comparing temperatures
-
 typedef enum TemperatureUnit
 {
     TEMP_UNIT_CELSIUS,
@@ -43,12 +41,12 @@ public:
 
     bool                        operator==(const Temperature& rhs) const noexcept
                                 {
-                                    return ::fabs(valKelvin_ - rhs.valKelvin_) < TEMP_TOLERANCE;
+                                    return ::fabs(valKelvin_ - rhs.valKelvin_) < tempTolerance;
                                 };
 
     bool                        operator!=(const Temperature& rhs) const noexcept
                                 {
-                                    return ::fabs(valKelvin_ - rhs.valKelvin_) >= TEMP_TOLERANCE;
+                                    return ::fabs(valKelvin_ - rhs.valKelvin_) >= tempTolerance;
                                 };
 
     bool                        operator!() const noexcept
@@ -63,7 +61,7 @@ public:
 
     bool                        operator<(const Temperature& rhs) const noexcept
                                 {
-                                    return (rhs.valKelvin_ - valKelvin_) >= TEMP_TOLERANCE;
+                                    return (rhs.valKelvin_ - valKelvin_) >= tempTolerance;
                                 };
 
     bool                        operator<=(const Temperature& rhs) const noexcept
@@ -73,7 +71,7 @@ public:
 
     bool                        operator>(const Temperature& rhs) const noexcept
                                 {
-                                    return (valKelvin_ - rhs.valKelvin_) >= TEMP_TOLERANCE;
+                                    return (valKelvin_ - rhs.valKelvin_) >= tempTolerance;
                                 };
 
     bool                        operator>=(const Temperature& rhs) const noexcept
@@ -108,6 +106,8 @@ public:
 
 protected:
     double                      valKelvin_;
+
+    static const double         tempTolerance;
 
     static const double         zeroCelsiusInKelvin;
     static const double         zeroFahrenheitInKelvin;

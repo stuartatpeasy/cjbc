@@ -33,6 +33,7 @@ public:
     int                 get(const std::string& key, const int defaultVal = 0) noexcept;
     long                get(const std::string& key, const long defaultVal = 0L) noexcept;
     long long           get(const std::string& key, const long long defaultVal = 0LL) noexcept;
+    unsigned int        get(const std::string& key, const unsigned int defaultVal = 0) noexcept;
     unsigned long       get(const std::string& key, const unsigned long defaultVal = 0UL) noexcept;
     unsigned long long  get(const std::string& key, const unsigned long long defaultVal = 0ULL) noexcept;
     float               get(const std::string& key, const float defaultVal = 0.0) noexcept;

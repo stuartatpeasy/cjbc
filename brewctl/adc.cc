@@ -10,15 +10,16 @@
 #include "registry.h"
 
 
-#define ADC_MAX_CHANNEL         (7)         // This ADC has channels numbered 0-7
-#define ADC_BITS                (10)        // This ADC has 10-bit resolution
-#define ADC_DEFAULT_REF_VOLTAGE (5.0)       // Default ADC reference voltage
-#define ADC_DEFAULT_ISOURCE_UA  (147)       // Default ADC current-source current, in microamps
+static const ADCChannel_t ADC_MAX_CHANNEL   = 7;        // This ADC has channels numbered 0-7
+static const unsigned int ADC_BITS          = 10;       // This ADC has 10-bit resolution
+static const double ADC_DEFAULT_REF_VOLTAGE = 5.0;      // Default ADC reference voltage
+static const double ADC_DEFAULT_ISOURCE_UA  = 147.0;    // Default ADC current-source current, in microamps
 
-#define ADC_START_BIT           (1 << 0)
-#define ADC_SINGLE_MODE_BIT     (1 << 7)
-#define ADC_CHANNEL_SHIFT       (4)
-#define ADC_PACKET_LEN          (3)         // An ADC read operation requires a 3-byte "packet"
+static const uint8_t
+    ADC_START_BIT           = 1 << 0,   // "Start conversion" flag in ADC command byte
+    ADC_SINGLE_MODE_BIT     = 1 << 7,   // Bit representing single-ended mode in ADC command byte
+    ADC_CHANNEL_SHIFT       = 4,        // Offset, in bits, of channel number from bit 0 of ADC command byte
+    ADC_PACKET_LEN          = 3;        // An ADC read operation requires a 3-byte "packet"
 
 //
 // Mapping of GPIO pin names to wiringPi pin numbers for ADC pins
@@ -53,7 +54,7 @@ ADC::ADC(GPIOPort& gpio, Config& config, Error * const err) noexcept
 
 // read() - read a sample from ADC channel <channel>; return the detected voltage or -1.0 in case of error.
 //
-double ADC::read(const unsigned int channel, Error * const err) noexcept
+double ADC::read(const ADCChannel_t channel, Error * const err) noexcept
 {
     Registry& r = Registry::instance();
     uint8_t tx_data[ADC_PACKET_LEN], rx_data[ADC_PACKET_LEN];

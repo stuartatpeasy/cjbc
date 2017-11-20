@@ -16,8 +16,9 @@
 using std::string;
 
 
-#define DEFAULT_MOVING_AVERAGE_LEN      (1000)  // Default length of moving average for sensor readings
-#define DEFAULT_LOG_INTERVAL_S          (10)    // Default interval between temp-sensor log writes, in seconds
+static const int 
+    DEFAULT_MOVING_AVERAGE_LEN  = 1000,     // Default length of moving average for sensor readings
+    DEFAULT_LOG_INTERVAL_S      = 10;       // Default interval between temp-sensor log writes, in seconds
 
 
 TempSensor::TempSensor(const int thermistor_id, const int channel, Error * const err) noexcept

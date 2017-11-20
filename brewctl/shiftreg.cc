@@ -47,8 +47,8 @@ typedef enum ShiftRegPin
     GPIO_SR_RCLK = 0                // Shift register "register clock" signal
 } ShiftRegPin_t;
 
-#define SR_CLOCK_MIN_US     (1)     // Minimum width of the register clock pulse, in microseconds
-#define SR_LEN_BITS         (16)    // Length of the entire shift register in bits
+static const unsigned int SR_CLOCK_MIN_US   = 1;      // Minimum width of the register clock pulse, in microseconds
+static const unsigned int SR_LEN_BITS       = 16;     // Length of the entire shift register in bits
 
 
 // ctor - configure GPIO port pins and set the shift register output value to 0.

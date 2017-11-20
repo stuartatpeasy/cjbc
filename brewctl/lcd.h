@@ -12,13 +12,18 @@
 #include <string>
 
 
+//
 // Character codes for custom LCD symbols
-#define LCD_CH_ARROW_UP     (1)
-#define LCD_CH_ARROW_DOWN   (2)
-#define LCD_CH_ARROW_2UP    (3)
-#define LCD_CH_ARROW_2DOWN  (4)
-#define LCD_CH_ARROW_LEFT   (5)
-#define LCD_CH_ARROW_RIGHT  (6)
+//
+typedef enum LCDCustomSym
+{
+    LCD_CH_ARROW_UP     = 1,
+    LCD_CH_ARROW_DOWN   = 2,
+    LCD_CH_ARROW_2UP    = 3,
+    LCD_CH_ARROW_2DOWN  = 4,
+    LCD_CH_ARROW_LEFT   = 5,
+    LCD_CH_ARROW_RIGHT  = 6
+} LCDCustomSym_t;
 
 
 class LCD
