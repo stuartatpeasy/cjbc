@@ -20,8 +20,12 @@ extern "C"
 }
 
 
-static const time_t secondsPerHour = 60 * 60;
-static const time_t secondsPerDay = 24 * secondsPerHour;
+// Time-interval constants
+static const time_t hoursPerDay     = 24,
+                    minsPerHour     = 60,
+                    secsPerMinute   = 60,
+                    secsPerHour     = minsPerHour * secsPerMinute,
+                    secsPerDay      = hoursPerDay * secsPerHour;
 
 
 SessionManager::~SessionManager() noexcept
@@ -96,8 +100,7 @@ char SessionManager::getSessionTypeIndicator(const SessionType_t type) const noe
 //
 void SessionManager::run() noexcept
 {
-    Registry& r = Registry::instance();
-    LCD& lcd = r.lcd();
+    LCD& lcd = Registry::instance().lcd();
 
     lcd.backlight(true);
 
@@ -128,7 +131,7 @@ void SessionManager::run() noexcept
             lcd.printAt(0, 0, buffer);
 
             if(tempSensorAmbient_->inRange())
-                lcd.printAt(16, 0, "%2d", (int) tempSensorAmbient_->sense().C());
+                lcd.printAt(16, 0, "%2d", (int) (tempSensorAmbient_->sense().C() + 0.5));
             else
                 lcd.printAt(16, 0, "--");
 
@@ -147,18 +150,38 @@ void SessionManager::run() noexcept
                     else
                         lcd.printAt(8, 2, "--.-\xdf");
 
-                    const time_t secsRemaining = session->remainingTime();
-                    const auto days = secsRemaining / secondsPerDay;
-                    const auto hours = (secsRemaining - (days * secondsPerDay)) / secondsPerHour;
+                    const time_t secsRemaining  = session->remainingTime(),
+                                 days           = secsRemaining / secsPerDay,
+                                 hours          = secsRemaining / secsPerHour,
+                                 minutes        = secsRemaining / secsPerMinute;
 
-                    lcd.printAt(14, 2, "%2dd%2dh", days, hours);
+                    time_t field1, field2;
+                    const char *fmt;
+
+                    if(days)
+                    {
+                        fmt = "%2dd%02dh";
+                        field1 = days;
+                        field2 = hours % hoursPerDay;
+                    }
+                    else if(hours)
+                    {
+                        fmt = "%2dh%02dm";
+                        field1 = hours;
+                        field2 = minutes % minsPerHour;
+                    }
+                    else
+                    {
+                        fmt = "%2dm%02ds";
+                        field1 = minutes;
+                        field2 = secsRemaining % secsPerMinute;
+                    }
+
+                    lcd.printAt(14, 2, fmt, field1, field2);
                 }
                 else
                 {
-                    if(session->isComplete())
-                        lcd.printAt(5, 0, "Complete");
-                    else
-                        lcd.printAt(5, 0, "Starts in");
+                    lcd.printAt(5, 0, session->isComplete() ? "Complete" : "Starts in");
                 }
             }
         }

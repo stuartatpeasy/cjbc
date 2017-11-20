@@ -129,7 +129,7 @@ typedef enum LCDPin
 
 
 // Display parameters
-static const uint8_t
+static const int
     LCD_DISP_WIDTH     = 20,   // Display width in characters
     LCD_DISP_HEIGHT    = 4;    // Display height in characters
 

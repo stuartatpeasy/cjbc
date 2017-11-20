@@ -58,9 +58,7 @@ bool Registry::init(Config& config, Error * const err) noexcept
         auto ret = instance_->sr().init(err);
 
         if(ret)
-        {
             instance_->lcd().init();
-        }
 
         return ret;
     }
