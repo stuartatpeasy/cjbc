@@ -31,7 +31,8 @@ Session::Session(const int id, Error * const err) noexcept
       lastEffectorUpdate_(0),
       tempSensorVessel_(TempSensor::getSessionVesselTempSensor(id, err)),
       effectorHeater_(Effector::getSessionHeater(id, err)),
-      effectorCooler_(Effector::getSessionCooler(id, err))
+      effectorCooler_(Effector::getSessionCooler(id, err)),
+      tempControlState_(HOLD)
 {
     if(err->code())
         return;         // Stop if initialisation of any member variable failed
@@ -150,6 +151,7 @@ bool Session::updateEffectors(Error * const err) noexcept
         // Session is inactive; ensure that its effectors are deactivated.
         effectorHeater_->activate(false);
         effectorCooler_->activate(false);
+        tempControlState_ = HOLD;
 
         return true;
     }
@@ -160,6 +162,7 @@ bool Session::updateEffectors(Error * const err) noexcept
         // Failed to sense temperature, or no sensor attached.  Deactivate effectors and return failure.
         effectorHeater_->activate(false);
         effectorCooler_->activate(false);
+        tempControlState_ = HOLD;
 
         return false;
     }
@@ -170,18 +173,24 @@ bool Session::updateEffectors(Error * const err) noexcept
     {
         // Temperature is within dead zone - deactivate all effectors
         logDebug("Session %d: temperature is within range", id_);
+        tempControlState_ = HOLD;
+
         return effectorHeater_->activate(false, err) && effectorCooler_->activate(false, err);
     }
     else if(diff > 0.0)
     {
         // Temperature is too high - activate cooling effectors
         logDebug("Session %d: temperature is too high; cooling", id_);
+        tempControlState_ = COOL;
+
         return effectorCooler_->activate(true, err);
     }
     else if(diff < 0.0)
     {
         // Temperature is too low - activate heating effectors
         logDebug("Session %d: temperature is too low; heating", id_);
+        tempControlState_ = HEAT;
+
         return effectorHeater_->activate(true, err);
     }
 
@@ -214,6 +223,19 @@ bool Session::isActive() const noexcept
 bool Session::isComplete() const noexcept
 {
     return ::time(NULL) >= end_ts_;
+}
+
+
+// remainingTime() - return the number of seconds remaining in the session, or 0 if the session is inactive.
+//
+time_t Session::remainingTime() const noexcept
+{
+    const time_t now = ::time(NULL);
+
+    if((now >= start_ts_) && (now < end_ts_))
+        return end_ts_ - now;
+
+    return 0;
 }
 
 

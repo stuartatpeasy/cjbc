@@ -22,6 +22,16 @@
 typedef std::pair<time_t, double> SessionStage_t;
 typedef std::vector<SessionStage_t> SessionStages_t;
 
+typedef enum SessionTempControlState
+{
+    FAST_COOL,
+    COOL,
+    HOLD,
+    HEAT,
+    FAST_HEAT
+} SessionTempControlState_t;
+
+
 class Session
 {
 public:
@@ -37,6 +47,8 @@ public:
     void                        main() noexcept;
     int                         gyleId() const noexcept { return gyle_id_; };
     std::string                 gyleName() const noexcept { return gyle_; };
+    time_t                      remainingTime() const noexcept;
+    SessionTempControlState_t   tempControlState() const noexcept { return tempControlState_; };
 
 private:
     bool                        updateEffectors(Error * const err = nullptr) noexcept;
@@ -54,7 +66,7 @@ private:
     DefaultTempSensor_uptr_t    tempSensorVessel_;
     DefaultEffector_uptr_t      effectorHeater_;
     DefaultEffector_uptr_t      effectorCooler_;
-
+    SessionTempControlState_t   tempControlState_;
 };
 
 #endif // SESSION_H_INC

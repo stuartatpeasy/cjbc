@@ -31,6 +31,8 @@ public:
     void                    run() noexcept;
 
 private:
+    char                    getTempControlIndicator(const SessionTempControlState_t state) const noexcept;
+
     std::vector<Session *>  sessions_;
     std::unique_ptr<DefaultTempSensor>       tempSensorAmbient_;
 };
