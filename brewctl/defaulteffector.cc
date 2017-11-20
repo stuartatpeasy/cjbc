@@ -9,6 +9,7 @@
 */
 
 #include "defaulteffector.h"
+#include "log.h"
 
 
 DefaultEffector::DefaultEffector(const int channel, const std::string& name) noexcept
@@ -30,6 +31,8 @@ bool DefaultEffector::activate(const bool state, Error * const err) noexcept
     // Suppress warnings about unused arguments
     (void) state;
     (void) err;
+
+    logWarning("DefaultEffector::activate(): channel %d -> %s (nop)", channel_, state ? "on" : "off");
 
     return true;
 }

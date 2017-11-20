@@ -91,19 +91,29 @@ bool Effector::activate(const bool state, Error * const err) noexcept
 DefaultEffector_uptr_t Effector::getSessionEffectorByType(const int sessionId, const std::string& type,
                                                           Error * const err) noexcept
 {
-    auto& db = Registry::instance().db();
     SQLiteStmt eff;
+    DefaultEffector* ret;
 
-    if(!db.prepare("SELECT channel, name, powerconsumption FROM sessioneffector "
-                   "LEFT JOIN effectortype ON sessioneffector.effectortype_id=effectortype.id "
-                   "WHERE session_id=:sessionId AND type=:type", eff, err)
+    if(!Registry::instance().db().prepare("SELECT channel, name, powerconsumption FROM sessioneffector "
+                                          "LEFT JOIN effectortype ON sessioneffector.effectortype_id=effectortype.id "
+                                          "WHERE session_id=:sessionId AND type=:type", eff, err)
        || !eff.bind(":sessionId", sessionId, err)
        || !eff.bind(":type", type, err)
        || !eff.step(err))
-        return DefaultEffector_uptr_t(new DefaultEffector());
+    {
+        logInfo("Session %d: no effector of type '%s' found", sessionId, type.c_str());
+        ret = new DefaultEffector();
+    }
+    else
+    {
+        logDebug("Session %d: returning Effector for type '%s'", sessionId, type.c_str());
+        ret = new Effector(eff["channel"], eff["powerconsumption"], eff["name"].asString());
+    }
 
-    // FIXME - verify that channel is in bounds
-    return DefaultEffector_uptr_t(new Effector(eff["channel"], eff["powerconsumption"], eff["name"].asString()));
+    if(ret == nullptr)
+        formatError(err, MALLOC_FAILED);
+
+    return DefaultEffector_uptr_t(ret);
 }
 
 

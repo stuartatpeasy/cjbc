@@ -201,10 +201,15 @@ DefaultTempSensor_uptr_t TempSensor::getTempSensor(const int sessionId, const st
        || !tempSensor.bind(":role", role, err)
        || !tempSensor.bind(":session_id", sessionId, err)
        || !tempSensor.step(err))
+    {
+        logInfo("Session %d: no temperature sensor found for role '%s'", sessionId, role.c_str());
         ret = new DefaultTempSensor();
-
-    logDebug("returning TempSensor for role %s on channel %d", role.c_str(), tempSensor["channel"].asInt());
-    ret = new TempSensor(tempSensor["thermistor_id"], tempSensor["channel"], err);
+    }
+    else
+    {
+        logDebug("returning TempSensor for role %s on channel %d", role.c_str(), tempSensor["channel"].asInt());
+        ret = new TempSensor(tempSensor["thermistor_id"], tempSensor["channel"], err);
+    }
 
     if(ret == nullptr)
         formatError(err, MALLOC_FAILED);

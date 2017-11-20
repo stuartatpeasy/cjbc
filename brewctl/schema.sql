@@ -5,7 +5,7 @@ DROP TABLE IF EXISTS "effectortype";
 CREATE TABLE "effectortype"(
     id                  INTEGER PRIMARY KEY NOT NULL,
     name                VARCHAR(255) NOT NULL,
-    type                CHAR(16) NOT NULL,
+    type                CHAR(16) NOT NULL COLLATE NOCASE,
     powerconsumption    DECIMAL(4, 4) NOT NULL);
 
 --
@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS "profile";
 CREATE TABLE "profile"(
     id                  INTEGER PRIMARY KEY NOT NULL,
     name                VARCHAR(255) NOT NULL,
-    type                CHAR(16) NOT NULL);
+    type                CHAR(16) NOT NULL COLLATE NOCASE);
 
 --
 -- profilestage
@@ -47,7 +47,7 @@ DROP TABLE IF EXISTS "sensortype";
 CREATE TABLE "sensortype"(
     id                  INTEGER PRIMARY KEY NOT NULL,
     name                VARCHAR(255) NOT NULL,
-    type                CHAR(16) NOT NULL,
+    type                CHAR(16) NOT NULL COLLATE NOCASE,
     type_id             INT UNSIGNED NOT NULL);
 
 --
@@ -97,7 +97,7 @@ CREATE UNIQUE INDEX temperature_date_create_sensor_id
 --
 DROP TABLE IF EXISTS "temperaturesensor";
 CREATE TABLE "temperaturesensor"(
-    role                CHAR(16) NOT NULL,
+    role                CHAR(16) NOT NULL COLLATE NOCASE,
     session_id          INT UNSIGNED NOT NULL,
     channel             INT UNSIGNED NOT NULL,
     thermistor_id       INT UNSIGNED NOT NULL);
@@ -109,7 +109,7 @@ DROP TABLE IF EXISTS "thermistor";
 CREATE TABLE "thermistor"(
     id                  INTEGER PRIMARY KEY NOT NULL,
     name                VARCHAR(255) NOT NULL,
-    type                CHAR(3) NOT NULL,
+    type                CHAR(3) NOT NULL COLLATE NOCASE,
     Tref_C              DECIMAL(4, 4) NOT NULL,
     Rref                DECIMAL(7, 3) NOT NULL,
     beta                DECIMAL(7, 3) NOT NULL,
@@ -119,8 +119,8 @@ CREATE TABLE "thermistor"(
 
 DELETE FROM effectortype;
 INSERT INTO effectortype(id, name, type, powerconsumption) VALUES
-    (1, "FV heater 30W",    "Heater",  30.0),
-    (2, "Coolant pump 18W", "Chiller", 18.0);
+    (1, "FV heater 30W",    "heater",  30.0),
+    (2, "Coolant pump 18W", "cooler", 18.0);
 
 DELETE FROM profile;
 INSERT INTO profile(id, name, type) VALUES
