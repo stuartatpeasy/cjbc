@@ -11,8 +11,12 @@
 #include "log.h"
 #include "registry.h"
 #include "tempsensor.h"
+#include <boost/algorithm/string.hpp>
 #include <cstdlib>      // NULL
 #include <ctime>        // ::time()
+
+using boost::iequals;
+using std::string;
 
 
 #define DEFAULT_TEMP_DEADZONE               (0.5)   // Temperature "dead zone", in deg C/K, within which effectors will
@@ -32,7 +36,8 @@ Session::Session(const int id, Error * const err) noexcept
       tempSensorVessel_(TempSensor::getSessionVesselTempSensor(id, err)),
       effectorHeater_(Effector::getSessionHeater(id, err)),
       effectorCooler_(Effector::getSessionCooler(id, err)),
-      tempControlState_(HOLD)
+      tempControlState_(HOLD),
+      type_(NONE)
 {
     if(err->code())
         return;         // Stop if initialisation of any member variable failed
@@ -61,7 +66,6 @@ Session::Session(const int id, Error * const err) noexcept
     start_ts_ = session["start_ts"];
 
     SQLiteStmt gyle;
-
     if(!db.prepare("SELECT name FROM gyle WHERE id=:gyle_id", gyle, err) ||
        !gyle.bind(":gyle_id", gyle_id_, err))
         return;
@@ -74,6 +78,31 @@ Session::Session(const int id, Error * const err) noexcept
             return;
 
         gyle_ = "<unknown gyle>";
+    }
+
+    // Read profile information
+    SQLiteStmt profile;
+    if(!db.prepare("SELECT type FROM profile WHERE id=:profileId", profile, err) ||
+       !profile.bind(":profileId", profile_, err))
+        return;
+
+    if(!profile.step(err))
+    {
+        if(!err->code())
+            formatError(err, NO_SUCH_PROFILE, profile_);
+
+        return;
+    }
+
+    const string typeStr = profile["type"].asString();
+    if(iequals(typeStr, "ferment"))
+        type_ = FERMENT;
+    else if(iequals(typeStr, "condition"))
+        type_ = CONDITION;
+    else
+    {
+        formatError(err, BAD_PROFILE_TYPE, profile_, typeStr.c_str());
+        return;
     }
 
     // Read session temperature-stage information

@@ -31,6 +31,13 @@ typedef enum SessionTempControlState
     FAST_HEAT
 } SessionTempControlState_t;
 
+typedef enum SessionType
+{
+    NONE = 0,
+    FERMENT,
+    CONDITION
+} SessionType_t;
+
 
 class Session
 {
@@ -49,6 +56,7 @@ public:
     std::string                 gyleName() const noexcept { return gyle_; };
     time_t                      remainingTime() const noexcept;
     SessionTempControlState_t   tempControlState() const noexcept { return tempControlState_; };
+    SessionType_t               type() const noexcept { return type_; };
 
 private:
     bool                        updateEffectors(Error * const err = nullptr) noexcept;
@@ -67,6 +75,7 @@ private:
     DefaultEffector_uptr_t      effectorHeater_;
     DefaultEffector_uptr_t      effectorCooler_;
     SessionTempControlState_t   tempControlState_;
+    SessionType_t               type_;
 };
 
 #endif // SESSION_H_INC

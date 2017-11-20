@@ -61,8 +61,8 @@ bool SessionManager::init(Error * const err) noexcept
 }
 
 
-// getTempControlIndicator() - return a character representing a session's current temperature-control activity, e.g.
-// an up-arrow character to indicate that the session is currently heating its vessel.
+// getTempControlIndicator() - return a character representing the temperature-control activity specified by <state>,
+// e.g. an up-arrow character to indicate that the session is currently heating its vessel.
 //
 char SessionManager::getTempControlIndicator(const SessionTempControlState_t state) const noexcept
 {
@@ -73,9 +73,22 @@ char SessionManager::getTempControlIndicator(const SessionTempControlState_t sta
         case HOLD:          return LCD_CH_ARROW_RIGHT;
         case HEAT:          return LCD_CH_ARROW_UP;
         case FAST_HEAT:     return LCD_CH_ARROW_2UP;
+        default:            return '?';
     }
+}
 
-    return '?';
+
+// getSessionTypeIndicator() - return a character representing the type (fermentation or conditioning) specified by
+// <type>.
+//
+char SessionManager::getSessionTypeIndicator(const SessionType_t type) const noexcept
+{
+    switch(type)
+    {
+        case FERMENT:       return 'F';
+        case CONDITION:     return 'C';
+        default:            return '?';
+    }
 }
 
 
@@ -124,7 +137,7 @@ void SessionManager::run() noexcept
                 
                 if(session->isActive())
                 {
-                    lcd.printAt(5, 2, "F");
+                    lcd.putAt(5, 2, getSessionTypeIndicator(session->type()));
 
                     lcd.putAt(7, 2, getTempControlIndicator(session->tempControlState()));
                     if(session->vesselTempSensorInRange())
