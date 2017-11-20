@@ -125,10 +125,12 @@ void SessionManager::run() noexcept
 
             ::time(&tm);
             ::strftime(buffer, sizeof(buffer), "%H:%M", ::localtime(&tm));
-
             lcd.printAt(0, 0, buffer);
-            // FIXME - detect in-range for ambient sensor
-            lcd.printAt(16, 0, "%2d", (int) tempSensorAmbient_->sense().C());
+
+            if(tempSensorAmbient_->inRange())
+                lcd.printAt(16, 0, "%2d", (int) tempSensorAmbient_->sense().C());
+            else
+                lcd.printAt(16, 0, "--");
 
             for(auto session : sessions_)
             {
