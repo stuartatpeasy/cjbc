@@ -86,7 +86,7 @@ DROP TABLE IF EXISTS "temperature";
 CREATE TABLE "temperature"(
     date_create         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     sensor_id           INT UNSIGNED NOT NULL,
-    temperature         DECIMAL(4, 4) NOT NULL);
+    temperature         DECIMAL(4, 6) NOT NULL);
 
 DROP INDEX IF EXISTS temperature_date_create_sensor_id;
 CREATE UNIQUE INDEX temperature_date_create_sensor_id
@@ -124,10 +124,10 @@ INSERT INTO effectortype(id, name, type, powerconsumption) VALUES
 
 DELETE FROM profile;
 INSERT INTO profile(id, name, type) VALUES
-    (1, "Lager, three-stage", "Ferment"),
-    (2, "Lager",              "Condition"),
-    (3, "Ale, two-stage",     "Ferment"),
-    (4, "Ale, two-stage",     "Condition");
+    (1, "Lager, three-stage", "ferment"),
+    (2, "Lager",              "condition"),
+    (3, "Ale, two-stage",     "ferment"),
+    (4, "Ale, two-stage",     "condition");
 
 DELETE FROM profilestage;
 INSERT INTO profilestage(profile_id, stage, duration_hours, temperature) VALUES

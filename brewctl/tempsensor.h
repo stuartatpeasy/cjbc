@@ -47,9 +47,9 @@ protected:
     void                            writeTempLog();
 
     Thermistor *                    thermistor_;
+    int                             avglen_;
     int                             nsamples_;
     double                          Idrive_;
-    bool                            sampleTaken_;
     Temperature                     currentTemp_;
     Temperature                     rangeMin_;
     Temperature                     rangeMax_;

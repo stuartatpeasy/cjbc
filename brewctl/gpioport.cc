@@ -19,6 +19,8 @@ extern "C"
 const gpio_pin_id_t GPIOPort::GPIO_PIN_MAX = 29;
 
 
+// ctor - ensure that libWiringPi is initialised
+//
 GPIOPort::GPIOPort(Error * const err) noexcept
     : ready_(false)
 {

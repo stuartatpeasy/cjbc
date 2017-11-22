@@ -206,7 +206,8 @@ bool Session::updateEffectors(Error * const err) noexcept
         logDebug("Session %d: temperature is within range", id_);
         tempControlState_ = HOLD;
 
-        return effectorHeater_->activate(false, err) && effectorCooler_->activate(false, err);
+        effectorHeater_->activate(false);   // Not ideal: error code not captured
+        return effectorCooler_->activate(false, err);
     }
     else if(diff > 0.0)
     {
@@ -214,6 +215,7 @@ bool Session::updateEffectors(Error * const err) noexcept
         logDebug("Session %d: temperature is too high; cooling", id_);
         tempControlState_ = COOL;
 
+        effectorHeater_->activate(false);   // Not ideal: error code not captured
         return effectorCooler_->activate(true, err);
     }
     else if(diff < 0.0)
@@ -222,6 +224,7 @@ bool Session::updateEffectors(Error * const err) noexcept
         logDebug("Session %d: temperature is too low; heating", id_);
         tempControlState_ = HEAT;
 
+        effectorCooler_->activate(false);   // Not ideal: error code not captured
         return effectorHeater_->activate(true, err);
     }
 

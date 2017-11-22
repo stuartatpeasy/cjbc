@@ -36,3 +36,4 @@ bool DefaultEffector::activate(const bool state, Error * const err) noexcept
 
     return true;
 }
+

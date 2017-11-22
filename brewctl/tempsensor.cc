@@ -24,7 +24,8 @@ static const int
 TempSensor::TempSensor(const int thermistor_id, const int channel, Error * const err) noexcept
     : DefaultTempSensor(channel, "TempSensor"),
       thermistor_(nullptr),
-      sampleTaken_(false),
+      avglen_(0),
+      nsamples_(0),
       currentTemp_(0.0, TEMP_UNIT_CELSIUS),
       rangeMin_(0.0, TEMP_UNIT_KELVIN),
       rangeMax_(1000.0, TEMP_UNIT_KELVIN),
@@ -71,11 +72,11 @@ TempSensor::TempSensor(const int thermistor_id, const int channel, Error * const
 
     auto& config = Registry::instance().config();
 
-    nsamples_ = config.get("sensor.average_len", DEFAULT_MOVING_AVERAGE_LEN);
-    if(nsamples_ < 1)
+    avglen_ = config.get("sensor.average_len", DEFAULT_MOVING_AVERAGE_LEN);
+    if(avglen_ < 1)
     {
-        logWarning("Invalid value (%d) for sensor.average_len; using sensor.average_len=1 instead", nsamples_);
-        nsamples_ = 1;
+        logWarning("Invalid value (%d) for sensor.average_len; using sensor.average_len=1 instead", avglen_);
+        avglen_ = 1;
     }
 
     logInterval_ = config.get("sensor.log_interval_s", DEFAULT_LOG_INTERVAL_S);
@@ -116,9 +117,9 @@ void TempSensor::move(TempSensor& rhs) noexcept
 {
     channel_            = rhs.channel_;
     thermistor_         = rhs.thermistor_;
+    avglen_             = rhs.avglen_;
     nsamples_           = rhs.nsamples_;
     Idrive_             = rhs.Idrive_;
-    sampleTaken_        = rhs.sampleTaken_;
     name_               = rhs.name_;
     currentTemp_        = rhs.currentTemp_;
     rangeMin_           = rhs.rangeMin_;
@@ -128,9 +129,9 @@ void TempSensor::move(TempSensor& rhs) noexcept
 
     rhs.channel_            = -1;
     rhs.thermistor_         = nullptr;
-    rhs.nsamples_           = 0;
+    rhs.avglen_             = 0;
     rhs.Idrive_             = 0.0;
-    rhs.sampleTaken_        = false;
+    rhs.nsamples_           = 0;
     rhs.name_               = "";
     rhs.currentTemp_        = Temperature(0.0, TEMP_UNIT_KELVIN);
     rhs.rangeMin_           = Temperature(0.0, TEMP_UNIT_KELVIN);
@@ -151,26 +152,12 @@ Temperature TempSensor::sense(Error * const err) noexcept
         return Temperature();       
 
     const Temperature sample = thermistor_->T(voltage / Registry::instance().adc().isource());
+    if(nsamples_ < avglen_)
+        ++nsamples_;
 
-    // If this is the first sample, set the moving-average value to the sampled temperature in order to initialise it to
-    // an approximate value.  If this is not the first sample, use the data to adjust the moving-average value.
-    if(sampleTaken_)
-    {
-        double tempKelvin = currentTemp_.K();
+    const double tempCelsius = currentTemp_.C() + ((sample.C() - currentTemp_.C()) / nsamples_);
 
-        // At least one sample has already been taken
-        tempKelvin -= tempKelvin / nsamples_;
-        tempKelvin += sample.K() / nsamples_;
-
-        currentTemp_.set(tempKelvin, TEMP_UNIT_KELVIN);
-    }
-    else
-    {
-        // This is the first sample
-        currentTemp_ = sample;
-        sampleTaken_ = true;
-    }
-
+    currentTemp_.set(tempCelsius, TEMP_UNIT_CELSIUS);
     writeTempLog();
 
     return currentTemp_;

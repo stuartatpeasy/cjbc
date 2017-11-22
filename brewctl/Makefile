@@ -16,6 +16,7 @@ SOURCES := \
     sqlitecolumn.cc sqlitestmt.cc temperature.cc tempsensor.cc thermistor.cc
 
 CFLAGS := -O3 -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17
+LDFLAGS := -s
 
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 
