@@ -19,7 +19,7 @@ Registry * Registry::instance_ = nullptr;
 //
 Registry::Registry(Config& config, Error * const err) noexcept
     : config_(config),
-      gpio_(err),
+      gpio_(GPIOPort::instance(err)),
       spi_(gpio_, config_, err),
       sr_(gpio_, err),
       adc_(gpio_, config_, err),

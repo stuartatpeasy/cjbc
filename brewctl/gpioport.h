@@ -12,17 +12,23 @@
 #include "gpiopin.h"
 #include <cstddef>
 #include <cstdint>
+#include <vector>
 
 
 class GPIOPort
 {
 public:
-                                GPIOPort(Error * const err = nullptr) noexcept;
-    GPIOPin                     pin(const gpio_pin_id_t num) noexcept;
+    static GPIOPort&            instance(Error * const err = nullptr) noexcept;
+    GPIOPin&                    pin(const gpio_pin_id_t num) noexcept;
 
-protected:
+private:
+                                GPIOPort(Error * const err = nullptr) noexcept;
+    static GPIOPort *           instance_;
+
     static const gpio_pin_id_t  GPIO_PIN_MAX;
+    GPIOPin                     invalidPin_;
     bool                        ready_;
+    std::vector<GPIOPin *>      pins_;
 };
 
 #endif // GPIOPORT_H_INC

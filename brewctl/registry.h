@@ -40,7 +40,7 @@ private:
 
     SQLite              db_;
     Config&             config_;
-    GPIOPort            gpio_;
+    GPIOPort&           gpio_;
     SPIPort             spi_;
     ShiftReg            sr_;
     ADC                 adc_;

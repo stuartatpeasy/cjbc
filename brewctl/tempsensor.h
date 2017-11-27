@@ -16,6 +16,7 @@
 #include "thermistor.h"
 #include <ctime>
 #include <memory>
+#include <mutex>
 #include <string>
 
 
@@ -33,7 +34,7 @@ public:
     virtual TempSensor&             operator=(TempSensor&& rhs) noexcept;
 
     virtual Temperature             sense(Error * const err = nullptr) noexcept;
-    virtual bool                    inRange() const noexcept;
+    virtual bool                    inRange() noexcept;
 
     static DefaultTempSensor_uptr_t getSessionVesselTempSensor(const int sessionId, Error * const err = nullptr)
                                         noexcept;
@@ -55,6 +56,7 @@ protected:
     Temperature                     rangeMax_;
     time_t                          lastLogWriteTime_;
     int                             logInterval_;
+    std::mutex                      lock_;
 };
 
 #endif // TEMPSENSOR_H_INC

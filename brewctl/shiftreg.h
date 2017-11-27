@@ -12,6 +12,7 @@
 #include "gpioport.h"
 #include <cstddef>
 #include <cstdint>
+#include <mutex>
 
 
 class ShiftReg
@@ -38,6 +39,8 @@ protected:
 
     bool                    ready_;
     uint16_t                currentVal_;
+    std::mutex              innerLock_;
+    std::mutex              lock_;
 };
 
 #endif // SHIFTREG_H_INC

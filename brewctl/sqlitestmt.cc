@@ -11,9 +11,14 @@
 #include <cstdlib>
 #include <initializer_list>
 
+using std::lock_guard;
+using std::mutex;
 using std::string;
 using std::unique_ptr;
 using std::vector;
+
+
+mutex SQLiteStmt::lock_;
 
 
 SQLiteStmt::SQLiteStmt() noexcept
@@ -187,6 +192,7 @@ bool SQLiteStmt::step(Error * const err) noexcept
 //
 bool SQLiteStmt::reset(Error * const err) noexcept
 {
+    lock_guard<mutex> lock(lock_);
     if(checkError(::sqlite3_reset(stmt_), err))
     {
         columnNames_.clear();

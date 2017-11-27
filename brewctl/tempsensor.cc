@@ -13,12 +13,14 @@
 #include "sqlitestmt.h"
 #include <string>
 
+using std::lock_guard;
+using std::mutex;
 using std::string;
 
 
 static const int 
     DEFAULT_MOVING_AVERAGE_LEN  = 1000,     // Default length of moving average for sensor readings
-    DEFAULT_LOG_INTERVAL_S      = 10;       // Default interval between temp-sensor log writes, in seconds
+    DEFAULT_LOG_INTERVAL_S      = 60;       // Default interval between temp-sensor log writes, in seconds
 
 
 TempSensor::TempSensor(const int thermistor_id, const int channel, Error * const err) noexcept
@@ -147,6 +149,8 @@ void TempSensor::move(TempSensor& rhs) noexcept
 //
 Temperature TempSensor::sense(Error * const err) noexcept
 {
+    lock_guard<mutex> lock(lock_);
+
     const double voltage = readRaw(err);
     if(voltage < 0.0)
         return Temperature();       
@@ -167,8 +171,9 @@ Temperature TempSensor::sense(Error * const err) noexcept
 // inRange() - return bool indicating whether the current sampled temperature is within the sensing range of this
 // object's thermistor.
 //
-bool TempSensor::inRange() const noexcept
+bool TempSensor::inRange() noexcept
 {
+    lock_guard<mutex> lock(lock_);
     return (currentTemp_ >= rangeMin_) && (currentTemp_ <= rangeMax_);
 }
 

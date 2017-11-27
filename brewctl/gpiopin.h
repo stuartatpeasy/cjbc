@@ -10,6 +10,7 @@
 
 #include "error.h"
 #include <memory>
+#include <mutex>
 
 
 typedef int gpio_pin_id_t;
@@ -62,6 +63,7 @@ public:
 
 protected:
     gpio_pin_id_t               pin_;
+    std::mutex                  lock_;
 };
 
 #endif // GPIO_PIN_H_INC

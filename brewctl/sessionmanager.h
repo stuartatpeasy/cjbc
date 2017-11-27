@@ -19,23 +19,25 @@
 class SessionManager
 {
 public:
-                            SessionManager() = default;
-                            SessionManager(const SessionManager& rhs) = delete;
-                            SessionManager(SessionManager&& rhs) = delete;
-                            ~SessionManager() noexcept;
+                                        SessionManager() noexcept;
+                                        SessionManager(const SessionManager& rhs) = delete;
+                                        SessionManager(SessionManager&& rhs) = delete;
+                                        ~SessionManager() noexcept;
 
-    SessionManager&         operator=(const SessionManager& rhs) = delete;
-    SessionManager&         operator=(SessionManager&& rhs) = delete;
+    SessionManager&                     operator=(const SessionManager& rhs) = delete;
+    SessionManager&                     operator=(SessionManager&& rhs) = delete;
 
-    bool                    init(Error * const err = nullptr) noexcept;
-    void                    run() noexcept;
+    bool                                init(Error * const err = nullptr) noexcept;
+    void                                run() noexcept;
 
 private:
-    char                    getTempControlIndicator(const SessionTempControlState_t state) const noexcept;
-    char                    getSessionTypeIndicator(const SessionType_t type) const noexcept;
+    char                                getTempControlIndicator(const SessionTempControlState_t state) const noexcept;
+    char                                getSessionTypeIndicator(const SessionType_t type) const noexcept;
 
-    std::vector<Session *>  sessions_;
-    std::unique_ptr<DefaultTempSensor>       tempSensorAmbient_;
+    std::vector<Session *>              sessions_;
+    std::unique_ptr<DefaultTempSensor>  tempSensorAmbient_;
+    time_t                              lastDisplayUpdate_;
+    time_t                              displayUpdateInterval_;
 };
 
 #endif // SESSIONMANAGER_H_INC

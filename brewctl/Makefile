@@ -15,8 +15,8 @@ SOURCES := \
     gpiopin.cc gpioport.cc lcd.cc log.cc main.cc registry.cc session.cc sessionmanager.cc shiftreg.cc spiport.cc       \
     sqlite.cc sqlitecolumn.cc sqlitestmt.cc temperature.cc tempsensor.cc thermistor.cc
 
-CFLAGS := -g -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17
-LDFLAGS :=
+CFLAGS := -g -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17 -pthread
+LDFLAGS := -pthread
 
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 
@@ -25,7 +25,7 @@ OBJDIR := .obj
 
 OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.cc,%.o,$(SOURCES)))
 
-LIBS := -lwiringPi -lsqlite3 -lm -lpthread -lavahi-common -lavahi-client
+LIBS := -lwiringPi -lsqlite3 -lm -lavahi-common -lavahi-client
 
 $(OBJDIR)/%.o : %.cc $(DEPDIR)/%.d
 	mkdir -p $(dir $@)

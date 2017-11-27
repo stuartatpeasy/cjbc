@@ -13,6 +13,9 @@ extern "C"
 #include <wiringPi.h>
 }
 
+using std::lock_guard;
+using std::mutex;
+
 
 const gpio_pin_id_t GPIOPin::invalid_pin = -1;
 
@@ -30,7 +33,12 @@ GPIOPin::GPIOPin(const gpio_pin_id_t pin) noexcept
 //
 bool GPIOPin::read() noexcept
 {
-    return (pin_ != invalid_pin) ? (::digitalRead(pin_) == HIGH) : false;
+    if(pin_ == invalid_pin)
+        return false;
+
+    lock_guard<mutex> lock(lock_);
+
+    return ::digitalRead(pin_) == HIGH;
 }
 
 
@@ -40,7 +48,10 @@ bool GPIOPin::read() noexcept
 void GPIOPin::write(const bool val) noexcept
 {
     if(pin_ != invalid_pin)
+    {
+        lock_guard<mutex> lock(lock_);
         ::digitalWrite(pin_, val ? HIGH : LOW);
+    }
 }
 
 
@@ -50,6 +61,8 @@ bool GPIOPin::setMode(const GPIOPinMode_t mode, Error * const err) noexcept
 {
     if(pin_ != invalid_pin)
     {
+        lock_guard<mutex> lock(lock_);
+
         switch(mode)
         {
             case PIN_INPUT:             ::pinMode(pin_, INPUT);              break;
@@ -80,6 +93,8 @@ bool GPIOPin::setPullupMode(const GPIOPinPullupMode_t mode, Error * const err) n
 {
     if(pin_ != invalid_pin)
     {
+        lock_guard<mutex> lock(lock_);
+
         switch(mode)
         {
             case PPM_UP:                ::pullUpDnControl(pin_, PUD_UP);     break;

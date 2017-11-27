@@ -29,6 +29,7 @@ static map<ErrorCode_t, string> errorMessages =
     {NO_SUCH_SESSION,                   "Session %d does not exist"},
     {NO_SUCH_PROFILE,                   "Profile %d does not exist"},
     {BAD_PROFILE_TYPE,                  "Profile %d has invalid type '%s'"},
+    {SIGHANDLER_INSTALL_FAILED,         "Failed to install %s signal handler: %s (%d)"},
     {DB_OPEN_FAILED,                    "Failed to create or open database file '%s': %s (%d)"},
     {DB_TOO_FEW_COLUMNS,                "Query returned too few columns"},
     {DB_SQLITE_ERROR,                   "SQLite error: %s (%d)"},

@@ -17,6 +17,8 @@
 
 class Application
 {
+friend void appSignalHandler(int signum) noexcept;
+
     // Exit codes
     typedef enum
     {
@@ -34,6 +36,8 @@ public:
 
 private:
     bool                        parseArgs(int argc, char **argv, Error * const err) noexcept;
+    bool                        installQuitHandler(Error * const err) noexcept;
+    void                        signalHandler(int signum) noexcept;
     void                        avahiThread() noexcept;
 
     Config                      config_;

@@ -14,6 +14,9 @@ extern "C"
 #include <unistd.h>     // usleep()
 }
 
+using std::lock_guard;
+using std::mutex;
+
 /*
     Shift register bit assignments
 
@@ -57,7 +60,7 @@ ShiftReg::ShiftReg(GPIOPort& gpio, Error * const err) noexcept
     : ready_(false)
 {
     // Force the register-clock signal to be an output, and de-assert it
-    auto RClk = gpio.pin(GPIO_SR_RCLK);
+    auto& RClk = gpio.pin(GPIO_SR_RCLK);
 
     RClk.write(0);
     if(!RClk.setMode(PIN_OUTPUT, err))
@@ -90,7 +93,7 @@ bool ShiftReg::init(Error * const err) noexcept
 //
 void ShiftReg::strobeRegClk() noexcept
 {
-    auto RClk = Registry::instance().gpio().pin(GPIO_SR_RCLK);
+    auto& RClk = Registry::instance().gpio().pin(GPIO_SR_RCLK);
 
     RClk.write(true);
     ::usleep(SR_CLOCK_MIN_US);
@@ -110,6 +113,8 @@ bool ShiftReg::write(const uint16_t val, Error * const err) noexcept
         formatError(err, GPIO_NOT_READY);
         return false;
     }
+
+    lock_guard<mutex> lock(innerLock_);
 
     // Force the register clock low
     r.gpio().pin(GPIO_SR_RCLK).write(false);
@@ -131,6 +136,8 @@ bool ShiftReg::write(const uint16_t val, Error * const err) noexcept
 //
 uint16_t ShiftReg::operator|=(const uint16_t rhs) noexcept
 {
+    lock_guard<mutex> lock(lock_);
+
     write(currentVal_ | rhs);
 
     // If write() succeeds, currentVal_ will equal the new value (ie. or'ed with rhs), which is the correct return value
@@ -145,6 +152,8 @@ uint16_t ShiftReg::operator|=(const uint16_t rhs) noexcept
 //
 uint16_t ShiftReg::operator&=(const uint16_t rhs) noexcept
 {
+    lock_guard<mutex> lock(lock_);
+
     write(currentVal_ & rhs);
 
     // If write() succeeds, currentVal_ will equal the new value (ie. or'ed with rhs), which is the correct return value
@@ -159,6 +168,8 @@ uint16_t ShiftReg::operator&=(const uint16_t rhs) noexcept
 //
 uint16_t ShiftReg::operator^=(const uint16_t rhs) noexcept
 {
+    lock_guard<mutex> lock(lock_);
+
     write(currentVal_ ^ rhs);
 
     // If write() succeeds, currentVal_ will equal the new value (ie. or'ed with rhs), which is the correct return value
@@ -178,6 +189,8 @@ bool ShiftReg::set(const unsigned int bit, Error * const err) noexcept
         return false;
     }
 
+    lock_guard<mutex> lock(lock_);
+
     return write(currentVal_ | (1 << bit), err);
 }
 
@@ -192,6 +205,8 @@ bool ShiftReg::clear(const unsigned int bit, Error * const err) noexcept
         formatError(err, GPIO_INVALID_PIN);
         return false;
     }
+
+    lock_guard<mutex> lock(lock_);
 
     return write(currentVal_ & ~(1 << bit), err);
 }
@@ -208,6 +223,8 @@ bool ShiftReg::toggle(const unsigned int bit, Error * const err) noexcept
         return false;
     }
 
+    lock_guard<mutex> lock(lock_);
+
     return write(currentVal_ ^ (1 << bit), err);
 }
 
@@ -221,6 +238,8 @@ bool ShiftReg::isSet(const unsigned int bit, Error * const err) noexcept
         formatError(err, GPIO_INVALID_PIN);
         return false;           // Consider out-of-range bits to be cleared
     }
+
+    lock_guard<mutex> lock(lock_);
 
     return currentVal_ & (1 << bit);
 }

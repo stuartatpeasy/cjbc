@@ -14,6 +14,8 @@
 #include <cstdarg>
 #include <initializer_list>
 
+using std::lock_guard;
+using std::mutex;
 using std::string;
 
 extern "C"
@@ -191,7 +193,7 @@ LCD::LCD(GPIOPort& gpio, Error * const err) noexcept
     for(auto pin_id : {GPIO_LCD_RS, GPIO_LCD_E, GPIO_LCD_D0, GPIO_LCD_D1, GPIO_LCD_D2, GPIO_LCD_D3, GPIO_LCD_D4,
                        GPIO_LCD_D5, GPIO_LCD_D6, GPIO_LCD_D7})
     {
-        auto pin = gpio.pin(pin_id);
+        auto& pin = gpio.pin(pin_id);
 
         pin.write(false);
         if(!pin.setMode(PIN_OUTPUT, err))

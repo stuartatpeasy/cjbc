@@ -11,6 +11,8 @@
 #include <cstdlib>
 #include <memory>
 
+using std::lock_guard;
+using std::mutex;
 using std::string;
 
 
@@ -79,6 +81,8 @@ bool SQLite::prepare(const string& sql, SQLiteStmt& stmt, Error * const err) noe
 
     if(isOpen())
     {
+        lock_guard<mutex> lock(lock_);
+
         stmt.finalise();        // in case stmt represents an active statement
         ret = ::sqlite3_prepare_v2(db_, sql.c_str(), -1, stmt, NULL);
 

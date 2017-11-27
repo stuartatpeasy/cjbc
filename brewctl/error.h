@@ -22,6 +22,7 @@ typedef enum
     NO_SUCH_SESSION                 = 0x0006,
     NO_SUCH_PROFILE                 = 0x0007,
     BAD_PROFILE_TYPE                = 0x0008,
+    SIGHANDLER_INSTALL_FAILED       = 0x0009,
     DB_OPEN_FAILED                  = 0x1100,
     DB_TOO_FEW_COLUMNS              = 0x1101,
     DB_SQLITE_ERROR                 = 0x1102,

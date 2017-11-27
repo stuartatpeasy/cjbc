@@ -188,6 +188,7 @@ bool Session::updateEffectors(Error * const err) noexcept
     }
 
     Temperature t = tempSensorVessel_->sense(err);
+
     if(!t || !tempSensorVessel_->inRange())
     {
         // Failed to sense temperature, or no sensor attached, or sensed temperature is out of the probe's range.
@@ -278,13 +279,18 @@ time_t Session::remainingTime() const noexcept
 //
 void Session::main() noexcept
 {
-    const time_t now = ::time(NULL);
-    currentTemp();      // Always sense the current temperature: oversampling maintains the moving average
-
-    if((now - lastEffectorUpdate_) >= effectorUpdateInterval_)
+    while(1)
     {
-        updateEffectors();
-        lastEffectorUpdate_ = now;
+        const time_t now = ::time(NULL);
+        currentTemp();      // Always sense the current temperature: oversampling maintains the moving average
+
+        if((now - lastEffectorUpdate_) >= effectorUpdateInterval_)
+        {
+            updateEffectors();
+            lastEffectorUpdate_ = now;
+        }
+        
+        ::usleep(10 * 1000);
     }
 }
 

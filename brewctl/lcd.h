@@ -10,6 +10,7 @@
 
 #include "gpioport.h"
 #include <string>
+#include <thread>
 
 
 //
@@ -42,6 +43,7 @@ protected:
     void            writeCommand(uint8_t cmd) noexcept;
     void            writeData(uint8_t cmd) noexcept;
     void            toggleEClock() noexcept;
+    std::mutex      lock_;
 };
 
 #endif // LCD_H_INC

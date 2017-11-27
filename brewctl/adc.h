@@ -10,6 +10,7 @@
 
 #include "config.h"
 #include "gpioport.h"
+#include <mutex>
 
 
 typedef unsigned int ADCChannel_t;
@@ -27,6 +28,7 @@ protected:
     double          vref_;
     double          isource_;
     bool            ready_;
+    std::mutex      lock_;
 };
 
 #endif // ADC_H_INC

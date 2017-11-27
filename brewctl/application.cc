@@ -10,31 +10,44 @@
 #include "avahiservice.h"
 #include "log.h"
 #include "registry.h"
+#include <cerrno>
 #include <cstdarg>
 #include <cstdlib>
 #include <cstdio>
+#include <cstring>
 #include <fstream>
 #include <queue>
 #include <thread>
+
+extern "C"
+{
+#include <signal.h>         // ::sigaction()
+#include <strings.h>        // ::bzero()
+}
 
 using std::ifstream;
 using std::queue;
 using std::string;
 using std::thread;
 
+void appSignalHandler(int signum) noexcept;
+static Application *gApp;
+
 
 // Default values for configuration keys
 static ConfigData_t defaultConfig =
 {
     {"adc.ref_voltage",                     "5.012"},
-    {"adc.isource_ua",                      "146"},             // ADC current-source current in microamps
-    {"database",                            "brewery.db"},      // FIXME - should be under /var/lib/brewctl
+    {"adc.isource_ua",                      "146"},                     // ADC current-source current in microamps
+    {"application.pid_file",                "/var/run/brewctl.pid"},
+    {"application.user",                    "brewctl"},
+    {"database",                            "brewery.db"},              // FIXME - should be under /var/lib/brewctl
     {"log.method",                          "syslog"},
     {"log.level",                           "debug"},
-    {"sensor.average_len",                  "1000"},            // Length of moving-average for sensor readings
-    {"sensor.log_interval_s",               "10"},              // Interval between sensor readings
-    {"session.dead_zone",                   "0.5C"},            // "Dead zone" for session temperature control
-    {"session.effector_update_interval_s",  "10"},
+    {"sensor.average_len",                  "1000"},                    // Length of moving-average for sensor readings
+    {"sensor.log_interval_s",               "10"},                      // Interval between sensor readings
+    {"session.dead_zone",                   "0.5C"},                    // "Dead zone" for session temperature control
+    {"session.effector_update_interval_s",  "60"},
     {"spi.dev",                             "/dev/spidev0.0"},
     {"spi.mode",                            "0"},
     {"spi.max_clock",                       "500000"},
@@ -43,7 +56,14 @@ static ConfigData_t defaultConfig =
 
 Application::Application(int argc, char **argv, Error * const err) noexcept
 {
+    gApp = this;
     appName_ = argc ? argv[0] : "<NoAppName>";
+
+    // Check that we're running as root
+
+    // Create pidfile
+
+    // Drop permissions
 
     config_.add(defaultConfig);             // add default values to config
     config_.add("/etc/brewctl.conf");       // default config file location
@@ -55,9 +75,41 @@ Application::Application(int argc, char **argv, Error * const err) noexcept
     logInit(config_("log.method"));
     logSetLevel(config_("log.level"));
 
+    // Register SIGQUIT handler
+    if(!installQuitHandler(err))
+        return;
+
     if(!Registry::init(config_, err) ||             // Initialise registry
        !sessionManager_.init(err))                  // Initialise session manager
         return;
+}
+
+
+// installQuitHandler() - install a handler for the SIGQUIT signal.
+//
+bool Application::installQuitHandler(Error * const err) noexcept
+{
+    struct sigaction sa;
+
+    ::bzero(&sa, sizeof(sa));
+    sa.sa_handler = appSignalHandler;
+
+    if(::sigaction(SIGQUIT, &sa, NULL))
+    {
+        formatError(err, SIGHANDLER_INSTALL_FAILED, "SIGQUIT", ::strerror(errno), errno);
+        return false;
+    }
+
+    logDebug("Installed handler for SIGQUIT");
+    return true;
+}
+
+
+// signalHandler() - receives and dispatches signal notifications
+//
+void Application::signalHandler(int signum) noexcept
+{
+    logDebug("Received signal %d", signum);
 }
 
 
@@ -125,3 +177,12 @@ bool Application::run() noexcept
 
     return true;
 }
+
+
+// appSignalHandler() - global signal-handler function which forwards signals to the running Application object.
+//
+void appSignalHandler(int signum) noexcept
+{
+    gApp->signalHandler(signum);
+}
+

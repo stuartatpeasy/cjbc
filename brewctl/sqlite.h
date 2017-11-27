@@ -10,6 +10,7 @@
 
 #include "error.h"
 #include "sqlitestmt.h"
+#include <mutex>
 #include <string>
 
 
@@ -36,6 +37,7 @@ private:
     void            formatError(Error * const err, const int code) noexcept;
     sqlite3 *       db_;
     std::string     path_;
+    std::mutex      lock_;
 };
 
 #endif // SQLITE_H_INC

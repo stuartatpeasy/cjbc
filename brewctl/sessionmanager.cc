@@ -13,21 +13,37 @@
 #include "tempsensor.h"
 #include <cstdlib>          // ::rand(), NULL
 #include <ctime>            // ::strftime(), ::localtime(), ::time()
+#include <thread>
 
 extern "C"
 {
 #include <unistd.h>         // ::usleep()
 }
 
+using std::thread;
+
 
 // Time-interval constants
-static const time_t hoursPerDay     = 24,
-                    minsPerHour     = 60,
-                    secsPerMinute   = 60,
-                    secsPerHour     = minsPerHour * secsPerMinute,
-                    secsPerDay      = hoursPerDay * secsPerHour;
+static const time_t 
+    HOURS_PER_DAY                   = 24,
+    MINS_PER_HOUR                   = 60,
+    SECS_PER_MINUTE                 = 60,
+    SECS_PER_HOUR                   = MINS_PER_HOUR * SECS_PER_MINUTE,
+    SECS_PER_DAY                    = HOURS_PER_DAY * SECS_PER_HOUR,
+    DEFAULT_DISPLAY_UPDATE_INTERVAL = 1;
 
 
+// ctor - trivial initialisation of members
+//
+SessionManager::SessionManager() noexcept
+    : lastDisplayUpdate_(0),
+      displayUpdateInterval_(DEFAULT_DISPLAY_UPDATE_INTERVAL)
+{
+}
+
+
+// dtor - free sessions
+//
 SessionManager::~SessionManager() noexcept
 {
     for(auto it : sessions_)
@@ -59,6 +75,7 @@ bool SessionManager::init(Error * const err) noexcept
             return false;
 
         sessions_.push_back(s);
+        thread(&Session::main, s).detach();
     }
 
     return true;
@@ -109,22 +126,19 @@ void SessionManager::run() noexcept
         lcd.printAt(0, i, "F%d", i + 1);
     }
 
-    lcd.printAt(14, 2, "10d18h");
     lcd.printAt(18, 0, "\xdf""C");
 
-    for(int i = 0;; ++i)
+    while(1)
     {
+        const time_t now = ::time(NULL);
         tempSensorAmbient_->sense();
 
-        for(auto session : sessions_)
-            session->main();
-
-        Temperature t = sessions_[0]->currentTemp();
-
-        if(!(i % 100))
+        if((now - lastDisplayUpdate_) > displayUpdateInterval_)
         {
             char buffer[16];
             time_t tm;
+
+            lastDisplayUpdate_ = now;
 
             ::time(&tm);
             ::strftime(buffer, sizeof(buffer), "%H:%M", ::localtime(&tm));
@@ -146,14 +160,14 @@ void SessionManager::run() noexcept
 
                     lcd.putAt(7, 2, getTempControlIndicator(session->tempControlState()));
                     if(session->vesselTempSensorInRange())
-                        lcd.printAt(8, 2, "%4.1lf\xdf", t.C() + 0.05);
+                        lcd.printAt(8, 2, "%4.1lf\xdf", session->currentTemp().C() + 0.05);
                     else
                         lcd.printAt(8, 2, "--.-\xdf");
 
                     const time_t secsRemaining  = session->remainingTime(),
-                                 days           = secsRemaining / secsPerDay,
-                                 hours          = secsRemaining / secsPerHour,
-                                 minutes        = secsRemaining / secsPerMinute;
+                                 days           = secsRemaining / SECS_PER_DAY,
+                                 hours          = secsRemaining / SECS_PER_HOUR,
+                                 minutes        = secsRemaining / SECS_PER_MINUTE;
 
                     time_t field1, field2;
                     const char *fmt;
@@ -162,19 +176,19 @@ void SessionManager::run() noexcept
                     {
                         fmt = "%2dd%02dh";
                         field1 = days;
-                        field2 = hours % hoursPerDay;
+                        field2 = hours % HOURS_PER_DAY;
                     }
                     else if(hours)
                     {
                         fmt = "%2dh%02dm";
                         field1 = hours;
-                        field2 = minutes % minsPerHour;
+                        field2 = minutes % MINS_PER_HOUR;
                     }
                     else
                     {
                         fmt = "%2dm%02ds";
                         field1 = minutes;
-                        field2 = secsRemaining % secsPerMinute;
+                        field2 = secsRemaining % SECS_PER_MINUTE;
                     }
 
                     lcd.printAt(14, 2, fmt, field1, field2);

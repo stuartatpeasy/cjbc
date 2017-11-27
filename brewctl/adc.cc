@@ -9,6 +9,9 @@
 #include "adc.h"
 #include "registry.h"
 
+using std::lock_guard;
+using std::mutex;
+
 
 static const ADCChannel_t ADC_MAX_CHANNEL   = 7;        // This ADC has channels numbered 0-7
 static const unsigned int ADC_BITS          = 10;       // This ADC has 10-bit resolution
@@ -41,7 +44,7 @@ ADC::ADC(GPIOPort& gpio, Config& config, Error * const err) noexcept
     isource_ = config.get("adc.isource_ua", ADC_DEFAULT_ISOURCE_UA) / 1000000.0;    // isource_ is in amps
 
     // Set ADC_nCS as an output, and de-assert it
-    auto nCS = gpio.pin(GPIO_ADC_nCS);
+    auto& nCS = gpio.pin(GPIO_ADC_nCS);
 
     nCS.write(true);
     if(!nCS.setMode(PIN_OUTPUT, err))
@@ -59,7 +62,7 @@ double ADC::read(const ADCChannel_t channel, Error * const err) noexcept
     Registry& r = Registry::instance();
     uint8_t tx_data[ADC_PACKET_LEN], rx_data[ADC_PACKET_LEN];
     unsigned short val;
-    auto nCS = r.gpio().pin(GPIO_ADC_nCS);
+    auto& nCS = r.gpio().pin(GPIO_ADC_nCS);
 
     if(!ready_)
     {
@@ -72,6 +75,8 @@ double ADC::read(const ADCChannel_t channel, Error * const err) noexcept
         formatError(err, ADC_INVALID_CHANNEL);
         return -1.0;
     }
+
+    lock_guard<mutex> lock(lock_);
 
     nCS.write(false);   // Assert the ADC's nCS line
 

@@ -11,6 +11,7 @@
 */
 
 #include "error.h"
+#include "log.h"
 #include "temperature.h"
 #include <memory>
 #include <string>
@@ -30,7 +31,7 @@ public:
     virtual DefaultTempSensor&  operator=(DefaultTempSensor&& rhs) noexcept;
 
     virtual Temperature         sense(Error * const err = nullptr) noexcept;
-    virtual bool                inRange() const noexcept { return false; };
+    virtual bool                inRange() noexcept { return false; };
     virtual std::string         name() const noexcept { return name_; };
     int                         channel() const noexcept { return channel_; };
 
