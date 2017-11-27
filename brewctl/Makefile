@@ -11,12 +11,12 @@ endif
 APPNAME := brewctl
 
 SOURCES := \
-    adc.cc application.cc config.cc defaulteffector.cc defaulttempsensor.cc effector.cc error.cc gpiopin.cc            \
-    gpioport.cc lcd.cc log.cc main.cc registry.cc session.cc sessionmanager.cc shiftreg.cc spiport.cc sqlite.cc        \
-    sqlitecolumn.cc sqlitestmt.cc temperature.cc tempsensor.cc thermistor.cc
+    adc.cc application.cc avahiservice.cc config.cc defaulteffector.cc defaulttempsensor.cc effector.cc error.cc       \
+    gpiopin.cc gpioport.cc lcd.cc log.cc main.cc registry.cc session.cc sessionmanager.cc shiftreg.cc spiport.cc       \
+    sqlite.cc sqlitecolumn.cc sqlitestmt.cc temperature.cc tempsensor.cc thermistor.cc
 
-CFLAGS := -O3 -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17
-LDFLAGS := -s
+CFLAGS := -g -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17
+LDFLAGS :=
 
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d
 
@@ -25,7 +25,7 @@ OBJDIR := .obj
 
 OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.cc,%.o,$(SOURCES)))
 
-LIBS := -lwiringPi -lsqlite3 -lm
+LIBS := -lwiringPi -lsqlite3 -lm -lpthread -lavahi-common -lavahi-client
 
 $(OBJDIR)/%.o : %.cc $(DEPDIR)/%.d
 	mkdir -p $(dir $@)

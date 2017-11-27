@@ -188,12 +188,13 @@ bool Session::updateEffectors(Error * const err) noexcept
     }
 
     Temperature t = tempSensorVessel_->sense(err);
-    if(!t)
+    if(!t || !tempSensorVessel_->inRange())
     {
-        // Failed to sense temperature, or no sensor attached.  Deactivate effectors and return failure.
+        // Failed to sense temperature, or no sensor attached, or sensed temperature is out of the probe's range.
+        // Deactivate effectors and return failure.
         effectorHeater_->activate(false);
         effectorCooler_->activate(false);
-        tempControlState_ = HOLD;
+        tempControlState_ = UNKNOWN;
 
         return false;
     }

@@ -7,6 +7,7 @@
 */
 
 #include "application.h"
+#include "avahiservice.h"
 #include "log.h"
 #include "registry.h"
 #include <cstdarg>
@@ -14,17 +15,19 @@
 #include <cstdio>
 #include <fstream>
 #include <queue>
+#include <thread>
 
 using std::ifstream;
-using std::string;
 using std::queue;
+using std::string;
+using std::thread;
 
 
 // Default values for configuration keys
 static ConfigData_t defaultConfig =
 {
-    {"adc.ref_voltage",                     "5.0"},
-    {"adc.isource_ua",                      "147"},             // ADC current-source current in microamps
+    {"adc.ref_voltage",                     "5.012"},
+    {"adc.isource_ua",                      "146"},             // ADC current-source current in microamps
     {"database",                            "brewery.db"},      // FIXME - should be under /var/lib/brewctl
     {"log.method",                          "syslog"},
     {"log.level",                           "debug"},
@@ -102,10 +105,22 @@ bool Application::parseArgs(int argc, char **argv, Error * const err) noexcept
 }
 
 
+// avahiThread() - main function for the "Avahi thread", which manages interactions with the Avahi service.
+//
+void Application::avahiThread() noexcept
+{
+    AvahiService avahiService("brewctl");
+
+    avahiService.run();
+}
+
+
 // run() - start application
 //
 bool Application::run() noexcept
 {
+    thread mdns_thread(&Application::avahiThread, this);
+
     sessionManager_.run();
 
     return true;

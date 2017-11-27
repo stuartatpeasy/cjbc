@@ -1,8 +1,20 @@
-ntp                 # not needed for build; needed to ensure sysclock accuracy
-gcc-c++
-make
+# Runtime packages
+avahi-daemon
+libavahi-client3
+libboost1.62
+libsnmp-base
+libsqlite3-0
+ntp
 wiringpi
-sqlite3
+
+# Build packages (all runtime packages are also needed)
+gcc-c++
 libsqlite3-dev
 libboost1.62-dev    # earlier versions are probably OK
+libavahi-common-dev
+libavahi-client-dev
+libdbus-1-dev
+make
+sqlite3
+wiringpi
 

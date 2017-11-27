@@ -24,6 +24,7 @@ typedef std::vector<SessionStage_t> SessionStages_t;
 
 typedef enum SessionTempControlState
 {
+    UNKNOWN,
     FAST_COOL,
     COOL,
     HOLD,
