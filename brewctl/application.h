@@ -8,6 +8,7 @@
     Part of brewctl
 */
 
+#include "avahiservice.h"
 #include "config.h"
 #include "error.h"
 #include "sessionmanager.h"
@@ -38,12 +39,10 @@ private:
     bool                        parseArgs(int argc, char **argv, Error * const err) noexcept;
     bool                        installQuitHandler(Error * const err) noexcept;
     void                        signalHandler(int signum) noexcept;
-    void                        avahiThread() noexcept;
 
     Config                      config_;
     std::string                 appName_;
-//    std::vector<std::string>    configLocations_;
-
+    AvahiService *              avahiService_;
     SessionManager              sessionManager_;
 };
 

@@ -121,11 +121,6 @@ void SessionManager::run() noexcept
 
     lcd.backlight(true);
 
-    for(int i = 2; i < 4; ++i)
-    {
-        lcd.printAt(0, i, "F%d", i + 1);
-    }
-
     lcd.printAt(18, 0, "\xdf""C");
 
     while(1)

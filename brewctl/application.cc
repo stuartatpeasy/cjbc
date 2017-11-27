@@ -7,7 +7,6 @@
 */
 
 #include "application.h"
-#include "avahiservice.h"
 #include "log.h"
 #include "registry.h"
 #include <cerrno>
@@ -16,6 +15,7 @@
 #include <cstdio>
 #include <cstring>
 #include <fstream>
+#include <memory>
 #include <queue>
 #include <thread>
 
@@ -33,6 +33,7 @@ using std::thread;
 void appSignalHandler(int signum) noexcept;
 static Application *gApp;
 
+const char * const DEFAULT_AVAHI_SERVICE_NAME = "brewctl";
 
 // Default values for configuration keys
 static ConfigData_t defaultConfig =
@@ -51,10 +52,12 @@ static ConfigData_t defaultConfig =
     {"spi.dev",                             "/dev/spidev0.0"},
     {"spi.mode",                            "0"},
     {"spi.max_clock",                       "500000"},
+    {"system.avahi_service_name",           "brewctl"},
 };
 
 
 Application::Application(int argc, char **argv, Error * const err) noexcept
+    : avahiService_(nullptr)
 {
     gApp = this;
     appName_ = argc ? argv[0] : "<NoAppName>";
@@ -82,6 +85,8 @@ Application::Application(int argc, char **argv, Error * const err) noexcept
     if(!Registry::init(config_, err) ||             // Initialise registry
        !sessionManager_.init(err))                  // Initialise session manager
         return;
+
+    avahiService_ = new AvahiService(config_.get("system.avahi_service_name", DEFAULT_AVAHI_SERVICE_NAME));
 }
 
 
@@ -157,21 +162,11 @@ bool Application::parseArgs(int argc, char **argv, Error * const err) noexcept
 }
 
 
-// avahiThread() - main function for the "Avahi thread", which manages interactions with the Avahi service.
-//
-void Application::avahiThread() noexcept
-{
-    AvahiService avahiService("brewctl");
-
-    avahiService.run();
-}
-
-
 // run() - start application
 //
 bool Application::run() noexcept
 {
-    thread mdns_thread(&Application::avahiThread, this);
+    thread(&AvahiService::run, avahiService_).detach();
 
     sessionManager_.run();
 
