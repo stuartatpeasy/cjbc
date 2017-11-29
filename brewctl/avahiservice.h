@@ -31,22 +31,23 @@ friend void avahiClientCallback(AvahiClient *client, AvahiClientState state, voi
 friend void avahiEntryGroupCallback(AvahiEntryGroup *group, AvahiEntryGroupState state, void *userdata) noexcept;
 
 public:
-                        AvahiService(const std::string& name, Error * const err = nullptr) noexcept;
-    virtual             ~AvahiService();
+                            AvahiService(const std::string& name, const unsigned short port,
+                                         Error * const err = nullptr) noexcept;
+    virtual                 ~AvahiService();
 
-    void                run() noexcept;
+    void                    run() noexcept;
 
 private:
-    void                clientCallback(AvahiClient *client, AvahiClientState state) noexcept;
-    void                entryGroupCallback(AvahiEntryGroup *group, AvahiEntryGroupState state) noexcept;
-    void                createService(AvahiClient *client) noexcept;
+    void                    clientCallback(AvahiClient *client, AvahiClientState state) noexcept;
+    void                    entryGroupCallback(AvahiEntryGroup *group, AvahiEntryGroupState state) noexcept;
+    void                    createService(AvahiClient *client) noexcept;
 
-    std::string         name_;
-    AvahiEntryGroup *   group_;
-    AvahiSimplePoll *   simplePoll_;
-    AvahiClient *       client_;
-    char *              cname_;
-    unsigned short      port_;
+    std::string             name_;
+    AvahiEntryGroup *       group_;
+    AvahiSimplePoll *       simplePoll_;
+    AvahiClient *           client_;
+    char *                  cname_;
+    const unsigned short    port_;
 };
 
 

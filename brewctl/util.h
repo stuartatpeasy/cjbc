@@ -15,6 +15,14 @@
 
 namespace Util
 {
+namespace Net
+{
+    std::vector<std::string>    getInterfaceNames() noexcept;
+    uint64_t                    getInterfaceHardwareAddress(const std::string& interface) noexcept;
+    uint64_t                    getRandomHardwareAddress() noexcept;
+
+} // namespace Net
+
 namespace Random
 {
 
@@ -24,13 +32,11 @@ namespace Random
 
 } // namespace Random
 
-namespace Net
+namespace Thread
 {
-    std::vector<std::string>    getInterfaceNames() noexcept;
-    uint64_t                    getInterfaceHardwareAddress(const std::string& interface) noexcept;
-    uint64_t                    getRandomHardwareAddress() noexcept;
+    bool                        setName(const std::string& name) noexcept;
+} // namespace Thread
 
-} // namespace Net
 } // namespace Util
 
 

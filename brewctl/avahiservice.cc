@@ -8,6 +8,8 @@
 
 #include "avahiservice.h"
 #include "log.h"
+#include "registry.h"
+#include "util.h"
 #include <cstdio>
 #include <cstdlib>
 
@@ -19,7 +21,6 @@ extern "C"
 using std::string;
 
 
-const unsigned short    AVAHI_SERVICE_DEFAULT_PORT  = 1900;     // Default port on which to announce our service
 const int               AVAHI_POLL_INTERVAL_MS      = 250;      // Interval between calls to avahi_simple_poll_iterate()
 
 
@@ -29,8 +30,8 @@ void avahiEntryGroupCallback(AvahiEntryGroup *group, AvahiEntryGroupState state,
 
 // ctor - allocate a service name; create a new Avahi client
 //
-AvahiService::AvahiService(const std::string& name, Error * const err) noexcept
-    : name_(name), group_(NULL), simplePoll_(NULL), client_(NULL), cname_(nullptr), port_(AVAHI_SERVICE_DEFAULT_PORT)
+AvahiService::AvahiService(const std::string& name, const unsigned short port, Error * const err) noexcept
+    : name_(name), group_(NULL), simplePoll_(NULL), client_(NULL), cname_(nullptr), port_(port)
 {
     int error;
 
@@ -77,6 +78,8 @@ AvahiService::~AvahiService()
 //
 void AvahiService::run() noexcept
 {
+    Util::Thread::setName(Registry::instance().config()("application.short_name") + ": avahi");
+
     if(simplePoll_ != NULL)
     {
         int ret = 0;

@@ -16,6 +16,7 @@ extern "C"
 {
 #include <netdb.h>
 #include <net/if.h>
+#include <pthread.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -30,43 +31,6 @@ using std::vector;
 
 namespace Util
 {
-namespace Random
-{
-
-static unsigned int seedVal_ = 0;
-
-
-// seed() - seed the random-number generator with the specified <seedVal>.
-//
-void seed(unsigned int seedVal) noexcept
-{
-    seedVal_ = seedVal;
-}
-
-
-// seed() - seed the random-number generator with the current time from the high-resolution clock
-//
-void seed() noexcept
-{
-    seed(high_resolution_clock::now().time_since_epoch().count());
-}
-
-
-// randomUnsignedInt() - return a random unsigned integer.
-//
-unsigned int randomUnsignedInt() noexcept
-{
-    std::minstd_rand0 generator(seedVal_);
-    unsigned int ret = generator();
-
-    seedVal_ = ret;
-
-    return ret;
-}
-
-
-} // namespace Random
-
 namespace Net
 {
 
@@ -129,5 +93,54 @@ uint64_t getRandomHardwareAddress() noexcept
 }
 
 } // namespace Net
+
+namespace Random
+{
+
+static unsigned int seedVal_ = 0;
+
+
+// seed() - seed the random-number generator with the specified <seedVal>.
+//
+void seed(unsigned int seedVal) noexcept
+{
+    seedVal_ = seedVal;
+}
+
+
+// seed() - seed the random-number generator with the current time from the high-resolution clock
+//
+void seed() noexcept
+{
+    seed(high_resolution_clock::now().time_since_epoch().count());
+}
+
+
+// randomUnsignedInt() - return a random unsigned integer.
+//
+unsigned int randomUnsignedInt() noexcept
+{
+    std::minstd_rand0 generator(seedVal_);
+    unsigned int ret = generator();
+
+    seedVal_ = ret;
+
+    return ret;
+}
+
+} // namespace Random
+
+namespace Thread
+{
+
+// setName() - set the current thread's name/title, as reported by ps, top, etc.  Returns true on success, or false if
+// the length of <name> exceeds the limit specified by the operating system.
+//
+bool setName(const string& name) noexcept
+{
+    return ::pthread_setname_np(::pthread_self(), name.c_str());
+}
+
+} // namespace Thread
 } // namespace Util
 

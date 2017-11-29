@@ -11,6 +11,7 @@
 #include "shiftreg.h"
 #include "temperature.h"
 #include "tempsensor.h"
+#include "util.h"
 #include <cstdlib>          // ::rand(), NULL
 #include <ctime>            // ::strftime(), ::localtime(), ::time()
 #include <thread>
@@ -118,6 +119,8 @@ char SessionManager::getSessionTypeIndicator(const SessionType_t type) const noe
 void SessionManager::run() noexcept
 {
     LCD& lcd = Registry::instance().lcd();
+
+    Util::Thread::setName(Registry::instance().config()("application.short_name") + ": smgr");
 
     lcd.backlight(true);
 

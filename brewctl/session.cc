@@ -11,6 +11,7 @@
 #include "log.h"
 #include "registry.h"
 #include "tempsensor.h"
+#include "util.h"
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>      // NULL
 #include <ctime>        // ::time()
@@ -279,6 +280,8 @@ time_t Session::remainingTime() const noexcept
 //
 void Session::main() noexcept
 {
+    Util::Thread::setName(Registry::instance().config()("application.short_name") + ": sess");
+
     while(1)
     {
         const time_t now = ::time(NULL);

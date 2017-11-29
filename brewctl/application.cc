@@ -40,7 +40,8 @@ using std::thread;
 void appSignalHandler(int signum) noexcept;
 static Application *gApp;
 
-const char * const DEFAULT_AVAHI_SERVICE_NAME = "brewctl";
+const char * const      DEFAULT_AVAHI_SERVICE_NAME  = "brewctl";
+const unsigned short    DEFAULT_AVAHI_SERVICE_PORT  = 1900;
 
 // Default values for configuration keys
 static ConfigData_t defaultConfig =
@@ -48,12 +49,14 @@ static ConfigData_t defaultConfig =
     {"adc.ref_voltage",                     "5.012"},
     {"adc.isource_ua",                      "146"},                     // ADC current-source current in microamps
     {"application.pid_file",                "/var/run/brewctl.pid"},
+    {"application.short_name",              "brewctl"},
     {"application.user",                    "brewctl"},
     {"database",                            "brewery.db"},              // FIXME - should be under /var/lib/brewctl
     {"log.method",                          "syslog"},
     {"log.level",                           "debug"},
     {"sensor.average_len",                  "1000"},                    // Length of moving-average for sensor readings
     {"sensor.log_interval_s",               "10"},                      // Interval between sensor readings
+    {"service.port",                        "1900"},                    // Port on which the app service interface runs
     {"session.dead_zone",                   "0.5C"},                    // "Dead zone" for session temperature control
     {"session.effector_update_interval_s",  "60"},
     {"spi.dev",                             "/dev/spidev0.0"},
@@ -102,7 +105,8 @@ Application::Application(int argc, char **argv, Error * const err) noexcept
                      << "-"
                      << std::hex << std::setw(12) << std::setfill('0') << systemId_;
 
-    avahiService_ = new AvahiService(avahiServiceName.str());
+    avahiService_ = new AvahiService(avahiServiceName.str(), config_.get("service.port", DEFAULT_AVAHI_SERVICE_PORT),
+                                     err);
 }
 
 
@@ -184,6 +188,8 @@ bool Application::run() noexcept
 {
     thread(&AvahiService::run, avahiService_).detach();
     thread(&SessionManager::run, &sessionManager_).detach();
+
+    Util::Thread::setName(Registry::instance().config()("application.short_name") + ": main");
 
     while(1)
         ::sleep(1);
