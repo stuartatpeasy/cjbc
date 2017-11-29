@@ -155,7 +155,7 @@ void SessionManager::run() noexcept
 
                     lcd.putAt(7, 2, getTempControlIndicator(session->tempControlState()));
                     if(session->vesselTempSensorInRange())
-                        lcd.printAt(8, 2, "%4.1lf\xdf", session->currentTemp().C() + 0.05);
+                        lcd.printAt(8, 2, "%4.1lf\xdf", session->currentTemp().C());
                     else
                         lcd.printAt(8, 2, "--.-\xdf");
 
