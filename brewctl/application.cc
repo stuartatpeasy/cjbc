@@ -1,5 +1,5 @@
 /*
-    application.h: application container class
+    application.cc: application container class
 
     Stuart Wallace <stuartw@atom.net>, September 2017.
 
@@ -66,6 +66,8 @@ static ConfigData_t defaultConfig =
 };
 
 
+// ctor - initialise top-level objects; prepare to run application.
+//
 Application::Application(int argc, char **argv, Error * const err) noexcept
     : avahiService_(nullptr), httpService_(nullptr), systemId_(0)
 {

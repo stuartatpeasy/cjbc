@@ -1,5 +1,5 @@
 /*
-    util.h: utility functions
+    util.cc: utility functions
 
     Stuart Wallace <stuartw@atom.net>, November 2017.
 
