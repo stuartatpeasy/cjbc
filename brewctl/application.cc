@@ -23,6 +23,7 @@ extern "C"
 {
 #include <signal.h>         // ::sigaction()
 #include <strings.h>        // ::bzero()
+#include <unistd.h>         // ::sleep()
 }
 
 using std::ifstream;
@@ -167,8 +168,10 @@ bool Application::parseArgs(int argc, char **argv, Error * const err) noexcept
 bool Application::run() noexcept
 {
     thread(&AvahiService::run, avahiService_).detach();
+    thread(&SessionManager::run, &sessionManager_).detach();
 
-    sessionManager_.run();
+    while(1)
+        ::sleep(1);
 
     return true;
 }
