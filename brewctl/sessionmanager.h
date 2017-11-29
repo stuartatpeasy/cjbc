@@ -8,15 +8,16 @@
     Part of brewctl
 */
 
+#include "defaulttempsensor.h"
 #include "error.h"
 #include "registry.h"
 #include "session.h"
-#include "defaulttempsensor.h"
+#include "thread.h"
 #include <cstddef>
 #include <vector>
 
 
-class SessionManager
+class SessionManager : public Thread
 {
 public:
                                         SessionManager() noexcept;

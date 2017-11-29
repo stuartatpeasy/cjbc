@@ -9,6 +9,7 @@
 */
 
 #include "error.h"
+#include "thread.h"
 #include <memory>
 #include <string>
 
@@ -25,7 +26,7 @@ extern "C"
 }
 
 
-class AvahiService
+class AvahiService : public Thread
 {
 friend void avahiClientCallback(AvahiClient *client, AvahiClientState state, void *userdata) noexcept;
 friend void avahiEntryGroupCallback(AvahiEntryGroup *group, AvahiEntryGroupState state, void *userdata) noexcept;

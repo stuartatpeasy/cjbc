@@ -8,6 +8,7 @@
 
 #include "httpservice.h"
 #include "registry.h"
+#include "thread.h"
 #include "util.h"
 #include <cstdlib>          // NULL
 
@@ -24,7 +25,7 @@ int handleConnection(void *cls, struct MHD_Connection *connection, const char *u
 // ctor - member initialisation only
 //
 HttpService::HttpService(const unsigned short port) noexcept
-    : stop_(false), running_(false), port_(port), daemon_(NULL)
+    : Thread(), port_(port), daemon_(NULL)
 {
 }
 
@@ -34,8 +35,7 @@ HttpService::HttpService(const unsigned short port) noexcept
 void HttpService::run() noexcept
 {
     running_ = true;
-    
-    Util::Thread::setName(Registry::instance().config()("application.short_name") + ": http");
+    setName("http");
 
     while(!stop_)
     {

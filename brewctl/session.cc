@@ -276,11 +276,12 @@ time_t Session::remainingTime() const noexcept
 }
 
 
-// main() - entry-point for session management.  This method will be called in a loop by SessionManager::run()
+// run() - entry-point for session management.  This method will be called in a loop by SessionManager::run()
 //
-void Session::main() noexcept
+void Session::run() noexcept
 {
-    Util::Thread::setName(Registry::instance().config()("application.short_name") + ": sess");
+    running_ = true;
+    setName("sess");
 
     while(1)
     {

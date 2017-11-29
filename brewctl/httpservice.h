@@ -9,6 +9,7 @@
 */
 
 #include "error.h"
+#include "thread.h"
 #include "log.h"
 
 extern "C"
@@ -17,7 +18,7 @@ extern "C"
 }
 
 
-class HttpService
+class HttpService : public Thread
 {
 friend int handleConnection(void *cls, struct MHD_Connection *connection, const char *url, const char *method,
                             const char *version, const char *upload_data, size_t *upload_data_size, void **con_cls)
@@ -29,16 +30,12 @@ public:
     HttpService&            operator=(const HttpService&) = delete;
 
     void                    run() noexcept;
-    void                    stop() noexcept { stop_ = true; };
-    bool                    isRunning() const noexcept { return running_; };
 
 private:
     int                     handleConnection(struct MHD_Connection *connection, const char *url, const char *method,
                                              const char *version, const char *upload_data, size_t *upload_data_size,
                                              void **con_cls) noexcept;
 
-    volatile bool           stop_;
-    volatile bool           running_;
     const unsigned short    port_;
     MHD_Daemon *            daemon_;
 };

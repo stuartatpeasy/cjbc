@@ -31,7 +31,13 @@ void avahiEntryGroupCallback(AvahiEntryGroup *group, AvahiEntryGroupState state,
 // ctor - allocate a service name; create a new Avahi client
 //
 AvahiService::AvahiService(const std::string& name, const unsigned short port, Error * const err) noexcept
-    : name_(name), group_(NULL), simplePoll_(NULL), client_(NULL), cname_(nullptr), port_(port)
+    : Thread(),
+      name_(name),
+      group_(NULL),
+      simplePoll_(NULL),
+      client_(NULL),
+      cname_(nullptr),
+      port_(port)
 {
     int error;
 
@@ -78,27 +84,26 @@ AvahiService::~AvahiService()
 //
 void AvahiService::run() noexcept
 {
-    Util::Thread::setName(Registry::instance().config()("application.short_name") + ": avahi");
+    running_ = true;
+    setName("avahi");
 
-    if(simplePoll_ != NULL)
-    {
-        int ret = 0;
-        logDebug("AvahiService::run(): entering simple poll loop");
-        
-        while(!ret)
-            ret = ::avahi_simple_poll_iterate(simplePoll_, AVAHI_POLL_INTERVAL_MS);
-
-        if(ret == -1)
-            logError("AvahiService::run(): avahi_simple_poll_iterate() failed");
-        else if(ret == 1)
-            logInfo("AvahiService::run(): quit request has been scheduled");
-        else if(!ret)
-            logInfo("AvahiService::run(): exiting polling loop");
-        else
-            logError("AvahiService::run(): unknown return code %d returned by avahi_simple_poll_iterate()", ret);
-    }
-    else
+    if(simplePoll_ == NULL)
         logWarning("AvahiService::run(): simplePoll_ is NULL; not entering poll loop");
+
+    int ret = 0;
+    logDebug("AvahiService::run(): entering simple poll loop");
+        
+    while(!ret)
+        ret = ::avahi_simple_poll_iterate(simplePoll_, AVAHI_POLL_INTERVAL_MS);
+
+    if(ret == -1)
+        logError("AvahiService::run(): avahi_simple_poll_iterate() failed");
+    else if(ret == 1)
+        logInfo("AvahiService::run(): quit request has been scheduled");
+    else if(!ret)
+        logInfo("AvahiService::run(): exiting polling loop");
+    else
+        logError("AvahiService::run(): unknown return code %d returned by avahi_simple_poll_iterate()", ret);
 }
 
 

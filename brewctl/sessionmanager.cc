@@ -37,7 +37,8 @@ static const time_t
 // ctor - trivial initialisation of members
 //
 SessionManager::SessionManager() noexcept
-    : lastDisplayUpdate_(0),
+    : Thread(),
+      lastDisplayUpdate_(0),
       displayUpdateInterval_(DEFAULT_DISPLAY_UPDATE_INTERVAL)
 {
 }
@@ -76,7 +77,7 @@ bool SessionManager::init(Error * const err) noexcept
             return false;
 
         sessions_.push_back(s);
-        thread(&Session::main, s).detach();
+        thread(&Session::run, s).detach();
     }
 
     return true;
@@ -118,9 +119,10 @@ char SessionManager::getSessionTypeIndicator(const SessionType_t type) const noe
 //
 void SessionManager::run() noexcept
 {
-    LCD& lcd = Registry::instance().lcd();
+    running_ = true;
+    setName("smgr");
 
-    Util::Thread::setName(Registry::instance().config()("application.short_name") + ": smgr");
+    LCD& lcd = Registry::instance().lcd();
 
     lcd.backlight(true);
 
