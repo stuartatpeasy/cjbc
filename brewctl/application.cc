@@ -41,7 +41,7 @@ void appSignalHandler(int signum) noexcept;
 static Application *gApp;
 
 const char * const      DEFAULT_AVAHI_SERVICE_NAME  = "brewctl";
-const unsigned short    DEFAULT_AVAHI_SERVICE_PORT  = 1900;
+const unsigned short    DEFAULT_HTTP_SERVICE_PORT   = 1900;
 
 // Default values for configuration keys
 static ConfigData_t defaultConfig =
@@ -67,7 +67,7 @@ static ConfigData_t defaultConfig =
 
 
 Application::Application(int argc, char **argv, Error * const err) noexcept
-    : avahiService_(nullptr), systemId_(0)
+    : avahiService_(nullptr), httpService_(nullptr), systemId_(0)
 {
     gApp = this;
     appName_ = argc ? argv[0] : "<NoAppName>";
@@ -105,8 +105,13 @@ Application::Application(int argc, char **argv, Error * const err) noexcept
                      << "-"
                      << std::hex << std::setw(12) << std::setfill('0') << systemId_;
 
-    avahiService_ = new AvahiService(avahiServiceName.str(), config_.get("service.port", DEFAULT_AVAHI_SERVICE_PORT),
-                                     err);
+    const unsigned short port = config_.get("service.port", DEFAULT_HTTP_SERVICE_PORT);
+
+    avahiService_ = new AvahiService(avahiServiceName.str(), port, err);
+    if(err->code())
+        return;
+
+    httpService_ = new Service(port);
 }
 
 
@@ -186,6 +191,7 @@ bool Application::parseArgs(int argc, char **argv, Error * const err) noexcept
 //
 bool Application::run() noexcept
 {
+    thread(&Service::run, httpService_).detach();
     thread(&AvahiService::run, avahiService_).detach();
     thread(&SessionManager::run, &sessionManager_).detach();
 

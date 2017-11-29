@@ -11,6 +11,7 @@
 #include "avahiservice.h"
 #include "config.h"
 #include "error.h"
+#include "service.h"
 #include "sessionmanager.h"
 #include <cstdint>
 #include <string>
@@ -45,6 +46,7 @@ private:
     std::string                 appName_;
     AvahiService *              avahiService_;
     SessionManager              sessionManager_;
+    Service *                   httpService_;
     uint64_t                    systemId_;
 };
 
