@@ -60,7 +60,8 @@ public:
     StringValue&    set(const char * const buf, const size_t len) noexcept
                     {
                         clear();
-                        value_.append(buf, len).append('\0');
+                        value_.resize(len + 1);
+                        value_.assign(buf, len);
                         return *this;
                     };
 
