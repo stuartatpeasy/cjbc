@@ -18,6 +18,14 @@ CREATE TABLE "gyle"(
     date_create         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP);
 
 --
+-- option
+--
+DROP TABLE IF EXISTS "option";
+CREATE TABLE "option"(
+    name                VARCHAR(255) PRIMARY KEY NOT NULL,
+    value               TEXT DEFAULT NULL);
+
+--
 -- profile
 --
 DROP TABLE IF EXISTS "profile";
