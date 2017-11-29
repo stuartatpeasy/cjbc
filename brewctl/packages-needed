@@ -2,6 +2,7 @@
 avahi-daemon
 libavahi-client3
 libboost1.62
+libmicrohttpd12
 libsnmp-base
 libsqlite3-0
 ntp
@@ -14,6 +15,7 @@ libboost1.62-dev    # earlier versions are probably OK
 libavahi-common-dev
 libavahi-client-dev
 libdbus-1-dev
+libmicrohttpd-dev
 make
 sqlite3
 wiringpi
