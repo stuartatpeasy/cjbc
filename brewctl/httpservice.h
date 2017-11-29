@@ -1,7 +1,7 @@
-#ifndef SERVICE_H_INC
-#define SERVICE_H_INC
+#ifndef HTTPSERVICE_H_INC
+#define HTTPSERVICE_H_INC
 /*
-    service.h: manages the web service which supports the brewery controller app.
+    httpservice.h: manages the web service which supports the brewery controller app.
 
     Stuart Wallace <stuartw@atom.net>, November 2017.
 
@@ -17,16 +17,16 @@ extern "C"
 }
 
 
-class Service
+class HttpService
 {
 friend int handleConnection(void *cls, struct MHD_Connection *connection, const char *url, const char *method,
                             const char *version, const char *upload_data, size_t *upload_data_size, void **con_cls)
                             noexcept;
 public:
-                            Service(const unsigned short port) noexcept;
-                            Service(const Service&) = delete;
+                            HttpService(const unsigned short port) noexcept;
+                            HttpService(const HttpService&) = delete;
 
-    Service&                operator=(const Service&) = delete;
+    HttpService&            operator=(const HttpService&) = delete;
 
     void                    run() noexcept;
     void                    stop() noexcept { stop_ = true; };
@@ -44,5 +44,5 @@ private:
 };
 
 
-#endif // SERVICE_H_INC
+#endif // HTTPSERVICE_H_INC
 

@@ -12,7 +12,7 @@ APPNAME := brewctl
 
 SOURCES := \
     adc.cc application.cc avahiservice.cc config.cc defaulteffector.cc defaulttempsensor.cc effector.cc error.cc       \
-    gpiopin.cc gpioport.cc lcd.cc log.cc main.cc registry.cc service.cc session.cc sessionmanager.cc shiftreg.cc       \
+    httpservice.cc gpiopin.cc gpioport.cc lcd.cc log.cc main.cc registry.cc session.cc sessionmanager.cc shiftreg.cc   \
     spiport.cc sqlite.cc sqlitecolumn.cc sqlitestmt.cc temperature.cc tempsensor.cc thermistor.cc util.cc
 
 CFLAGS := -g -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17 -pthread

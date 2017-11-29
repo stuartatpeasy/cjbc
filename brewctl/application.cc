@@ -113,7 +113,7 @@ Application::Application(int argc, char **argv, Error * const err) noexcept
     if(err->code())
         return;
 
-    httpService_ = new Service(port);
+    httpService_ = new HttpService(port);
 }
 
 
@@ -193,7 +193,7 @@ bool Application::parseArgs(int argc, char **argv, Error * const err) noexcept
 //
 bool Application::run() noexcept
 {
-    thread(&Service::run, httpService_).detach();
+    thread(&HttpService::run, httpService_).detach();
     thread(&AvahiService::run, avahiService_).detach();
     thread(&SessionManager::run, &sessionManager_).detach();
 
