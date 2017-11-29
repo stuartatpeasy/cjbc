@@ -16,11 +16,11 @@ extern "C"
 #include <unistd.h>     // ::sleep()
 }
 
+using std::string;
+
+
 const unsigned short    AVAHI_SERVICE_DEFAULT_PORT  = 1900;     // Default port on which to announce our service
 const int               AVAHI_POLL_INTERVAL_MS      = 250;      // Interval between calls to avahi_simple_poll_iterate()
-
-
-using std::string;
 
 
 void avahiClientCallback(AvahiClient *client, AvahiClientState state, void *userdata) noexcept;
@@ -182,7 +182,6 @@ void AvahiService::entryGroupCallback(AvahiEntryGroup *group, AvahiEntryGroupSta
 //
 void AvahiService::createService(AvahiClient *client) noexcept
 {
-    char txt[32];
     logInfo("AvahiService::createService(): creating service '%s'", name_.c_str());
 
     if(group_ == NULL)
@@ -202,12 +201,8 @@ void AvahiService::createService(AvahiClient *client) noexcept
     {
         logInfo("AvahiService::createService(): adding service '%s'", cname_);
 
-        // FIXME store something meaningful in the TXT record
-        ::snprintf(txt, sizeof(txt), "random=%d", ::rand());
-
-        // FIXME - find out what the last three parameters of this call are doing
         int ret = ::avahi_entry_group_add_service(group_, AVAHI_IF_UNSPEC, AVAHI_PROTO_UNSPEC, (AvahiPublishFlags) 0,
-                                                  cname_, "_http._tcp", NULL, NULL, port_, "test=blah", txt, NULL);
+                                                  cname_, "_http._tcp", NULL, NULL, port_, NULL);
 
         if(ret < 0)
         {
