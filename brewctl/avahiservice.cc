@@ -1,5 +1,5 @@
 /*
-    avahiservice.h: publish an Avahi service corresponding to the brewery controller.
+    avahiservice.cc: publish an Avahi service corresponding to the brewery controller.
 
     Stuart Wallace <stuartw@atom.net>, November 2017.
 
