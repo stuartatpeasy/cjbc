@@ -12,8 +12,8 @@
 #include "config.h"
 #include "error.h"
 #include "sessionmanager.h"
+#include <cstdint>
 #include <string>
-#include <vector>
 
 
 class Application
@@ -39,11 +39,13 @@ private:
     bool                        parseArgs(int argc, char **argv, Error * const err) noexcept;
     bool                        installQuitHandler(Error * const err) noexcept;
     void                        signalHandler(int signum) noexcept;
+    uint64_t                    getSystemId() noexcept;
 
     Config                      config_;
     std::string                 appName_;
     AvahiService *              avahiService_;
     SessionManager              sessionManager_;
+    uint64_t                    systemId_;
 };
 
 #endif // APPLICATION_H_INC

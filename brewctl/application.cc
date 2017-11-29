@@ -9,15 +9,19 @@
 #include "application.h"
 #include "log.h"
 #include "registry.h"
+#include "util.h"
 #include <cerrno>
 #include <cstdarg>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
+#include <iomanip>
 #include <memory>
+#include <sstream>
 #include <queue>
 #include <thread>
+#include <vector>
 
 extern "C"
 {
@@ -27,9 +31,11 @@ extern "C"
 }
 
 using std::ifstream;
+using std::ostringstream;
 using std::queue;
 using std::string;
 using std::thread;
+
 
 void appSignalHandler(int signum) noexcept;
 static Application *gApp;
@@ -58,10 +64,12 @@ static ConfigData_t defaultConfig =
 
 
 Application::Application(int argc, char **argv, Error * const err) noexcept
-    : avahiService_(nullptr)
+    : avahiService_(nullptr), systemId_(0)
 {
     gApp = this;
     appName_ = argc ? argv[0] : "<NoAppName>";
+
+    Util::Random::seed();
 
     // Check that we're running as root
 
@@ -87,7 +95,14 @@ Application::Application(int argc, char **argv, Error * const err) noexcept
        !sessionManager_.init(err))                  // Initialise session manager
         return;
 
-    avahiService_ = new AvahiService(config_.get("system.avahi_service_name", DEFAULT_AVAHI_SERVICE_NAME));
+    systemId_ = getSystemId();
+    ostringstream avahiServiceName;
+
+    avahiServiceName << config_.get("system.avahi_service_name", DEFAULT_AVAHI_SERVICE_NAME)
+                     << "-"
+                     << std::hex << std::setw(12) << std::setfill('0') << systemId_;
+
+    avahiService_ = new AvahiService(avahiServiceName.str());
 }
 
 
@@ -174,6 +189,47 @@ bool Application::run() noexcept
         ::sleep(1);
 
     return true;
+}
+
+
+// getSystemId() - get a unique identifier for this system (hardware).  This will be either the hardware (MAC) address
+// of the first Ethernet adaptor, or a 48-bit random number.
+//
+uint64_t Application::getSystemId() noexcept
+{
+    static uint64_t systemId = 0;
+
+    if(!systemId)
+    {
+        for(auto interface : Util::Net::getInterfaceNames())
+        {
+            if((interface.length() >= 3) && (interface.substr(0, 3) == "enx"))
+            {
+                const uint64_t hwaddr = Util::Net::getInterfaceHardwareAddress(interface);
+                if(hwaddr != (uint64_t) -1)
+                {
+                    logDebug("Application::getSystemId(): Using system ID %012llx (physical address of network "
+                             "interface '%s'", hwaddr, interface.c_str());
+                    systemId = hwaddr;
+                }
+                else
+                    logDebug("Application::getSystemId(): Failed to get hardware address for interface '%s'",
+                             interface.c_str());
+
+                break;
+            }
+        }
+
+        if(!systemId)
+        {
+            // No wired Ethernet adaptor found, or unable to retrieve the hardware (MAC) address of the adaptor.
+            // Use a random number instead.
+            systemId = Util::Net::getRandomHardwareAddress();
+            logDebug("Application::getSystemId(): using random number %012llx as system ID", systemId);
+        }
+    }
+
+    return systemId;
 }
 
 

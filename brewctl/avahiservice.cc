@@ -44,6 +44,7 @@ AvahiService::AvahiService(const std::string& name, Error * const err) noexcept
     cname_ = ::avahi_strdup(name_.c_str());
 
     error = 0;
+    logDebug("Creating Avahi client in order to publish service '%s'", cname_);
     client_ = ::avahi_client_new(::avahi_simple_poll_get(simplePoll_), (AvahiClientFlags) 0, avahiClientCallback, this,
                                  &error);
 
