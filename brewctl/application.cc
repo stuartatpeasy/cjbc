@@ -46,23 +46,23 @@ const unsigned short    DEFAULT_HTTP_SERVICE_PORT   = 1900;
 // Default values for configuration keys
 static ConfigData_t defaultConfig =
 {
-    {"adc.ref_voltage",                     "5.012"},
-    {"adc.isource_ua",                      "146"},                     // ADC current-source current in microamps
-    {"application.pid_file",                "/var/run/brewctl.pid"},
-    {"application.short_name",              "brewctl"},
-    {"application.user",                    "brewctl"},
-    {"database",                            "brewery.db"},              // FIXME - should be under /var/lib/brewctl
-    {"log.method",                          "syslog"},
-    {"log.level",                           "debug"},
-    {"sensor.average_len",                  "1000"},                    // Length of moving-average for sensor readings
-    {"sensor.log_interval_s",               "10"},                      // Interval between sensor readings
-    {"service.port",                        "1900"},                    // Port on which the app service interface runs
-    {"session.dead_zone",                   "0.5C"},                    // "Dead zone" for session temperature control
-    {"session.effector_update_interval_s",  "60"},
-    {"spi.dev",                             "/dev/spidev0.0"},
-    {"spi.mode",                            "0"},
-    {"spi.max_clock",                       "500000"},
-    {"system.avahi_service_name",           "brewctl"},
+    {"adc.ref_voltage",             StringValue("5.012")},
+    {"adc.isource_ua",              StringValue("146")},                    // ADC current-source current in microamps
+    {"application.pid_file",        StringValue("/var/run/brewctl.pid")},
+    {"application.short_name",      StringValue("brewctl")},
+    {"application.user",            StringValue("brewctl")},
+    {"database",                    StringValue("brewery.db")},             // FIXME - should be under /var/lib/brewctl
+    {"log.method",                  StringValue("syslog")},
+    {"log.level",                   StringValue("debug")},
+    {"sensor.average_len",          StringValue("1000")},                   // Sensor-reading moving-avg len
+    {"sensor.log_interval_s",       StringValue("10")},                     // Interval between sensor readings
+    {"service.port",                StringValue("1900")},                   // App web service interface port
+    {"session.dead_zone",           StringValue("0.5C")},                   // "Dead zone" for session temp control
+    {"session.switch_interval_s",   StringValue("60")},
+    {"spi.dev",                     StringValue("/dev/spidev0.0")},
+    {"spi.mode",                    StringValue("0")},
+    {"spi.max_clock",               StringValue("500000")},
+    {"system.avahi_service_name",   StringValue("brewctl")},
 };
 
 
@@ -101,7 +101,7 @@ Application::Application(int argc, char **argv, Error * const err) noexcept
     systemId_ = getSystemId();
     ostringstream avahiServiceName;
 
-    avahiServiceName << config_.get("system.avahi_service_name", DEFAULT_AVAHI_SERVICE_NAME)
+    avahiServiceName << config_.get<string>("system.avahi_service_name", DEFAULT_AVAHI_SERVICE_NAME)
                      << "-"
                      << std::hex << std::setw(12) << std::setfill('0') << systemId_;
 

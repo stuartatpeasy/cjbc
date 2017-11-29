@@ -8,41 +8,37 @@
     Part of brewctl
 */
 
+#include "stringvalue.h"
 #include <map>
 #include <string>
 #include <fstream>
 
 
-typedef std::map<std::string, std::string> ConfigData_t;
+typedef std::map<std::string, StringValue> ConfigData_t;
 
 
 class Config
 {
 public:
-    void                add(std::istream& is, const std::string& name = "<istream>") noexcept;
-    void                add(const std::string& filename) noexcept;
-    void                add(const ConfigData_t data) noexcept;
-    void                add(const std::string& key, const std::string& value) noexcept;
+    void                    add(std::istream& is, const std::string& name = "<istream>") noexcept;
+    void                    add(const std::string& filename) noexcept;
+    void                    add(const ConfigData_t data) noexcept;
+    void                    add(const std::string& key, const std::string& value) noexcept;
 
-    void                reset() noexcept;
+    void                    reset() noexcept;
     
-    bool                exists(const std::string& key) const noexcept;
-    std::string         operator()(const std::string& key) noexcept;
+    bool                    exists(const std::string& key) const noexcept;
+    std::string             operator()(const std::string& key) noexcept;
     
-    std::string         get(const std::string& key, const std::string& defaultVal = std::string("")) noexcept;
-    int                 get(const std::string& key, const int defaultVal = 0) noexcept;
-    long                get(const std::string& key, const long defaultVal = 0L) noexcept;
-    long long           get(const std::string& key, const long long defaultVal = 0LL) noexcept;
-    unsigned int        get(const std::string& key, const unsigned int defaultVal = 0) noexcept;
-    unsigned long       get(const std::string& key, const unsigned long defaultVal = 0UL) noexcept;
-    unsigned long long  get(const std::string& key, const unsigned long long defaultVal = 0ULL) noexcept;
-    float               get(const std::string& key, const float defaultVal = 0.0) noexcept;
-    double              get(const std::string& key, const double defaultVal = 0.0) noexcept;
+    template<typename T> T  get(const std::string& key, const T& defaultVal = T()) noexcept
+                            {
+                                return exists(key) ? (T) data_[key] : defaultVal;
+                            }
 
-    void                dump(std::ostream& oss) const noexcept;
+    void                    dump(std::ostream& oss) const noexcept;
 
 protected:
-    ConfigData_t        data_;
+    ConfigData_t            data_;
 };
 
 

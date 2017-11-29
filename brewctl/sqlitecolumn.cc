@@ -9,12 +9,13 @@
 #include "sqlitecolumn.h"
 #include "log.h"
 #include "sqlitestmt.h"
-#include <cstring>      // memcpy()
 
 
+// ctor - read column data from the statement object; determine the length of the data and whether it represents a SQL
+// NULL value.  The SQLiteStmt object, <stmt>, is not needed once the ctor returns; it can be finalise()d, etc.
+//
 SQLiteColumn::SQLiteColumn(SQLiteStmt &stmt, const int index) noexcept
     : index_(index),
-      data_(nullptr),
       len_(0)
 {
     sqlite3_stmt * const stmtRaw = (sqlite3_stmt *) stmt;
@@ -28,18 +29,12 @@ SQLiteColumn::SQLiteColumn(SQLiteStmt &stmt, const int index) noexcept
         isNull_ = false;
 
         const int len = ::sqlite3_column_bytes(stmtRaw, index);
+        const void *p = ::sqlite3_column_blob(stmtRaw, index);
 
-        data_ = new char[len + 1];
-        if(data_ != nullptr)
+        if(p != NULL)
         {
-            const void *p = ::sqlite3_column_blob(stmtRaw, index);
-
-            if(p != NULL)
-            {
-                ::memcpy(data_, p, len);
-                data_[len] = '\0';
-                len_ = len;
-            }
+            value_.set((const char *) p, len);
+            len_ = len;
         }
     }
 }
@@ -75,44 +70,14 @@ SQLiteColumn& SQLiteColumn::operator=(SQLiteColumn&& rhs) noexcept
 }
 
 
-// dtor - free data buffer
-//
-SQLiteColumn::~SQLiteColumn() noexcept
-{
-    if(data_ != nullptr)
-        delete[] data_;
-}
-
-
 // copy() - copy <rhs> into this object
 //
 SQLiteColumn& SQLiteColumn::copy(const SQLiteColumn& rhs) noexcept
 {
-    index_ = rhs.index_;
+    index_  = rhs.index_;
     isNull_ = rhs.isNull_;
-    len_ = rhs.len_;
-
-    if(!isNull_)
-    {
-        if(data_ != nullptr)
-            delete[] data_;
-
-        data_ = new char[len_ + 1];
-        if(data_ != nullptr)
-        {
-            ::memcpy(rhs.data_, data_, len_);
-            data_[len_] = '\0';
-        }
-        else
-        {
-            // XXX This is pretty bad.  If buffer allocation fails, we have little recourse (in the absence of
-            // exceptions) other than to log an error and make the copy of the source object an SQL NULL.
-            logError("SQLite column init: failed to allocate %d bytes; creating an SQL NULL instead!", len_);
-
-            len_ = 0;
-            isNull_ = true;
-        }
-    }
+    len_    = rhs.len_;
+    value_  = rhs.value_;
 
     return *this;
 }
@@ -122,16 +87,13 @@ SQLiteColumn& SQLiteColumn::copy(const SQLiteColumn& rhs) noexcept
 //
 SQLiteColumn& SQLiteColumn::move(SQLiteColumn& rhs) noexcept
 {
-    if(data_ != nullptr)
-        delete[] data_;
-
-    index_ = rhs.index_;
-    data_ = rhs.data_;
-    len_ = rhs.len_;
+    index_  = rhs.index_;
+    len_    = rhs.len_;
     isNull_ = rhs.isNull_;
+    value_  = rhs.value_;
 
     rhs.len_ = 0;
-    rhs.data_ = nullptr;
+    rhs.value_.clear();
 
     return *this;
 }

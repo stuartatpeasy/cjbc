@@ -52,16 +52,16 @@ TempSensor::TempSensor(const int thermistor_id, const int channel, Error * const
         return;
     }
 
-    if(thermistor_data["type"].asString() != "NTC")
+    if(thermistor_data["type"].get<string>() != "NTC")
     {
-        formatError(err, SENSOR_INVALID_TYPE, thermistor_data["type"].asCString());
+        formatError(err, SENSOR_INVALID_TYPE, thermistor_data["type"].get<string>());
         return;
     }
 
-    name_ = thermistor_data["name"].asString();
+    name_ = thermistor_data["name"].get<string>();
     
-    thermistor_ = new Thermistor(thermistor_data["beta"], thermistor_data["Rref"],
-                                 Temperature(thermistor_data["Tref_C"], TEMP_UNIT_CELSIUS));
+    thermistor_ = new Thermistor(thermistor_data["beta"].get<double>(), thermistor_data["Rref"].get<double>(),
+                                 Temperature(thermistor_data["Tref_C"].get<double>(), TEMP_UNIT_CELSIUS));
 
     if(thermistor_ == nullptr)
     {
@@ -69,8 +69,8 @@ TempSensor::TempSensor(const int thermistor_id, const int channel, Error * const
         return;
     }
 
-    rangeMin_.set(thermistor_data["range_min"], TEMP_UNIT_CELSIUS);
-    rangeMax_.set(thermistor_data["range_max"], TEMP_UNIT_CELSIUS);
+    rangeMin_.set(thermistor_data["range_min"].get<double>(), TEMP_UNIT_CELSIUS);
+    rangeMax_.set(thermistor_data["range_max"].get<double>(), TEMP_UNIT_CELSIUS);
 
     auto& config = Registry::instance().config();
 
@@ -200,8 +200,8 @@ DefaultTempSensor_uptr_t TempSensor::getTempSensor(const int sessionId, const st
     }
     else
     {
-        logDebug("returning TempSensor for role %s on channel %d", role.c_str(), tempSensor["channel"].asInt());
-        ret = new TempSensor(tempSensor["thermistor_id"], tempSensor["channel"], err);
+        logDebug("returning TempSensor for role %s on channel %d", role.c_str(), tempSensor["channel"].get<int>());
+        ret = new TempSensor(tempSensor["thermistor_id"].get<int>(), tempSensor["channel"].get<int>(), err);
     }
 
     if(ret == nullptr)

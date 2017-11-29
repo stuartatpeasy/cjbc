@@ -68,7 +68,7 @@ SPIPort::SPIPort(GPIOPort& gpio, Config& config, Error * const err) noexcept
         if(!gpio.pin(pin).setMode(PIN_ALT0, err))
             return;
 
-    fd_ = ::open(config.get("spi.dev", SPI_DEFAULT_DEVICE).c_str(), O_RDWR);
+    fd_ = ::open(config.get<string>("spi.dev", SPI_DEFAULT_DEVICE).c_str(), O_RDWR);
 
     ::bzero(&xfer_, sizeof(xfer_));
 

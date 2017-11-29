@@ -1,5 +1,5 @@
 /*
-    effector.h: effector abstraction.  Provides an interface to switch on and off a device attached to a particular
+    effector.cc: effector abstraction.  Provides an interface to switch on and off a device attached to a particular
     output channel.
 
     Stuart Wallace <stuartw@atom.net>, November 2017.
@@ -107,7 +107,7 @@ DefaultEffector_uptr_t Effector::getSessionEffectorByType(const int sessionId, c
     else
     {
         logDebug("Session %d: returning Effector for type '%s'", sessionId, type.c_str());
-        ret = new Effector(eff["channel"], eff["powerconsumption"], eff["name"].asString());
+        ret = new Effector(eff["channel"].get<int>(), eff["powerconsumption"].get<double>(), eff["name"].get<string>());
     }
 
     if(ret == nullptr)

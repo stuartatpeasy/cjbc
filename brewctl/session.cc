@@ -21,10 +21,10 @@ using std::string;
 
 
 static const double
-    DEFAULT_TEMP_DEADZONE               = 0.5;  // Temperature "dead zone", in deg C/K, within which effectors will not
-                                                // be activated to modify the session temperature
+    DEFAULT_TEMP_DEADZONE       = 0.5;  // Temperature "dead zone", in deg C/K, within which effectors will not be
+                                        // activated to modify the session temperature
 static const time_t
-    DEFAULT_EFFECTOR_UPDATE_INTERVAL_S  = 10;   // Default interval between effector updates, in seconds
+    DEFAULT_SWITCH_INTERVAL_S   = 10;   // Default interval between effector updates, in seconds
 
 
 Session::Session(const int id, Error * const err) noexcept
@@ -64,9 +64,9 @@ Session::Session(const int id, Error * const err) noexcept
         return;
     }
 
-    gyle_id_ = session["gyle_id"];
-    profile_ = session["profile_id"];
-    start_ts_ = session["start_ts"];
+    gyle_id_ = session["gyle_id"].get<int>();
+    profile_ = session["profile_id"].get<int>();
+    start_ts_ = session["start_ts"].get<int>();
 
     SQLiteStmt gyle;
     if(!db.prepare("SELECT name FROM gyle WHERE id=:gyle_id", gyle, err) ||
@@ -74,7 +74,7 @@ Session::Session(const int id, Error * const err) noexcept
         return;
 
     if(gyle.step(err))
-        gyle_ = gyle["name"].asString();
+        gyle_ = gyle["name"].get<string>();
     else
     {
         if(err->code())
@@ -97,7 +97,7 @@ Session::Session(const int id, Error * const err) noexcept
         return;
     }
 
-    const string typeStr = profile["type"].asString();
+    const string typeStr = profile["type"].get<string>();
     if(iequals(typeStr, "ferment"))
         type_ = FERMENT;
     else if(iequals(typeStr, "condition"))
@@ -117,10 +117,10 @@ Session::Session(const int id, Error * const err) noexcept
     time_t offset = start_ts_;
     while(session.step(err))
     {
-        const time_t duration = session["duration_hours"].asInt() * 3600;
+        const time_t duration = session["duration_hours"].get<int>() * 3600;
 
         offset += duration;
-        stages_.push_back(SessionStage_t(duration, session["temperature"]));
+        stages_.push_back(SessionStage_t(duration, session["temperature"].get<double>()));
     }
     
     if(stages_.empty())
@@ -132,7 +132,7 @@ Session::Session(const int id, Error * const err) noexcept
     end_ts_ = offset;
 
     deadZone_ = cfg.get("session.dead_zone", DEFAULT_TEMP_DEADZONE);
-    effectorUpdateInterval_ = cfg.get("session.effector_update_interval_s", DEFAULT_EFFECTOR_UPDATE_INTERVAL_S);
+    effectorUpdateInterval_ = cfg.get("session.switch_interval_s", DEFAULT_SWITCH_INTERVAL_S);
 
     effectorHeater_->activate(false);
     effectorCooler_->activate(false);

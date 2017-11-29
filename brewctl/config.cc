@@ -109,79 +109,7 @@ bool Config::exists(const std::string& key) const noexcept
 //
 string Config::operator()(const string& key) noexcept
 {
-    return get(key.c_str(), "");
-}
-
-
-// get() - if key <key> exists, return its value as a string; otherwise return <defaultVal>.
-//
-string Config::get(const string& key, const string& defaultVal) noexcept
-{
-    return exists(key) ? data_[key] : defaultVal;
-}
-
-
-// get() - if key <key> exists, return its value converted to an int; otherwise return <defaultVal>.
-//
-int Config::get(const string& key, const int defaultVal) noexcept
-{
-    return exists(key) ? std::stoi(data_[key]) : defaultVal;
-}
-
-
-// get() - if key <key> exists, return its value converted to an unsigned int; otherwise return <defaultVal>.
-//
-unsigned int Config::get(const string& key, const unsigned int defaultVal) noexcept
-{
-    return exists(key) ? std::stoul(data_[key]) : defaultVal;
-}
-
-
-// get() - if key <key> exists, return its value converted to a long; otherwise return <defaultVal>.
-//
-long Config::get(const string& key, const long defaultVal) noexcept
-{
-    return exists(key) ? std::stol(data_[key]) : defaultVal;
-}
-
-
-// get() - if key <key> exists, return its value converted to a long long; otherwise return <defaultVal>.
-//
-long long Config::get(const string& key, const long long defaultVal) noexcept
-{
-    return exists(key) ? std::stoll(data_[key]) : defaultVal;
-}
-
-
-// get() - if key <key> exists, return its value converted to an unsigned long; otherwise return <defaultVal>.
-//
-unsigned long Config::get(const string& key, const unsigned long defaultVal) noexcept
-{
-    return exists(key) ? std::stoul(data_[key]) : defaultVal;
-}
-
-
-// get() - if key <key> exists, return its value converted to an unsigned long long; otherwise return <defaultVal>.
-//
-unsigned long long Config::get(const string& key, const unsigned long long defaultVal) noexcept
-{
-    return exists(key) ? std::stoull(data_[key]) : defaultVal;
-}
-
-
-// get() - if key <key> exists, return its value converted to a float; otherwise return <defaultVal>.
-//
-float Config::get(const string& key, const float defaultVal) noexcept
-{
-    return exists(key) ? std::stof(data_[key]) : defaultVal;
-}
-
-
-// get() - if key <key> exists, return its value converted to a double; otherwise return <defaultVal>.
-//
-double Config::get(const string& key, const double defaultVal) noexcept
-{
-    return exists(key) ? std::stod(data_[key]) : defaultVal;
+    return get<string>(key, "");
 }
 
 
@@ -190,6 +118,6 @@ double Config::get(const string& key, const double defaultVal) noexcept
 void Config::dump(ostream& oss) const noexcept
 {
     for(auto it : data_)
-        oss << it.first << "=" << it.second << endl;
+        oss << it.first << "=" << (string) it.second.str() << endl;
 }
 

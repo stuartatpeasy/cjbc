@@ -71,7 +71,7 @@ bool SessionManager::init(Error * const err) noexcept
 
     while(sessions.step(err))
     {
-        Session * const s = new Session(sessions["id"], err);
+        Session * const s = new Session(sessions["id"].get<int>(), err);
         if(err->code())
             return false;
 
