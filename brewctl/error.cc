@@ -7,8 +7,10 @@
 */
 
 #include "error.h"
+#include <cerrno>
 #include <cstdarg>
 #include <cstdio>
+#include <cstring>      // ::strerror()
 #include <map>
 #include <iomanip>
 #include <sstream>
@@ -30,6 +32,7 @@ static map<ErrorCode_t, string> errorMessages =
     {NO_SUCH_PROFILE,                   "Profile %d does not exist"},
     {BAD_PROFILE_TYPE,                  "Profile %d has invalid type '%s'"},
     {SIGHANDLER_INSTALL_FAILED,         "Failed to install %s signal handler: %s (%d)"},
+    {SYSCALL_FAILED,                    "System call %s failed"},
     {DB_OPEN_FAILED,                    "Failed to create or open database file '%s': %s (%d)"},
     {DB_TOO_FEW_COLUMNS,                "Query returned too few columns"},
     {DB_SQLITE_ERROR,                   "SQLite error: %s (%d)"},
@@ -60,7 +63,6 @@ Error::Error() noexcept
     : msg_(""),
       code_(0)
 {
-
 }
 
 
@@ -106,6 +108,31 @@ Error& Error::init(const Error& rhs) noexcept
 }
 
 
+// append() - use <format> and <...> to format a string; append it to the object's error string.
+//
+void Error::append(const string& format, ...) noexcept
+{
+    va_list args;
+    va_start(args, format);
+
+    appendV(format, args);
+}
+
+
+// appendV() - use <format> and <args> to format a string; append it to the object's error string.
+//
+void Error::appendV(const string& format, va_list args) noexcept
+{
+    char buffer[msg_buffer_len];
+
+    const int ret = ::vsnprintf(buffer, msg_buffer_len, format.c_str(), args);
+    if(ret >= msg_buffer_len)
+        buffer[msg_buffer_len - 1] = '\0';      // Output truncated
+
+    msg_ += buffer;
+}
+
+
 // format() - format and store the error message identified by <code>.
 //
 void Error::format(const ErrorCode_t code, ...) noexcept
@@ -141,14 +168,9 @@ void Error::formatV(const ErrorCode_t code, va_list args) noexcept
 //
 void Error::formatV(const ErrorCode_t code, const string& format, va_list args) noexcept
 {
-    char buffer[msg_buffer_len];
-
-    const int ret = ::vsnprintf(buffer, msg_buffer_len, format.c_str(), args);
-    if(ret >= msg_buffer_len)
-        buffer[msg_buffer_len - 1] = '\0';      // Output truncated
-
     code_ = code;
-    msg_ = buffer;
+    msg_ = "";
+    appendV(format, args);
 }
 
 
@@ -189,6 +211,22 @@ void formatError(Error * const err, const ErrorCode_t code, ...) noexcept
         va_start(args, code);
 
         err->formatV(code, args);
+    }
+}
+
+
+// formatErrorWithErrno() - like formatError(), but appends a string containing the description of the error represented
+// by the current value of errno, and the value of errno itself.
+//
+void formatErrorWithErrno(Error * const err, const ErrorCode_t code, ...) noexcept
+{
+    if(err != nullptr)
+    {
+        va_list args;
+        va_start(args, code);
+
+        err->formatV(code, args);
+        err->append(": %s (%d)", ::strerror(errno), errno);
     }
 }
 

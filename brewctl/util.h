@@ -8,13 +8,17 @@
     Part of brewctl
 */
 
+#include "error.h"
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
 
 namespace Util
 {
+    bool                        daemonise(Error * const err = nullptr) noexcept;
+
 namespace Net
 {
     std::vector<std::string>    getInterfaceNames() noexcept;

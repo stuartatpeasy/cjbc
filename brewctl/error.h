@@ -23,6 +23,7 @@ typedef enum
     NO_SUCH_PROFILE                 = 0x0007,
     BAD_PROFILE_TYPE                = 0x0008,
     SIGHANDLER_INSTALL_FAILED       = 0x0009,
+    SYSCALL_FAILED                  = 0x000a,
     DB_OPEN_FAILED                  = 0x1100,
     DB_TOO_FEW_COLUMNS              = 0x1101,
     DB_SQLITE_ERROR                 = 0x1102,
@@ -57,6 +58,8 @@ public:
     Error&              operator=(const Error& rhs) noexcept;
     Error&              operator=(Error&& rhs) noexcept;
 
+    void                append(const std::string& format, ...) noexcept;
+    void                appendV(const std::string& format, va_list args) noexcept;
     void                format(const ErrorCode_t code, ...) noexcept;
     void                formatV(const ErrorCode_t code, va_list args) noexcept;
     void                formatV(const ErrorCode_t code, const std::string& format, va_list args) noexcept;
@@ -73,6 +76,7 @@ private:
 };
 
 void formatError(Error * const err, const ErrorCode_t code, ...) noexcept;
+void formatErrorWithErrno(Error * const err, const ErrorCode_t code, ...) noexcept;
 
 #endif // ERROR_H_INC
 
