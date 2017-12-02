@@ -8,8 +8,8 @@
     Part of brewctl
 */
 
-#include "error.h"
-#include "sqlitestmt.h"
+#include "include/error.h"
+#include "include/sqlite/sqlitestmt.h"
 #include <mutex>
 #include <string>
 

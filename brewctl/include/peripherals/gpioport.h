@@ -1,5 +1,5 @@
-#ifndef GPIOPORT_H_INC
-#define GPIOPORT_H_INC
+#ifndef PERIPHERALS_GPIOPORT_H_INC
+#define PERIPHERALS_GPIOPORT_H_INC
 /*
     gpioport.h: GPIO port driver for Raspberry Pi.  This is a simple abstraction around the wiringPi library.
 
@@ -8,8 +8,8 @@
     Part of brewctl
 */
 
-#include "error.h"
-#include "gpiopin.h"
+#include "include/error.h"
+#include "include/peripherals/gpiopin.h"
 #include <cstddef>
 #include <cstdint>
 #include <vector>
@@ -31,5 +31,5 @@ private:
     std::vector<GPIOPin *>      pins_;
 };
 
-#endif // GPIOPORT_H_INC
+#endif // PERIPHERALS_GPIOPORT_H_INC
 

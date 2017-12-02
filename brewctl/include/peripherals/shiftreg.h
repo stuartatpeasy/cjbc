@@ -1,5 +1,5 @@
-#ifndef SHIFTREG_H_INC
-#define SHIFTREG_H_INC
+#ifndef PERIPHERALS_SHIFTREG_H_INC
+#define PERIPHERALS_SHIFTREG_H_INC
 /*
     74xx595 shift-register SPI driver
 
@@ -8,8 +8,8 @@
     Part of brewctl
 */
 
-#include "error.h"
-#include "gpioport.h"
+#include "include/error.h"
+#include "include/peripherals/gpioport.h"
 #include <cstddef>
 #include <cstdint>
 #include <mutex>
@@ -43,5 +43,5 @@ protected:
     std::mutex              lock_;
 };
 
-#endif // SHIFTREG_H_INC
+#endif // PERIPHERALS_SHIFTREG_H_INC
 

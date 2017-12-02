@@ -1,5 +1,5 @@
-#ifndef DEFAULTEFFECTOR_H_INC
-#define DEFAULTEFFECTOR_H_INC
+#ifndef PERIPHERALS_DEFAULTEFFECTOR_H_INC
+#define PERIPHERALS_DEFAULTEFFECTOR_H_INC
 /*
     defaulteffector.h: represents the absence of an effector; operations performed on objects of this type have no
     effect.  Used in cases where ptrs/refs to an Effector object are required, but a real effector may not be present.
@@ -9,7 +9,7 @@
     Part of brewctl
 */
 
-#include "error.h"
+#include "include/error.h"
 #include <memory>
 #include <string>
 
@@ -34,5 +34,5 @@ protected:
 typedef std::unique_ptr<DefaultEffector> DefaultEffector_uptr_t;
 
 
-#endif // DEFAULTEFFECTOR_H_INC
+#endif // PERIPHERALS_DEFAULTEFFECTOR_H_INC
 

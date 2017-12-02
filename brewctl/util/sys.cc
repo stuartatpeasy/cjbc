@@ -51,7 +51,7 @@ bool daemonise(const string& user, Error * const err) noexcept
 {
     // If <user> is non-empty, validate username by attempting to map it to a uid.
     bool switchUser = false;
-    uid_t uid;
+    uid_t uid = ::getuid();
     if(user.length())
     {
         errno = 0;

@@ -8,8 +8,8 @@
     Part of brewctl
 */
 
-#include "error.h"
-#include "thread.h"
+#include "include/error.h"
+#include "include/thread.h"
 #include <memory>
 #include <string>
 

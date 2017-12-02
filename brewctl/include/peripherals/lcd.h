@@ -1,5 +1,5 @@
-#ifndef LCD_H_INC
-#define LCD_H_INC
+#ifndef PERIPHERALS_LCD_H_INC
+#define PERIPHERALS_LCD_H_INC
 /*
     lcd.h: HD44780U 20x4-character LCD driver
 
@@ -8,7 +8,7 @@
     Part of brewctl
 */
 
-#include "gpioport.h"
+#include "include/peripherals/gpioport.h"
 #include <string>
 #include <thread>
 
@@ -46,5 +46,5 @@ protected:
     std::mutex      lock_;
 };
 
-#endif // LCD_H_INC
+#endif // PERIPHERALS_LCD_H_INC
 

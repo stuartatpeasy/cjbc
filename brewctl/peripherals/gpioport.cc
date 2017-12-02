@@ -6,7 +6,7 @@
     Part of brewctl
 */
 
-#include "include/gpioport.h"
+#include "include/peripherals/gpioport.h"
 #include "include/log.h"
 #include <memory>
 

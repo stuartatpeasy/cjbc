@@ -6,7 +6,7 @@
     Part of brewctl
 */
 
-#include "include/adc.h"
+#include "include/peripherals/adc.h"
 #include "include/registry.h"
 
 using std::lock_guard;

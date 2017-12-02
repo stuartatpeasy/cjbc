@@ -8,9 +8,9 @@
     Part of brewctl
 */
 
-#include "error.h"
-#include "thread.h"
-#include "log.h"
+#include "include/error.h"
+#include "include/log.h"
+#include "include/thread.h"
 
 extern "C"
 {

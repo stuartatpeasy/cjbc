@@ -11,12 +11,13 @@ endif
 APPNAME := brewctl
 
 SOURCES := \
-    adc.cc application.cc avahiservice.cc config.cc defaulteffector.cc defaulttempsensor.cc effector.cc error.cc       \
-    httpservice.cc gpiopin.cc gpioport.cc lcd.cc log.cc main.cc registry.cc session.cc sessionmanager.cc shiftreg.cc   \
-    spiport.cc sqlite/sqlite.cc sqlite/sqlitecolumn.cc sqlite/sqlitestmt.cc temperature.cc tempsensor.cc thermistor.cc \
-    thread.cc util/net.cc util/random.cc util/sys.cc util/thread.cc
+    application.cc avahiservice.cc config.cc error.cc httpservice.cc log.cc main.cc peripherals/adc.cc                 \
+    peripherals/defaulteffector.cc peripherals/defaulttempsensor.cc peripherals/effector.cc peripherals/gpiopin.cc     \
+    peripherals/gpioport.cc peripherals/lcd.cc peripherals/shiftreg.cc peripherals/spiport.cc                          \
+    peripherals/tempsensor.cc registry.cc session.cc sessionmanager.cc sqlite/sqlite.cc sqlite/sqlitecolumn.cc         \
+    sqlite/sqlitestmt.cc temperature.cc thermistor.cc thread.cc util/net.cc util/random.cc util/sys.cc util/thread.cc
 
-CFLAGS := -g -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17 -pthread -I.
+CFLAGS := -O3 -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17 -pthread -I.
 LDFLAGS := -pthread
 
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d

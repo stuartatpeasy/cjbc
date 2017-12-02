@@ -8,13 +8,13 @@
     Part of brewctl
 */
 
+#include "include/sqlite/sqlitecolumn.h"
+#include "include/error.h"
 #include <string>
 #include <map>
 #include <memory>
 #include <mutex>
 #include <vector>
-#include "include/sqlite/sqlitecolumn.h"
-#include "include/error.h"
 
 extern "C"
 {

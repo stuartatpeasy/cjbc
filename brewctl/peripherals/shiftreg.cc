@@ -6,7 +6,7 @@
     Part of brewctl
 */
 
-#include "include/shiftreg.h"
+#include "include/peripherals/shiftreg.h"
 #include "include/registry.h"
 
 extern "C"

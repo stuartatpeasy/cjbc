@@ -1,5 +1,5 @@
-#ifndef GPIOPIN_H_INC
-#define GPIOPIN_H_INC
+#ifndef PERIPHERALS_GPIOPIN_H_INC
+#define PERIPHERALS_GPIOPIN_H_INC
 /*
     gpiopin.h: GPIO pin driver for Raspberry Pi.  This is a simple abstraction of a single GPIO port pin.
 
@@ -8,7 +8,7 @@
     Part of brewctl
 */
 
-#include "error.h"
+#include "include/error.h"
 #include <memory>
 #include <mutex>
 
@@ -66,5 +66,5 @@ protected:
     std::mutex                  lock_;
 };
 
-#endif // GPIO_PIN_H_INC
+#endif // PERIPHERALS_GPIO_PIN_H_INC
 

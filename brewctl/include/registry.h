@@ -8,14 +8,14 @@
     Part of brewctl
 */
 
-#include "adc.h"
-#include "config.h"
-#include "error.h"
-#include "gpioport.h"
-#include "lcd.h"
-#include "shiftreg.h"
-#include "spiport.h"
-#include "sqlite/sqlite.h"
+#include "include/config.h"
+#include "include/error.h"
+#include "include/peripherals/adc.h"
+#include "include/peripherals/gpioport.h"
+#include "include/peripherals/lcd.h"
+#include "include/peripherals/shiftreg.h"
+#include "include/peripherals/spiport.h"
+#include "include/sqlite/sqlite.h"
 
 
 class Registry

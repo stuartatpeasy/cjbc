@@ -6,7 +6,7 @@
     Part of brewctl
 */
 
-#include "include/lcd.h"
+#include "include/peripherals/lcd.h"
 #include "include/log.h"
 #include "include/registry.h"
 #include <cstdint>

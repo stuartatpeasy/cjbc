@@ -8,8 +8,8 @@
     Part of brewctl
 */
 
-#include "include/defaulttempsensor.h"
 #include "include/log.h"
+#include "include/peripherals/defaulttempsensor.h"
 #include "include/registry.h"
 
 

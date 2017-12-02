@@ -1,5 +1,5 @@
-#ifndef TEMPSENSOR_H_INC
-#define TEMPSENSOR_H_INC
+#ifndef PERIPHERALS_TEMPSENSOR_H_INC
+#define PERIPHERALS_TEMPSENSOR_H_INC
 /*
     tempsensor.h: models a temperature sensor (i.e. a thermistor) attached to an ADC channel.  Assumes that there is a
     constant current flowing through the sensor and developing a voltage across it.
@@ -9,10 +9,10 @@
     Part of brewctl
 */
 
-#include "error.h"
-#include "defaulttempsensor.h"
-#include "temperature.h"
-#include "thermistor.h"
+#include "include/error.h"
+#include "include/peripherals/defaulttempsensor.h"
+#include "include/temperature.h"
+#include "include/thermistor.h"
 #include <ctime>
 #include <memory>
 #include <mutex>
@@ -58,5 +58,5 @@ protected:
     std::mutex                      lock_;
 };
 
-#endif // TEMPSENSOR_H_INC
+#endif // PERIPHERALS_TEMPSENSOR_H_INC
 

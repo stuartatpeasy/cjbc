@@ -7,8 +7,8 @@
     Part of brewctl
 */
 
-#include "include/effector.h"
 #include "include/log.h"
+#include "include/peripherals/effector.h"
 #include "include/registry.h"
 #include "include/sqlite/sqlite.h"
 #include "include/sqlite/sqlitestmt.h"

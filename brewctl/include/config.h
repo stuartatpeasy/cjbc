@@ -8,7 +8,7 @@
     Part of brewctl
 */
 
-#include "stringvalue.h"
+#include "include/stringvalue.h"
 #include <map>
 #include <string>
 #include <fstream>

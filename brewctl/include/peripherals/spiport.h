@@ -1,5 +1,5 @@
-#ifndef SPIPORT_H_INC
-#define SPIPORT_H_INC
+#ifndef PERIPHERALS_SPIPORT_H_INC
+#define PERIPHERALS_SPIPORT_H_INC
 /*
     spiport.cc: SPI port abstraction class.  Wraps calls to the linux kernel SPI driver; also uses libWiringPi functions
     to manage port pins.
@@ -10,9 +10,9 @@
 */
 
 
-#include "config.h"
-#include "error.h"
-#include "gpioport.h"
+#include "include/config.h"
+#include "include/error.h"
+#include "include/peripherals/gpioport.h"
 #include <cstddef>
 #include <cstdint>
 #include <string>
@@ -53,5 +53,5 @@ protected:
     struct spi_ioc_transfer xfer_;
 };
 
-#endif // SPIPORT_H_INC
+#endif // PERIPHERALS_SPIPORT_H_INC
 

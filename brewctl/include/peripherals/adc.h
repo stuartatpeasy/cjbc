@@ -1,5 +1,5 @@
-#ifndef ADC_H_INC
-#define ADC_H_INC
+#ifndef PERIPHERALS_ADC_H_INC
+#define PERIPHERALS_ADC_H_INC
 /*
     adc.h: MCP3008 8-channel ADC driver
 
@@ -8,8 +8,8 @@
     Part of brewctl
 */
 
-#include "config.h"
-#include "gpioport.h"
+#include "include/config.h"
+#include "include/peripherals/gpioport.h"
 #include <mutex>
 
 
@@ -31,5 +31,5 @@ protected:
     std::mutex      lock_;
 };
 
-#endif // ADC_H_INC
+#endif // PERIPHERALS_ADC_H_INC
 

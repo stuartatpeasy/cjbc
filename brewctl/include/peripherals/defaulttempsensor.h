@@ -1,5 +1,5 @@
-#ifndef DEFAULTTEMPSENSOR_H_INC
-#define DEFAULTTEMPSENSOR_H_INC
+#ifndef PERIPHERALS_DEFAULTTEMPSENSOR_H_INC
+#define PERIPHERALS_DEFAULTTEMPSENSOR_H_INC
 /*
     defaulttempsensor.h: representation of the absence of a temperature sensor.  Any temperature measurements taken
     through objects of this type will return absolute zero.  Useful in cases where a ref/ptr to a TempSensor is
@@ -10,9 +10,9 @@
     Part of brewctl
 */
 
-#include "error.h"
-#include "log.h"
-#include "temperature.h"
+#include "include/error.h"
+#include "include/log.h"
+#include "include/temperature.h"
 #include <memory>
 #include <string>
 
@@ -47,5 +47,5 @@ protected:
 typedef std::unique_ptr<DefaultTempSensor> DefaultTempSensor_uptr_t;
 
 
-#endif // DEFAULTTEMPSENSOR_H_INC
+#endif // PERIPHERALS_DEFAULTTEMPSENSOR_H_INC
 

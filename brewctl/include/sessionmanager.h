@@ -8,11 +8,11 @@
     Part of brewctl
 */
 
-#include "defaulttempsensor.h"
-#include "error.h"
-#include "registry.h"
-#include "session.h"
-#include "thread.h"
+#include "include/error.h"
+#include "include/peripherals/defaulttempsensor.h"
+#include "include/registry.h"
+#include "include/session.h"
+#include "include/thread.h"
 #include <cstddef>
 #include <vector>
 

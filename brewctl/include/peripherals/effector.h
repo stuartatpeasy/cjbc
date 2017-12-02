@@ -1,5 +1,5 @@
-#ifndef EFFECTOR_H_INC
-#define EFFECTOR_H_INC
+#ifndef PERIPHERALS_EFFECTOR_H_INC
+#define PERIPHERALS_EFFECTOR_H_INC
 /*
     effector.h: effector abstraction.  Provides an interface to switch on and off a device attached to a particular
     output channel.
@@ -9,8 +9,8 @@
     Part of brewctl
 */
 
-#include "defaulteffector.h"
-#include "error.h"
+#include "include/error.h"
+#include "include/peripherals/defaulteffector.h"
 #include <memory>
 #include <string>
 
@@ -45,5 +45,5 @@ protected:
     bool                            state_;
 };
 
-#endif // EFFECTOR_H_INC
+#endif // PERIPHERALS_EFFECTOR_H_INC
 
