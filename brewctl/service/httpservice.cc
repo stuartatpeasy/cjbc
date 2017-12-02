@@ -6,7 +6,7 @@
     Part of brewctl
 */
 
-#include "include/httpservice.h"
+#include "include/service/httpservice.h"
 #include "include/framework/registry.h"
 #include "include/framework/thread.h"
 #include <cstdlib>          // NULL

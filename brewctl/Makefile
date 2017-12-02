@@ -11,14 +11,14 @@ endif
 APPNAME := brewctl
 
 SOURCES := \
-    avahiservice.cc framework/application.cc framework/config.cc framework/error.cc framework/log.cc                   \
-    framework/registry.cc framework/thread.cc httpservice.cc main.cc peripherals/adc.cc peripherals/defaulteffector.cc \
-    peripherals/defaulttempsensor.cc peripherals/effector.cc peripherals/gpiopin.cc peripherals/gpioport.cc            \
-    peripherals/lcd.cc peripherals/shiftreg.cc peripherals/spiport.cc peripherals/tempsensor.cc                        \
-    peripherals/thermistor.cc session.cc sessionmanager.cc sqlite/sqlite.cc sqlite/sqlitecolumn.cc                     \
-    sqlite/sqlitestmt.cc temperature.cc util/net.cc util/random.cc util/sys.cc util/thread.cc
+    framework/application.cc framework/config.cc framework/error.cc framework/log.cc framework/registry.cc             \
+    framework/thread.cc main.cc peripherals/adc.cc peripherals/defaulteffector.cc peripherals/defaulttempsensor.cc     \
+    peripherals/effector.cc peripherals/gpiopin.cc peripherals/gpioport.cc peripherals/lcd.cc peripherals/shiftreg.cc  \
+    peripherals/spiport.cc peripherals/tempsensor.cc peripherals/thermistor.cc session.cc sessionmanager.cc            \
+    service/avahiservice.cc service/httpservice.cc sqlite/sqlite.cc sqlite/sqlitecolumn.cc sqlite/sqlitestmt.cc        \
+    temperature.cc util/net.cc util/random.cc util/sys.cc util/thread.cc
 
-CFLAGS := -O3 -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17 -pthread -I.
+CFLAGS := -g -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17 -pthread -I.
 LDFLAGS := -pthread
 
 DEPFLAGS = -MT $@ -MMD -MP -MF $(DEPDIR)/$*.d

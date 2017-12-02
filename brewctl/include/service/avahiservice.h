@@ -1,5 +1,5 @@
-#ifndef AVAHISERVICE_H_INC
-#define AVAHISERVICE_H_INC
+#ifndef SERVICE_AVAHISERVICE_H_INC
+#define SERVICE_AVAHISERVICE_H_INC
 /*
     avahiservice.h: publish an Avahi service corresponding to the brewery controller.
 
@@ -13,7 +13,6 @@
 #include <memory>
 #include <string>
 
-// FIXME - check that all of these #includes are needed
 extern "C"
 {
 #include <avahi-client/client.h>
@@ -52,5 +51,5 @@ private:
 };
 
 
-#endif // AVAHISERVICE_H_INC
+#endif // SERVICE_AVAHISERVICE_H_INC
 

@@ -1,5 +1,5 @@
-#ifndef HTTPSERVICE_H_INC
-#define HTTPSERVICE_H_INC
+#ifndef SERVICE_HTTPSERVICE_H_INC
+#define SERVICE_HTTPSERVICE_H_INC
 /*
     httpservice.h: manages the web service which supports the brewery controller app.
 
@@ -41,5 +41,5 @@ private:
 };
 
 
-#endif // HTTPSERVICE_H_INC
+#endif // SERVICE_HTTPSERVICE_H_INC
 

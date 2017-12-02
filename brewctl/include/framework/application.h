@@ -8,10 +8,10 @@
     Part of brewctl
 */
 
-#include "include/avahiservice.h"
 #include "include/framework/config.h"
 #include "include/framework/error.h"
-#include "include/httpservice.h"
+#include "include/service/avahiservice.h"
+#include "include/service/httpservice.h"
 #include "include/sessionmanager.h"
 #include <cstdint>
 #include <string>
