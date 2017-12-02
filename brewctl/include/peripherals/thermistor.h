@@ -1,5 +1,5 @@
-#ifndef THERMISTOR_H_INC
-#define THERMISTOR_H_INC
+#ifndef PERIPHERALS_THERMISTOR_H_INC
+#define PERIPHERALS_THERMISTOR_H_INC
 /*
     thermistor.h: models an NTC thermistor using the beta parameter.  Deals with temperatures in Celsius.
 
@@ -28,5 +28,5 @@ protected:
     double              Rinf_;
 };
 
-#endif // THERMISTOR_H_INC
+#endif // PERIPHERALS_THERMISTOR_H_INC
 

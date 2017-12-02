@@ -6,7 +6,7 @@
     Part of brewctl
 */
 
-#include "include/thermistor.h"
+#include "include/peripherals/thermistor.h"
 
 
 Thermistor::Thermistor(const double beta, const double R0, const Temperature& T0) noexcept
