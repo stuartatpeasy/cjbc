@@ -7,7 +7,9 @@
 */
 
 #include "include/util/sys.h"
+#include "include/util/string.h"
 #include "include/framework/registry.h"
+#include <boost/regex.hpp>
 #include <cstdlib>          // NULL
 
 extern "C"
@@ -22,6 +24,7 @@ extern "C"
 #include <unistd.h>
 }
 
+using boost::regex;
 using std::string;
 
 
@@ -37,39 +40,19 @@ static bool checkSyscall(const int ret, const string& name, Error * const err, c
 {
     if(ret == errVal)
     {
-        formatErrorWithErrno(err, SYSCALL_FAILED, name);
+        formatErrorWithErrno(err, SYSCALL_FAILED, name.c_str());
         return false;
     }
 
     return true;
 }
 
+
 // daemonise() - convert the current foreground process to a daemon using the procedure described in daemon(7).
 // Drop privileges by switching to the user specified by <user>.  Returns true on success; false otherwise.
 //
-bool daemonise(const string& user, Error * const err) noexcept
+bool daemonise(Error * const err) noexcept
 {
-    // If <user> is non-empty, validate username by attempting to map it to a uid.
-    bool switchUser = false;
-    uid_t uid = ::getuid();
-    if(user.length())
-    {
-        errno = 0;
-        struct passwd *pw = ::getpwnam(user.c_str());
-        if(pw == NULL)
-        {
-            if(!errno)
-                formatError(err, NO_SUCH_USER, user);                       // user not found
-            else
-                formatErrorWithErrno(err, SYSCALL_FAILED, "getpwnam()");    // getpwnam() failed for some other reason
-
-            return false;
-        }
-
-        uid = pw->pw_uid;
-        switchUser = true;
-    }
-
     // 1. Ensure that all open files (except stdin, stdout and stderr) are closed.
     struct rlimit rlim;
     if(!checkSyscall(::getrlimit(RLIMIT_NOFILE, &rlim), "getrlimit(RLIMIT_NOFILE)", err))
@@ -79,10 +62,25 @@ bool daemonise(const string& user, Error * const err) noexcept
         ::close(fd);
 
     // 2. Reset all signal handlers to their default.
-    for(int signum = 0; signum < _NSIG; ++signum)
+    struct sigaction sa;
+    sigset_t blockmask;
+
+    if(!checkSyscall(::sigemptyset(&blockmask), "sigemptyset()", err))
+        return false;
+
+    for(int signum = 1; signum < _NSIG; ++signum)
     {
-        if(!checkSyscall(::signal(signum, SIG_DFL) == SIG_ERR, "signal()", err, 0))
+        errno = 0;
+        sa.sa_handler = SIG_DFL;
+        sa.sa_sigaction = NULL;
+        sa.sa_mask = blockmask;
+        sa.sa_flags = 0;
+
+        if((::sigaction(signum, &sa, NULL) == -1) && (errno != EINVAL))
+        {
+            formatErrorWithErrno(err, SYSCALL_FAILED, "sigaction()");
             return false;
+        }
     }
 
     // 3. Reset the signal mask.
@@ -136,11 +134,8 @@ bool daemonise(const string& user, Error * const err) noexcept
         // TODO
 
         // 13. Drop privileges, if required
-        if(switchUser)
-        {
-            if(!checkSyscall(::setuid(uid), "setuid()", err))
-                return false;
-        }
+        // This isn't done here, but is instead done separately by the caller.  That way, it is easier for the
+        // application to drop privileges without daemonising, thereby simplifying debugging.
 
         // 14. From the daemon process, notify the original parent process that initialisation is complete
         // (this is currently a no-op)
@@ -148,7 +143,35 @@ bool daemonise(const string& user, Error * const err) noexcept
     else
         ::exit(0);      // 15. Call ::exit() in the original parent process.
 
-    return true;        // FIXME
+    return true;
+}
+
+
+// getUid() - given a username, or a numeric user ID, in <username>, return the corresponding user ID.  If the user does
+// not exist, return (uid_t) -1.  If an error occurs, return (uid_t) -1 and set <err> accordingly.
+//
+uid_t getUid(const string& username, Error * const err) noexcept
+{
+    int intUid;
+    if(Util::String::isIntStr(username, &intUid))
+    {
+        if(intUid >= 0)
+            return (uid_t) intUid;
+
+        return false;
+    }
+
+    errno = 0;
+    struct passwd *pw = ::getpwnam(username.c_str());
+    if(pw == NULL)
+    {
+        if(errno)
+            formatErrorWithErrno(err, SYSCALL_FAILED, "getpwnam()");
+
+        return (uid_t) -1;
+    }
+
+    return pw->pw_uid;
 }
 
 } // namespace Util::Sys

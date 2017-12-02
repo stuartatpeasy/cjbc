@@ -15,7 +15,8 @@
 
 namespace Util::Sys
 {
-    bool                        daemonise(const std::string& user, Error * const err = nullptr) noexcept;
+    bool        daemonise(Error * const err = nullptr) noexcept;
+    uid_t       getUid(const std::string& username, Error * const err) noexcept;
 } // namespace Util::Sys
 
 #endif // SYS_H_INC

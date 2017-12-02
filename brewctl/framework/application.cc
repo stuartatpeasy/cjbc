@@ -96,14 +96,6 @@ Application::Application(int argc, char **argv, Error * const err) noexcept
     logInit(config_("log.method"));
     logSetLevel(config_("log.level"));
 
-    // Daemonise, if specified in config
-//    if(config_.strToBool("application.daemonise"))
-//        Util::daemonise(config_.get<string>("
-
-    // Register SIGQUIT handler
-    if(!installQuitHandler(err))
-        return;
-
     if(!Registry::init(config_, err) ||             // Initialise registry
        !sessionManager_.init(err))                  // Initialise session manager
         return;
@@ -206,14 +198,23 @@ bool Application::parseArgs(int argc, char **argv, Error * const err) noexcept
 
 // run() - start application
 //
-bool Application::run() noexcept
+bool Application::run(Error * const err) noexcept
 {
+    // Daemonise, if specified in config
+    if(config_.strToBool("application.daemonise") && !Util::Sys::daemonise(err))
+        return false;
+
+    // Register SIGQUIT handler
+    if(!installQuitHandler(err))
+        return false;
+
     thread(&HttpService::run, httpService_).detach();
     thread(&AvahiService::run, avahiService_).detach();
     thread(&SessionManager::run, &sessionManager_).detach();
 
     Util::Thread::setName(Registry::instance().config()("application.short_name") + ": main");
 
+    // Loop indefinitely
     while(1)
         ::sleep(1);
 

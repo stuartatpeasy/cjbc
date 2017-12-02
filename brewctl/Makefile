@@ -16,7 +16,7 @@ SOURCES := \
     peripherals/effector.cc peripherals/gpiopin.cc peripherals/gpioport.cc peripherals/lcd.cc peripherals/shiftreg.cc  \
     peripherals/spiport.cc peripherals/tempsensor.cc peripherals/thermistor.cc session.cc sessionmanager.cc            \
     service/avahiservice.cc service/httpservice.cc sqlite/sqlite.cc sqlite/sqlitecolumn.cc sqlite/sqlitestmt.cc        \
-    temperature.cc util/net.cc util/random.cc util/sys.cc util/thread.cc
+    temperature.cc util/net.cc util/random.cc util/string.cc util/sys.cc util/thread.cc
 
 CFLAGS := -g -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17 -pthread -I.
 LDFLAGS := -pthread

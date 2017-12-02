@@ -51,10 +51,8 @@ int main(int argc, char **argv) noexcept
     Error err;
     Application app(argc, argv, &err);
 
-    if(err.code())
+    if(err.code() || !app.run(&err))
         ::error(err.code(), 0, err.message().c_str());
-
-    app.run();
 
     return 0;
 }

@@ -14,6 +14,7 @@
 #include "include/service/httpservice.h"
 #include "include/sessionmanager.h"
 #include <cstdint>
+#include <memory>
 #include <string>
 
 
@@ -34,7 +35,7 @@ friend void appSignalHandler(int signum) noexcept;
 
 public:
                                 Application(int argc, char **argv, Error * const err) noexcept;
-    bool                        run() noexcept;
+    bool                        run(Error * const err = nullptr) noexcept;
 
 private:
     bool                        parseArgs(int argc, char **argv, Error * const err) noexcept;
