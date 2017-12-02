@@ -48,6 +48,7 @@ static ConfigData_t defaultConfig =
 {
     {"adc.ref_voltage",             StringValue("5.012")},
     {"adc.isource_ua",              StringValue("146")},                    // ADC current-source current in microamps
+    {"application.daemonise",       StringValue("0")},
     {"application.pid_file",        StringValue("/var/run/brewctl.pid")},
     {"application.short_name",      StringValue("brewctl")},
     {"application.user",            StringValue("brewctl")},
@@ -91,6 +92,10 @@ Application::Application(int argc, char **argv, Error * const err) noexcept
     // FIXME error-checking in these methods
     logInit(config_("log.method"));
     logSetLevel(config_("log.level"));
+
+    // Daemonise, if specified in config
+//    if(config_.strToBool("application.daemonise"))
+//        Util::daemonise(config_.get<string>("
 
     // Register SIGQUIT handler
     if(!installQuitHandler(err))
@@ -178,6 +183,13 @@ bool Application::parseArgs(int argc, char **argv, Error * const err) noexcept
 
             config_.add(fileName.c_str());
         }
+        else if(arg.substr(0, 2) == "-C")
+        {
+            if(!config_.addLine(arg.substr(2)))
+                logWarning("Ignoring malformed command-line config key '%s'", arg.c_str());
+        }
+        else if(arg == "-D")
+            config_.addLine("application.daemonise=1");
         else
         {
             err->format(UNKNOWN_ARG, arg.c_str());

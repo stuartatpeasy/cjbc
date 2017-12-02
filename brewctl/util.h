@@ -17,7 +17,6 @@
 
 namespace Util
 {
-    bool                        daemonise(Error * const err = nullptr) noexcept;
 
 namespace Net
 {
@@ -36,6 +35,11 @@ namespace Random
 
 } // namespace Random
 
+namespace Sys
+{
+    bool                        daemonise(const std::string& user, Error * const err = nullptr) noexcept;
+} // namespace Sys
+
 namespace Thread
 {
     bool                        setName(const std::string& name) noexcept;
@@ -43,5 +47,5 @@ namespace Thread
 
 } // namespace Util
 
-
 #endif // UTIL_H_INC
+

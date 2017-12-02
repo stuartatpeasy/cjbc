@@ -33,6 +33,7 @@ static map<ErrorCode_t, string> errorMessages =
     {BAD_PROFILE_TYPE,                  "Profile %d has invalid type '%s'"},
     {SIGHANDLER_INSTALL_FAILED,         "Failed to install %s signal handler: %s (%d)"},
     {SYSCALL_FAILED,                    "System call %s failed"},
+    {NO_SUCH_USER,                      "User '%s' does not exist"},
     {DB_OPEN_FAILED,                    "Failed to create or open database file '%s': %s (%d)"},
     {DB_TOO_FEW_COLUMNS,                "Query returned too few columns"},
     {DB_SQLITE_ERROR,                   "SQLite error: %s (%d)"},

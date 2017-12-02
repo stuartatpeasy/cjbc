@@ -24,6 +24,7 @@ typedef enum
     BAD_PROFILE_TYPE                = 0x0008,
     SIGHANDLER_INSTALL_FAILED       = 0x0009,
     SYSCALL_FAILED                  = 0x000a,
+    NO_SUCH_USER                    = 0x000b,
     DB_OPEN_FAILED                  = 0x1100,
     DB_TOO_FEW_COLUMNS              = 0x1101,
     DB_SQLITE_ERROR                 = 0x1102,

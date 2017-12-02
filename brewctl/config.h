@@ -24,6 +24,7 @@ public:
     void                    add(const std::string& filename) noexcept;
     void                    add(const ConfigData_t data) noexcept;
     void                    add(const std::string& key, const std::string& value) noexcept;
+    bool                    addLine(std::string line) noexcept;
 
     void                    reset() noexcept;
     
@@ -35,11 +36,13 @@ public:
                                 return exists(key) ? (T) data_[key] : defaultVal;
                             }
 
+    bool                    strToBool(const std::string& key) noexcept;
+
     void                    dump(std::ostream& oss) const noexcept;
 
 protected:
     ConfigData_t            data_;
 };
 
-
 #endif // CONFIG_H_INC
+

@@ -23,6 +23,9 @@ using std::map;
 using std::ostream;
 using std::string;
 using boost::algorithm::trim;
+using boost::algorithm::trim_left;
+using boost::algorithm::trim_right;
+using boost::iequals;
 
 
 // add() - read the supplied input stream <is> (whose "name", e.g. a filename) is given in <name>, and add the key/value
@@ -36,27 +39,8 @@ void Config::add(istream& is, const string& name) noexcept
     for(linenum = 1; is.good() && !is.eof(); ++linenum)
     {
         getline(is, line);
-        trim(line);
-
-        if(line.length())
-        {
-            if((line[0] == ';') || (line[0] == '#'))
-                continue;       // Ignore comments
-
-            size_t delim = line.find('=');
-            if((delim == string::npos) || !delim)
-            {
-                logNotice("config: %s+%d: ignoring line: missing delimiter or key name", name.c_str(), linenum);
-                continue;       // Ignore malformed lines
-            }
-
-            string key = line.substr(0, delim), val = line.substr(delim + 1);
-
-            trim(key);
-            trim(val);
-
-            data_[key] = val;
-        }
+        if(!addLine(line))
+            logNotice("config: %s+%d: ignoring line: missing delimiter or key name", name.c_str(), linenum);
     }
 }
 
@@ -89,6 +73,38 @@ void Config::add(const string& key, const string& value) noexcept
 }
 
 
+// addLine() - given a line from a config file (or from a cmd-line argument), in <line>, of the form
+// "\s*[:alnum:]+\s*=\s*[:alnum:]*\s*", extract and add a key/value pair and store it in the configuration map.
+// If <line> represents a comment (i.e. it matches "^\s*(#|;|//)"), treat it as a comment and ignore it.  If the line is
+// empty, ignore it.  Return true in all cases except where a non-empty, non-comment line is not a valid key/value pair.
+//
+bool Config::addLine(string line) noexcept
+{
+    trim(line);
+
+    if(!line.length())
+        return true;
+
+    // Detect comments
+    if((line[0] == '#') || (line[0] == ';') || ((line.length() > 1) && (line[0] == '/') && (line[1] == '/')))
+        return true;
+
+    size_t delim = line.find('=');
+    if((delim == string::npos) || !delim)
+        return false;
+
+    string key = line.substr(0, delim),
+           val = line.substr(delim + 1);
+
+    trim_right(key);
+    trim_left(val);
+
+    data_[key] = val;
+
+    return true;
+}
+
+
 // reset() - erase all configuration values
 //
 void Config::reset() noexcept
@@ -110,6 +126,25 @@ bool Config::exists(const std::string& key) const noexcept
 string Config::operator()(const string& key) noexcept
 {
     return get<string>(key, "");
+}
+
+
+// strToBool() - if the config value identified by <key> equals the string values "yes", "true" or "on", or an integer
+// conversion of the value results in a quantity greater than zero, return true.  In all other cases, return false.
+// The string tests do not respect case.
+//
+bool Config::strToBool(const string& key) noexcept
+{
+    if(exists(key))
+    {
+        const string& val = data_[key];
+
+        for(auto testVal : {"yes", "true", "on"})
+            if(iequals(val, testVal))
+                return true;
+    }
+
+    return get<int>(key, 0) > 0;
 }
 
 
