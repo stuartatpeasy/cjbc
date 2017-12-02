@@ -7,11 +7,11 @@
     Part of brewctl
 */
 
-#include "effector.h"
-#include "log.h"
-#include "registry.h"
-#include "sqlite.h"
-#include "sqlitestmt.h"
+#include "include/effector.h"
+#include "include/log.h"
+#include "include/registry.h"
+#include "include/sqlite.h"
+#include "include/sqlitestmt.h"
 
 using std::string;
 

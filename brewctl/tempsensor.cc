@@ -7,10 +7,10 @@
     Part of brewctl
 */
 
-#include "tempsensor.h"
-#include "log.h"
-#include "registry.h"
-#include "sqlitestmt.h"
+#include "include/tempsensor.h"
+#include "include/log.h"
+#include "include/registry.h"
+#include "include/sqlitestmt.h"
 #include <string>
 
 using std::lock_guard;

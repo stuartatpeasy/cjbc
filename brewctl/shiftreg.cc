@@ -6,8 +6,8 @@
     Part of brewctl
 */
 
-#include "shiftreg.h"
-#include "registry.h"
+#include "include/shiftreg.h"
+#include "include/registry.h"
 
 extern "C"
 {

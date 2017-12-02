@@ -6,8 +6,8 @@
     Part of brewctl
 */
 
-#include "adc.h"
-#include "registry.h"
+#include "include/adc.h"
+#include "include/registry.h"
 
 using std::lock_guard;
 using std::mutex;

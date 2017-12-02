@@ -6,7 +6,7 @@
     Part of brewctl
 */
 
-#include "error.h"
+#include "include/error.h"
 #include <cerrno>
 #include <cstdarg>
 #include <cstdio>

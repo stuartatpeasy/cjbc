@@ -8,9 +8,9 @@
     Part of brewctl
 */
 
-#include "defaulttempsensor.h"
-#include "log.h"
-#include "registry.h"
+#include "include/defaulttempsensor.h"
+#include "include/log.h"
+#include "include/registry.h"
 
 
 DefaultTempSensor::DefaultTempSensor(const int channel, const std::string& name) noexcept

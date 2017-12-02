@@ -6,7 +6,7 @@
     Part of brewctl
 */
 
-#include "temperature.h"
+#include "include/temperature.h"
 #include <cstdlib>
 
 

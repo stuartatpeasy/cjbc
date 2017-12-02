@@ -6,8 +6,8 @@
     Part of brewctl
 */
 
-#include "config.h"
-#include "log.h"
+#include "include/config.h"
+#include "include/log.h"
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 

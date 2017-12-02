@@ -6,10 +6,10 @@
     Part of brewctl
 */
 
-#include "application.h"
-#include "log.h"
-#include "registry.h"
-#include "util.h"
+#include "include/application.h"
+#include "include/log.h"
+#include "include/registry.h"
+#include "include/util/util.h"
 #include <cerrno>
 #include <cstdarg>
 #include <cstdlib>

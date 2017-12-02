@@ -6,10 +6,9 @@
     Part of brewctl
 */
 
-#include "avahiservice.h"
-#include "log.h"
-#include "registry.h"
-#include "util.h"
+#include "include/avahiservice.h"
+#include "include/log.h"
+#include "include/registry.h"
 #include <cstdio>
 #include <cstdlib>
 

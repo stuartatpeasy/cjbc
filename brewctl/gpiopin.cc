@@ -6,7 +6,7 @@
     Part of brewctl
 */
 
-#include "gpiopin.h"
+#include "include/gpiopin.h"
 
 extern "C"
 {

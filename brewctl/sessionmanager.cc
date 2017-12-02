@@ -6,12 +6,11 @@
     Part of brewctl
 */
 
-#include "sessionmanager.h"
-#include "log.h"
-#include "shiftreg.h"
-#include "temperature.h"
-#include "tempsensor.h"
-#include "util.h"
+#include "include/sessionmanager.h"
+#include "include/log.h"
+#include "include/shiftreg.h"
+#include "include/temperature.h"
+#include "include/tempsensor.h"
 #include <cstdlib>          // ::rand(), NULL
 #include <ctime>            // ::strftime(), ::localtime(), ::time()
 #include <thread>

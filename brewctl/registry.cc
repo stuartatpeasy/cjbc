@@ -6,8 +6,8 @@
     Part of brewctl
 */
 
-#include "registry.h"
-#include "log.h"
+#include "include/registry.h"
+#include "include/log.h"
 #include <memory>
 
 

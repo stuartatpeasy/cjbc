@@ -6,7 +6,7 @@
     Part of brewctl
 */
 
-#include "log.h"
+#include "include/log.h"
 #include <boost/algorithm/string.hpp>
 #include <cstdarg>
 #include <cstdio>

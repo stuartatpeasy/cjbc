@@ -19,8 +19,8 @@
     +------+----------+----------+-----------------------------------------------------------+
 */
 
-#include "spiport.h"
-#include "error.h"
+#include "include/spiport.h"
+#include "include/error.h"
 #include <cstring>
 #include <initializer_list>
 

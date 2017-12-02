@@ -6,12 +6,11 @@
     Part of brewctl
 */
 
-#include "session.h"
-#include "effector.h"
-#include "log.h"
-#include "registry.h"
-#include "tempsensor.h"
-#include "util.h"
+#include "include/session.h"
+#include "include/effector.h"
+#include "include/log.h"
+#include "include/registry.h"
+#include "include/tempsensor.h"
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>      // NULL
 #include <ctime>        // ::time()

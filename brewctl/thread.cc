@@ -6,9 +6,9 @@
     Part of brewctl
 */
 
-#include "thread.h"
-#include "registry.h"
-#include "util.h"
+#include "include/thread.h"
+#include "include/registry.h"
+#include "include/util/thread.h"
 
 
 // ctor - mark thread as not-running and not-requested-to-stop.
