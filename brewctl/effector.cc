@@ -10,8 +10,8 @@
 #include "include/effector.h"
 #include "include/log.h"
 #include "include/registry.h"
-#include "include/sqlite.h"
-#include "include/sqlitestmt.h"
+#include "include/sqlite/sqlite.h"
+#include "include/sqlite/sqlitestmt.h"
 
 using std::string;
 

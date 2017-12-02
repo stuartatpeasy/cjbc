@@ -13,11 +13,8 @@
 using std::chrono::high_resolution_clock;
 
 
-namespace Util
+namespace Util::Random
 {
-namespace Random
-{
-
 static unsigned int seedVal_ = 0;
 
 
@@ -49,6 +46,5 @@ unsigned int randomUnsignedInt() noexcept
     return ret;
 }
 
-} // namespace Random
-} // namespace Util
+} // namespace Util::Random
 

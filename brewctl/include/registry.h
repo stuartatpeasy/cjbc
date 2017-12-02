@@ -15,7 +15,7 @@
 #include "lcd.h"
 #include "shiftreg.h"
 #include "spiport.h"
-#include "sqlite.h"
+#include "sqlite/sqlite.h"
 
 
 class Registry

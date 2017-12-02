@@ -16,9 +16,7 @@ extern "C"
 using std::string;
 
 
-namespace Util
-{
-namespace Thread
+namespace Util::Thread
 {
 
 // setName() - set the current thread's name/title, as reported by ps, top, etc.  Returns true on success, or false if
@@ -29,6 +27,5 @@ bool setName(const string& name) noexcept
     return ::pthread_setname_np(::pthread_self(), name.c_str());
 }
 
-} // namespace Thread
-} // namespace Util
+} // namespace Util::Thread
 

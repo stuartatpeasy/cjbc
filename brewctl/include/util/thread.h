@@ -12,13 +12,10 @@
 #include <string>
 
 
-namespace Util
-{
-namespace Thread
+namespace Util::Thread
 {
     bool                        setName(const std::string& name) noexcept;
-} // namespace Thread
-} // namespace Util
+} // namespace Util::Thread
 
 #endif // UTIL_THREAD_H_INC
 

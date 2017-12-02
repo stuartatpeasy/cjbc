@@ -6,9 +6,9 @@
     Part of brewctl
 */
 
-#include "include/sqlitecolumn.h"
+#include "include/sqlite/sqlitecolumn.h"
 #include "include/log.h"
-#include "include/sqlitestmt.h"
+#include "include/sqlite/sqlitestmt.h"
 
 
 // ctor - read column data from the statement object; determine the length of the data and whether it represents a SQL

@@ -9,7 +9,10 @@
 #include "include/application.h"
 #include "include/log.h"
 #include "include/registry.h"
-#include "include/util/util.h"
+#include "include/util/net.h"
+#include "include/util/random.h"
+#include "include/util/sys.h"
+#include "include/util/thread.h"
 #include <cerrno>
 #include <cstdarg>
 #include <cstdlib>

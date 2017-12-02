@@ -1,5 +1,5 @@
-#ifndef SQLITESTMT_H_INC
-#define SQLITESTMT_H_INC
+#ifndef SQLITE_SQLITESTMT_H_INC
+#define SQLITE_SQLITESTMT_H_INC
 /*
     sqlitestmt.h: wraps a sqlite3_stmt object
 
@@ -13,8 +13,8 @@
 #include <memory>
 #include <mutex>
 #include <vector>
-#include "sqlitecolumn.h"
-#include "error.h"
+#include "include/sqlite/sqlitecolumn.h"
+#include "include/error.h"
 
 extern "C"
 {
@@ -77,5 +77,5 @@ private:
     static std::mutex   lock_;
 };
 
-#endif // SQLITESTMT_H_INC
+#endif // SQLITE_SQLITESTMT_H_INC
 

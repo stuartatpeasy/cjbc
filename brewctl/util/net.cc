@@ -25,9 +25,7 @@ using std::string;
 using std::vector;
 
 
-namespace Util
-{
-namespace Net
+namespace Util::Net
 {
 
 const unsigned short HWADDR_LEN = 6;        // Length, in bytes, of a MAC address
@@ -87,6 +85,5 @@ uint64_t getRandomHardwareAddress() noexcept
     return ret & 0xffffffffffff;
 }
 
-} // namespace Net
-} // namespace Util
+} // namespace Util::Net
 

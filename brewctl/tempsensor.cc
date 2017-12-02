@@ -10,7 +10,7 @@
 #include "include/tempsensor.h"
 #include "include/log.h"
 #include "include/registry.h"
-#include "include/sqlitestmt.h"
+#include "include/sqlite/sqlitestmt.h"
 #include <string>
 
 using std::lock_guard;

@@ -13,16 +13,12 @@
 #include <vector>
 
 
-namespace Util
-{
-namespace Net
+namespace Util::Net
 {
     std::vector<std::string>    getInterfaceNames() noexcept;
     uint64_t                    getInterfaceHardwareAddress(const std::string& interface) noexcept;
     uint64_t                    getRandomHardwareAddress() noexcept;
-
-} // namespace Net
-} // namespace Util
+} // namespace Util::Net
 
 #endif // UTIL_NET_H_INC
 

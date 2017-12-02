@@ -1,5 +1,5 @@
-#ifndef SQLITECOLUMN_H_INC
-#define SQLITECOLUMN_H_INC
+#ifndef SQLITE_SQLITECOLUMN_H_INC
+#define SQLITE_SQLITECOLUMN_H_INC
 /*
     sqlitecolumn.h: abstraction for a column value in a result set returned from a SQLite query
 
@@ -8,7 +8,7 @@
     Part of brewctl
 */
 
-#include "stringvalue.h"
+#include "include/stringvalue.h"
 
 extern "C"
 {
@@ -51,5 +51,5 @@ private:
     bool                    isNull_;
 };
 
-#endif // SQLITECOLUMN_H_INC
+#endif // SQLITE_SQLITECOLUMN_H_INC
 

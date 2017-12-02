@@ -25,9 +25,7 @@ extern "C"
 using std::string;
 
 
-namespace Util
-{
-namespace Sys
+namespace Util::Sys
 {
 
 // checkSyscall() - local helper function.  Takes the return value from a syscall in <ret>, compares it with a value
@@ -153,6 +151,5 @@ bool daemonise(const string& user, Error * const err) noexcept
     return true;        // FIXME
 }
 
-} // namespace Sys
-} // namespace Util
+} // namespace Util::Sys
 

@@ -13,13 +13,10 @@
 #include <string>
 
 
-namespace Util
-{
-namespace Sys
+namespace Util::Sys
 {
     bool                        daemonise(const std::string& user, Error * const err = nullptr) noexcept;
-} // namespace Sys
-} // namespace Util
+} // namespace Util::Sys
 
 #endif // SYS_H_INC
 

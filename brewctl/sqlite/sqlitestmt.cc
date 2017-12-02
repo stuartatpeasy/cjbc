@@ -6,7 +6,7 @@
     Part of brewctl
 */
 
-#include "include/sqlitestmt.h"
+#include "include/sqlite/sqlitestmt.h"
 #include "include/log.h"
 #include <cstdlib>
 #include <initializer_list>

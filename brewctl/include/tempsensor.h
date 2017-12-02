@@ -9,7 +9,6 @@
     Part of brewctl
 */
 
-#include "sqlite.h"
 #include "error.h"
 #include "defaulttempsensor.h"
 #include "temperature.h"

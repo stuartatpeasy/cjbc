@@ -1,5 +1,5 @@
-#ifndef SQLITE_H_INC
-#define SQLITE_H_INC
+#ifndef SQLITE_SQLITE_H_INC
+#define SQLITE_SQLITE_H_INC
 /*
     sqlite.h: minimal wrapper around common SQLite functions and management for a SQLite database object.
 
@@ -40,5 +40,5 @@ private:
     std::mutex      lock_;
 };
 
-#endif // SQLITE_H_INC
+#endif // SQLITE_SQLITE_H_INC
 

@@ -11,17 +11,12 @@
 #include "include/error.h"
 
 
-namespace Util
+namespace Util::Random
 {
-namespace Random
-{
-
     void                        seed(unsigned int seedVal) noexcept;
     void                        seed() noexcept;
     unsigned int                randomUnsignedInt() noexcept;
-
-} // namespace Random
-} // namespace Util
+} // namespace Util::Random
 
 #endif // UTIL_RANDOM_H_INC
 
