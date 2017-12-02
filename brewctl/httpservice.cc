@@ -7,8 +7,8 @@
 */
 
 #include "include/httpservice.h"
-#include "include/registry.h"
-#include "include/thread.h"
+#include "include/framework/registry.h"
+#include "include/framework/thread.h"
 #include <cstdlib>          // NULL
 
 extern "C"

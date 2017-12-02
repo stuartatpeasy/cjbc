@@ -7,8 +7,8 @@
 */
 
 #include "include/peripherals/lcd.h"
-#include "include/log.h"
-#include "include/registry.h"
+#include "include/framework/log.h"
+#include "include/framework/registry.h"
 #include <cstdint>
 #include <cstdio>
 #include <cstdarg>

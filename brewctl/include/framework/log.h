@@ -1,5 +1,5 @@
-#ifndef LOG_H_INC
-#define LOG_H_INC
+#ifndef FRAMEWORK_LOG_H_INC
+#define FRAMEWORK_LOG_H_INC
 /*
     log.h: global logging functions
 
@@ -51,5 +51,5 @@ bool doLog(const char * const file, const int line, const LogLevel_t level, cons
 bool doLogV(const char * const file, const int line, const LogLevel_t level, const std::string& fmt, va_list args)
         noexcept;
 
-#endif // LOG_H_INC
+#endif // FRAMEWORK_LOG_H_INC
 

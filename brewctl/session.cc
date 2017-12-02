@@ -7,10 +7,10 @@
 */
 
 #include "include/session.h"
-#include "include/log.h"
+#include "include/framework/log.h"
+#include "include/framework/registry.h"
 #include "include/peripherals/effector.h"
 #include "include/peripherals/tempsensor.h"
-#include "include/registry.h"
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>      // NULL
 #include <ctime>        // ::time()

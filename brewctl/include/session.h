@@ -8,11 +8,11 @@
     Part of brewctl
 */
 
-#include "include/error.h"
+#include "include/framework/error.h"
+#include "include/framework/thread.h"
 #include "include/peripherals/defaulteffector.h"
 #include "include/peripherals/defaulttempsensor.h"
 #include "include/temperature.h"
-#include "include/thread.h"
 #include <ctime>        // ::time()
 #include <map>
 #include <memory>

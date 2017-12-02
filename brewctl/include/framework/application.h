@@ -1,5 +1,5 @@
-#ifndef APPLICATION_H_INC
-#define APPLICATION_H_INC
+#ifndef FRAMEWORK_APPLICATION_H_INC
+#define FRAMEWORK_APPLICATION_H_INC
 /*
     application.h: application container class
 
@@ -9,8 +9,8 @@
 */
 
 #include "include/avahiservice.h"
-#include "include/config.h"
-#include "include/error.h"
+#include "include/framework/config.h"
+#include "include/framework/error.h"
 #include "include/httpservice.h"
 #include "include/sessionmanager.h"
 #include <cstdint>
@@ -50,5 +50,5 @@ private:
     uint64_t                    systemId_;
 };
 
-#endif // APPLICATION_H_INC
+#endif // FRAMEWORK_APPLICATION_H_INC
 

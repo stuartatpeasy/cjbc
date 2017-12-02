@@ -9,7 +9,7 @@
     Part of brewctl
 */
 
-#include "include/error.h"
+#include "include/framework/error.h"
 #include "include/peripherals/defaulteffector.h"
 #include <memory>
 #include <string>

@@ -6,9 +6,9 @@
     Part of brewctl
 */
 
-#include "include/application.h"
-#include "include/log.h"
-#include "include/registry.h"
+#include "include/framework/application.h"
+#include "include/framework/log.h"
+#include "include/framework/registry.h"
 #include "include/util/net.h"
 #include "include/util/random.h"
 #include "include/util/sys.h"

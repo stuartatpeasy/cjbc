@@ -1,5 +1,5 @@
-#ifndef THREAD_H_INC
-#define THREAD_H_INC
+#ifndef FRAMEWORK_THREAD_H_INC
+#define FRAMEWORK_THREAD_H_INC
 /*
     thread.h: interface defining a class intended to run in its own thread
 
@@ -27,5 +27,5 @@ protected:
     volatile bool       running_;
 };
 
-#endif // THREAD_H_INC
+#endif // FRAMEWORK_THREAD_H_INC
 

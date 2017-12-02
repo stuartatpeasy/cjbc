@@ -1,5 +1,5 @@
-#ifndef REGISTRY_H_INC
-#define REGISTRY_H_INC
+#ifndef FRAMEWORK_REGISTRY_H_INC
+#define FRAMEWORK_REGISTRY_H_INC
 /*
     registry.h: acts as a container for pseudo-global data
 
@@ -8,8 +8,8 @@
     Part of brewctl
 */
 
-#include "include/config.h"
-#include "include/error.h"
+#include "include/framework/config.h"
+#include "include/framework/error.h"
 #include "include/peripherals/adc.h"
 #include "include/peripherals/gpioport.h"
 #include "include/peripherals/lcd.h"
@@ -47,5 +47,5 @@ private:
     LCD                 lcd_;
 };
 
-#endif // REGISTRY_H_INC
+#endif // FRAMEWORK_REGISTRY_H_INC
 

@@ -9,7 +9,7 @@
 */
 
 #include "include/sqlite/sqlitecolumn.h"
-#include "include/error.h"
+#include "include/framework/error.h"
 #include <string>
 #include <map>
 #include <memory>

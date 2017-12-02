@@ -8,7 +8,7 @@
     Part of brewctl
 */
 
-#include "include/config.h"
+#include "include/framework/config.h"
 #include "include/peripherals/gpioport.h"
 #include <mutex>
 

@@ -10,8 +10,8 @@
 */
 
 
-#include "include/config.h"
-#include "include/error.h"
+#include "include/framework/config.h"
+#include "include/framework/error.h"
 #include "include/peripherals/gpioport.h"
 #include <cstddef>
 #include <cstdint>

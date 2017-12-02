@@ -7,7 +7,7 @@
 */
 
 #include "include/peripherals/shiftreg.h"
-#include "include/registry.h"
+#include "include/framework/registry.h"
 
 extern "C"
 {

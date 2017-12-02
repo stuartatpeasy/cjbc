@@ -7,7 +7,7 @@
 */
 
 #include "include/sessionmanager.h"
-#include "include/log.h"
+#include "include/framework/log.h"
 #include "include/peripherals/shiftreg.h"
 #include "include/peripherals/tempsensor.h"
 #include "include/temperature.h"

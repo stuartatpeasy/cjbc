@@ -1,5 +1,5 @@
-#ifndef ERROR_H_INC
-#define ERROR_H_INC
+#ifndef FRAMEWORK_ERROR_H_INC
+#define FRAMEWORK_ERROR_H_INC
 /*
     error.h: declares the Error class, which acts as a container for runtime errors and their descriptions.
 
@@ -79,5 +79,5 @@ private:
 void formatError(Error * const err, const ErrorCode_t code, ...) noexcept;
 void formatErrorWithErrno(Error * const err, const ErrorCode_t code, ...) noexcept;
 
-#endif // ERROR_H_INC
+#endif // FRAMEWORK_ERROR_H_INC
 

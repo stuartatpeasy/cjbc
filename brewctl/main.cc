@@ -6,8 +6,8 @@
     Part of brewctl
 */
 
-#include "include/application.h"
-#include "include/error.h"
+#include "include/framework/application.h"
+#include "include/framework/error.h"
 
 extern "C"
 {

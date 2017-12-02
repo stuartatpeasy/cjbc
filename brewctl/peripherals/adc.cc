@@ -7,7 +7,7 @@
 */
 
 #include "include/peripherals/adc.h"
-#include "include/registry.h"
+#include "include/framework/registry.h"
 
 using std::lock_guard;
 using std::mutex;

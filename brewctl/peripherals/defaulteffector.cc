@@ -8,8 +8,8 @@
     Part of brewctl
 */
 
-#include "include/log.h"
 #include "include/peripherals/defaulteffector.h"
+#include "include/framework/log.h"
 
 
 DefaultEffector::DefaultEffector(const int channel, const std::string& name) noexcept

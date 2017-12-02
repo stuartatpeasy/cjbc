@@ -1,5 +1,5 @@
-#ifndef CONFIG_H_INC
-#define CONFIG_H_INC
+#ifndef FRAMEWORK_CONFIG_H_INC
+#define FRAMEWORK_CONFIG_H_INC
 /*
     config.h: provides an abstraction for reading config files
 
@@ -44,5 +44,5 @@ protected:
     ConfigData_t            data_;
 };
 
-#endif // CONFIG_H_INC
+#endif // FRAMEWORK_CONFIG_H_INC
 

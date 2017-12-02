@@ -7,7 +7,7 @@
 */
 
 #include "include/sqlite/sqlitecolumn.h"
-#include "include/log.h"
+#include "include/framework/log.h"
 #include "include/sqlite/sqlitestmt.h"
 
 

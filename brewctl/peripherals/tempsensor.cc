@@ -7,9 +7,9 @@
     Part of brewctl
 */
 
-#include "include/log.h"
+#include "include/framework/log.h"
+#include "include/framework/registry.h"
 #include "include/peripherals/tempsensor.h"
-#include "include/registry.h"
 #include "include/sqlite/sqlitestmt.h"
 #include <string>
 

@@ -6,8 +6,8 @@
     Part of brewctl
 */
 
-#include "include/thread.h"
-#include "include/registry.h"
+#include "include/framework/thread.h"
+#include "include/framework/registry.h"
 #include "include/util/thread.h"
 
 

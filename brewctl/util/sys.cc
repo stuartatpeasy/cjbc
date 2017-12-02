@@ -7,7 +7,7 @@
 */
 
 #include "include/util/sys.h"
-#include "include/registry.h"
+#include "include/framework/registry.h"
 #include <cstdlib>          // NULL
 
 extern "C"
