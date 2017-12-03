@@ -15,6 +15,8 @@
 namespace JSON
 {
 
+class Array;
+
 class Object
 {
 public:
@@ -38,6 +40,8 @@ public:
     std::string     getString() const noexcept;
     std::string     getStringExt(int flags) const noexcept;
     Type_t          type() const noexcept { return type_; };
+    void            addObject(const std::string& key, Object obj) const noexcept;
+    void            addArray(Array array) const noexcept;
 
 protected:
     Type_t          type_;
@@ -45,7 +49,7 @@ protected:
     
 };
 
-}
+} // namespace JSON
 
 #endif // INCLUDE_SERVICE_JSON_OBJECT_H_INC
 

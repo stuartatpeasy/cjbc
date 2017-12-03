@@ -17,6 +17,7 @@ namespace JSON
 template<typename T>
 class ObjectType : public Object
 {
+public:
             ObjectType<T>() noexcept;
             ObjectType<T>(const T& val) noexcept;
     T       get() const noexcept;
@@ -25,7 +26,7 @@ private:
     T       val_;
 };
 
-}
+} // namespace JSON
 
 #endif // INCLUDE_SERVICE_JSON_OBJECTTYPE_H_INC
 

@@ -105,5 +105,5 @@ bool ObjectType<bool>::get() const noexcept
     return ::json_object_get_boolean(jobj_);
 }
 
-}
+} // namespace JSON
 
