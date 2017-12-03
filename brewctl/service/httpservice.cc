@@ -31,7 +31,7 @@ HttpService::HttpService(const unsigned short port) noexcept
 
 // run() - main exection method for the Service thread.  Start the daemon, accept connections, etc.
 //
-void HttpService::run() noexcept
+bool HttpService::run() noexcept
 {
     running_ = true;
     setName("http");
@@ -44,7 +44,11 @@ void HttpService::run() noexcept
     }
 
     // Stop service
+    logInfo("HTTP service stopping");
     MHD_stop_daemon(daemon_);
+    running_ = false;
+
+    return false;
 }
 
 

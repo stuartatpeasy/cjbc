@@ -197,6 +197,48 @@ bool setUid(const string& username, Error * const err) noexcept
 }
 
 
+// readPidFile() - read a PID from the file specified in <filename> and return it.  Return -1 if the file could not be
+// read, or its contents is not a valid PID.
+//
+int readPidFile(const string& filename, Error * const err) noexcept
+{
+    int fd, nread;
+    char buffer[64];
+
+    errno = 0;
+    fd = ::open(filename.c_str(), O_RDONLY);
+    if(fd == -1)
+    {
+        // If the file was not found, return -1 without setting an error in <err>.  Otherwise, report the error through
+        // <err>.
+        if(errno != ENOENT)
+            formatError(err, SYSCALL_FAILED, "open()");
+
+        return -1;
+    }
+
+    if(!checkSyscall(nread = ::read(fd, buffer, sizeof(buffer) - 1), "read()", err))
+    {
+        ::close(fd);
+        return -1;
+    }
+
+    ::close(fd);
+    buffer[nread] = '\0';
+    string pidstr = buffer;
+
+    if(nread && Util::String::isIntStr(pidstr))
+    {
+        int pidval = ::stol(pidstr);
+        if(pidval > 0)
+            return pidval;
+    }
+
+    formatError(err, CORRUPT_PIDFILE, filename.c_str());
+    return -1;
+}
+
+
 // writePidFile() - write the current process ID to the file specified by <filename>, after first verifying that the
 // file does not already contain the PID of a running process.  Returns true on success; false otherwise.
 //

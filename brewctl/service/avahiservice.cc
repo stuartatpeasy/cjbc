@@ -61,6 +61,13 @@ AvahiService::AvahiService(const std::string& name, const unsigned short port, E
         simplePoll_ = NULL;
         return;
     }
+
+    if(simplePoll_ == NULL)
+    {
+        ::avahi_client_free(client_);
+        logWarning("AvahiService::run(): simplePoll_ is NULL; not entering poll loop");
+        return;
+    }
 }
 
 
@@ -81,28 +88,34 @@ AvahiService::~AvahiService()
 
 // run() - main function.  Runs in its own thread to execute the Avahi simple poll loop.
 //
-void AvahiService::run() noexcept
+bool AvahiService::run() noexcept
 {
-    running_ = true;
     setName("avahi");
-
-    if(simplePoll_ == NULL)
-        logWarning("AvahiService::run(): simplePoll_ is NULL; not entering poll loop");
-
-    int ret = 0;
     logDebug("AvahiService::run(): entering simple poll loop");
         
-    while(!ret)
+    running_ = true;
+    int ret = 0;
+    while(!ret && !stop_)
+    {
         ret = ::avahi_simple_poll_iterate(simplePoll_, AVAHI_POLL_INTERVAL_MS);
 
-    if(ret == -1)
-        logError("AvahiService::run(): avahi_simple_poll_iterate() failed");
-    else if(ret == 1)
-        logInfo("AvahiService::run(): quit request has been scheduled");
-    else if(!ret)
-        logInfo("AvahiService::run(): exiting polling loop");
-    else
-        logError("AvahiService::run(): unknown return code %d returned by avahi_simple_poll_iterate()", ret);
+        if(ret == -1)
+            logError("AvahiService::run(): avahi_simple_poll_iterate() failed");
+        else if(ret == 1)
+            logInfo("AvahiService::run(): quit request has been scheduled");
+        else if(ret != 0)
+            logError("AvahiService::run(): unknown return code %d returned by avahi_simple_poll_iterate()", ret);
+    }
+
+    logInfo("Avahi service stopping");
+    ::avahi_client_free(client_);
+    client_ = NULL;
+    ::avahi_simple_poll_free(simplePoll_);
+    simplePoll_ = NULL;
+
+    running_ = false;
+
+    return true;
 }
 
 

@@ -7,6 +7,7 @@
 */
 
 #include "include/framework/error.h"
+#include "include/framework/log.h"
 #include <cerrno>
 #include <cstdarg>
 #include <cstdio>
@@ -22,7 +23,7 @@ using std::string;
 
 static map<ErrorCode_t, string> errorMessages =
 {
-    {NO_ERROR,                          ""},                                    // Not really an error code
+    {NO_ERROR,                          "Success"},         // Not really an error code
     {MISSING_ARGVAL,                    "Missing value for argument '%s'"},
     {UNKNOWN_ARG,                       "Unrecognised argument '%s'"},
     {CFG_FILE_OPEN_FAILED,              "Failed to open config file '%s'"},
@@ -38,6 +39,10 @@ static map<ErrorCode_t, string> errorMessages =
     {ALREADY_RUNNING,                   "The process is already running"},
     {NOT_RUNNING,                       "The process is not running"},
     {INCOMPLETE_WRITE,                  "Incomplete write to file %s: tried to write %d bytes; actually wrote %d"},
+    {CORRUPT_PIDFILE,                   "PID file '%s' appears to be corrupt.  Delete the file, and then manually stop "
+                                        "the service"},
+    {CONFIG_KEY_MISSING,                "A required key, '%s', is not present in the configuration"},
+    {SWITCH_USER_INSUFFICIENT_PRIV,     "Insufficient privilege to switch to user %s"},
     {DB_OPEN_FAILED,                    "Failed to create or open database file '%s': %s (%d)"},
     {DB_TOO_FEW_COLUMNS,                "Query returned too few columns"},
     {DB_SQLITE_ERROR,                   "SQLite error: %s (%d)"},
@@ -210,13 +215,14 @@ void Error::reset() noexcept
 //
 void formatError(Error * const err, const ErrorCode_t code, ...) noexcept
 {
-    if(err != nullptr)
-    {
-        va_list args;
-        va_start(args, code);
+    Error tmp;
+    va_list args;
+    va_start(args, code);
 
-        err->formatV(code, args);
-    }
+    Error& e = (err != nullptr) ? *err : tmp;
+
+    e.formatV(code, args);
+    logError("%s [%d]", e.message(), e.code());
 }
 
 
@@ -225,13 +231,14 @@ void formatError(Error * const err, const ErrorCode_t code, ...) noexcept
 //
 void formatErrorWithErrno(Error * const err, const ErrorCode_t code, ...) noexcept
 {
-    if(err != nullptr)
-    {
-        va_list args;
-        va_start(args, code);
+    Error tmp;
+    va_list args;
+    va_start(args, code);
 
-        err->formatV(code, args);
-        err->append(": %s (%d)", ::strerror(errno), errno);
-    }
+    Error& e = (err != nullptr) ? *err : tmp;
+
+    e.formatV(code, args);
+    e.append(": %s (%d)", ::strerror(errno), errno);
+    logError("%s [%d]", e.message(), e.code());
 }
 

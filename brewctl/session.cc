@@ -277,12 +277,12 @@ time_t Session::remainingTime() const noexcept
 
 // run() - entry-point for session management.  This method will be called in a loop by SessionManager::run()
 //
-void Session::run() noexcept
+bool Session::run() noexcept
 {
     running_ = true;
     setName("sess");
 
-    while(1)
+    while(!stop_)
     {
         const time_t now = ::time(NULL);
         currentTemp();      // Always sense the current temperature: oversampling maintains the moving average
@@ -295,5 +295,10 @@ void Session::run() noexcept
         
         ::usleep(10 * 1000);
     }
+
+    logInfo("Session %d stopping", id_);
+    running_ = false;
+
+    return true;
 }
 

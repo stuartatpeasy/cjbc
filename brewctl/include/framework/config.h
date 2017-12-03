@@ -8,8 +8,10 @@
     Part of brewctl
 */
 
+#include "include/framework/error.h"
 #include "include/stringvalue.h"
 #include <map>
+#include <memory>
 #include <string>
 #include <fstream>
 
@@ -29,6 +31,7 @@ public:
     void                    reset() noexcept;
     
     bool                    exists(const std::string& key) const noexcept;
+    bool                    require(const std::string& key, Error * const err = nullptr) const noexcept;
     std::string             operator()(const std::string& key) noexcept;
     
     template<typename T> T  get(const std::string& key, const T& defaultVal = T()) noexcept

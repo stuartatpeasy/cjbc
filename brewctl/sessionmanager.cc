@@ -116,7 +116,7 @@ char SessionManager::getSessionTypeIndicator(const SessionType_t type) const noe
 
 // run() - main loop.
 //
-void SessionManager::run() noexcept
+bool SessionManager::run() noexcept
 {
     running_ = true;
     setName("smgr");
@@ -127,7 +127,7 @@ void SessionManager::run() noexcept
 
     lcd.printAt(18, 0, "\xdf""C");
 
-    while(1)
+    while(!stop_)
     {
         const time_t now = ::time(NULL);
         tempSensorAmbient_->sense();
@@ -201,5 +201,16 @@ void SessionManager::run() noexcept
 
         ::usleep(10 * 1000);
     }
+
+    logInfo("SessionManager stopping");
+
+    for(auto session : sessions_)
+        session->stop();
+
+    lcd.clear();
+    lcd.backlight(false);
+    running_ = false;
+
+    return true;
 }
 

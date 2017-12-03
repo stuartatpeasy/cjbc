@@ -17,7 +17,7 @@ public:
                         Thread() noexcept;
     virtual             ~Thread() = default;
 
-    virtual void        run() noexcept = 0;
+    virtual bool        run() noexcept = 0;
     void                stop() noexcept;
     bool                isRunning() const noexcept { return running_; };
     bool                setName(const std::string& name) noexcept;

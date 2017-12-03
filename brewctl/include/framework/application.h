@@ -36,9 +36,11 @@ friend void appSignalHandler(int signum) noexcept;
 public:
                                 Application(int argc, char **argv, Error * const err) noexcept;
     bool                        run(Error * const err = nullptr) noexcept;
+    void                        stop() noexcept;
 
 private:
     bool                        parseArgs(int argc, char **argv, Error * const err) noexcept;
+    bool                        sendQuitSignal(Error * const err = nullptr) noexcept;
     bool                        installQuitHandler(Error * const err) noexcept;
     void                        signalHandler(int signum) noexcept;
     uint64_t                    getSystemId() noexcept;
@@ -49,6 +51,7 @@ private:
     SessionManager              sessionManager_;
     HttpService *               httpService_;
     uint64_t                    systemId_;
+    volatile bool               stop_;
 };
 
 #endif // FRAMEWORK_APPLICATION_H_INC

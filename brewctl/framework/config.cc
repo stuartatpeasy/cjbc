@@ -121,6 +121,20 @@ bool Config::exists(const std::string& key) const noexcept
 }
 
 
+// require() - return true if a key named <key> exists; return false and set <err> otherwise.
+//
+bool Config::require(const std::string& key, Error * const err) const noexcept
+{
+    if(!exists(key))
+    {
+        formatError(err, CONFIG_KEY_MISSING, key.c_str());
+        return false;
+    }
+
+    return true;
+}
+
+
 // operator() - return the value of the key identified by the argument; return an empty string if no such key exists.
 //
 string Config::operator()(const string& key) noexcept

@@ -14,9 +14,7 @@
 #include "include/util/sys.h"
 #include "include/util/thread.h"
 #include <cerrno>
-#include <cstdarg>
 #include <cstdlib>
-#include <cstdio>
 #include <cstring>
 #include <fstream>
 #include <iomanip>
@@ -75,7 +73,7 @@ static ConfigData_t defaultConfig =
 // ctor - initialise top-level objects; prepare to run application.
 //
 Application::Application(int argc, char **argv, Error * const err) noexcept
-    : avahiService_(nullptr), httpService_(nullptr), systemId_(0)
+    : avahiService_(nullptr), httpService_(nullptr), systemId_(0), stop_(false)
 {
     gApp = this;
     appName_ = argc ? argv[0] : DEFAULT_APP_NAME;
@@ -117,7 +115,13 @@ bool Application::installQuitHandler(Error * const err) noexcept
 //
 void Application::signalHandler(int signum) noexcept
 {
-    logDebug("Received signal %d", signum);
+    if(signum == SIGQUIT)
+    {
+        logInfo("Received SIGQUIT; stopping");
+        stop();
+    }
+    else
+        logInfo("Ignoring spurious signal %d", signum);
 }
 
 
@@ -128,6 +132,12 @@ bool Application::parseArgs(int argc, char **argv, Error * const err) noexcept
     queue<string> args;
     for(int i = 1; i < argc; ++i)
         args.push(argv[i]);
+
+    if((args.size() == 1) && (args.back() == "stop"))
+    {
+        stop_ = true;       // Prevent this instance of the application from starting up
+        return sendQuitSignal(err);
+    }
 
     while(!args.empty())
     {
@@ -176,6 +186,31 @@ bool Application::parseArgs(int argc, char **argv, Error * const err) noexcept
 //
 bool Application::run(Error * const err) noexcept
 {
+    // Don't start the application if the "stop" flag is set.  This is the case when the application is executed with
+    // the "stop" command-line argument - the intention is to stop a running instance of the application, not to start a
+    // new one.
+    if(stop_)
+        return true;
+
+    // Verify that we will be able to drop privileges, if this has been specified in config.  We can drop privileges if
+    // we are root, or if the requested runtime user is the same as the current user.
+    if(config_.exists("application.user"))
+    {
+        const string requestedUser = config_.get<string>("application.user");
+        const uid_t requestedUid = Util::Sys::getUid(requestedUser);
+
+        if(requestedUid == (uid_t) -1)
+            return false;       // No such user
+
+        const uid_t currentUid = ::getuid();
+
+        if(currentUid && (currentUid != requestedUid))
+        {
+            formatError(err, SWITCH_USER_INSUFFICIENT_PRIV, requestedUser);
+            return false;
+        }
+    }
+
     // Daemonise, if specified in config
     if(config_.strToBool("application.daemonise") && !Util::Sys::daemonise(err))
         return false;
@@ -185,7 +220,7 @@ bool Application::run(Error * const err) noexcept
         return false;
 
     // Create pidfile
-    if(config_.exists("application.pid_file") &&
+    if(!config_.require("application.pid_file") ||
        !Util::Sys::writePidFile(config_.get<string>("application.pid_file"), err))
         return false;
 
@@ -218,9 +253,79 @@ bool Application::run(Error * const err) noexcept
 
     Util::Thread::setName(Registry::instance().config()("application.short_name") + ": main");
 
-    // Loop indefinitely
-    while(1)
+    // Loop until a stop signal is received
+    while(!stop_)
         ::sleep(1);
+
+    // Signal child threads to stop
+    if(httpService_ != nullptr)
+    {
+        logInfo("Stopping HTTP service");
+        httpService_->stop();
+    }
+
+    if(avahiService_ != nullptr)
+    {
+        logInfo("Stopping Avahi service");
+        avahiService_->stop();
+    }
+
+    logInfo("Stopping session manager");
+    sessionManager_.stop();
+
+    // Wait for child threads to stop
+    while(httpService_->isRunning() || avahiService_->isRunning() || sessionManager_.isRunning())
+    {
+        logInfo("Waiting for child threads to stop");
+        ::sleep(1);
+    }
+
+    // Remove PID file
+    ::unlink(config_.get<string>("application.pid_file").c_str());
+
+    return true;
+}
+
+
+// stop() - stop application
+//
+void Application::stop() noexcept
+{
+    stop_ = true;
+}
+
+
+// sendQuitSignal() - look up the PID of a running instance of this application from the application's PID file; send a
+// SIGQUIT signal to the process in order to stop it.
+//
+bool Application::sendQuitSignal(Error * const err) noexcept
+{
+    if(!config_.require("application.pid_file"))
+        return false;
+
+    const int pid = Util::Sys::readPidFile(config_.get<string>("application.pid_file"), err);
+    if(pid == -1)
+    {
+        // If readPidFile() returned -1 and did not set <err>, the PID file doesn't exist, i.e. the application is not
+        // running.  In all other cases where -1 is returned, <err> will be set to indicate an error which occurred
+        // while attempting to open or read the file.
+        if(!err->code())
+            formatError(err, NOT_RUNNING);
+
+        return false;
+    }
+
+    logInfo("Sending SIGQUIT to process %d", pid);
+    errno = 0;
+    if(::kill(pid, SIGQUIT) == -1)
+    {
+        if(errno == ESRCH)
+            formatError(err, NOT_RUNNING);
+        else
+            formatErrorWithErrno(err, SYSCALL_FAILED, "kill()");
+
+        return false;
+    }
 
     return true;
 }

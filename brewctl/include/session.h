@@ -53,7 +53,7 @@ public:
     bool                        isNotStartedYet() const noexcept;
     bool                        isActive() const noexcept;
     bool                        isComplete() const noexcept;
-    void                        run() noexcept;
+    bool                        run() noexcept;
     int                         gyleId() const noexcept { return gyle_id_; };
     std::string                 gyleName() const noexcept { return gyle_; };
     time_t                      remainingTime() const noexcept;

@@ -14,6 +14,7 @@
 #include "include/peripherals/defaulttempsensor.h"
 #include "include/session.h"
 #include <cstddef>
+#include <memory>
 #include <vector>
 
 
@@ -29,7 +30,7 @@ public:
     SessionManager&                     operator=(SessionManager&& rhs) = delete;
 
     bool                                init(Error * const err = nullptr) noexcept;
-    void                                run() noexcept;
+    bool                                run() noexcept;
 
 private:
     char                                getTempControlIndicator(const SessionTempControlState_t state) const noexcept;
