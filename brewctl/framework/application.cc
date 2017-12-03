@@ -133,12 +133,22 @@ bool Application::parseArgs(int argc, char **argv, Error * const err) noexcept
     for(int i = 1; i < argc; ++i)
         args.push(argv[i]);
 
-    if((args.size() == 1) && (args.back() == "stop"))
+    // Handle argument-less command-line forms "<app> stop" and "<app> status"
+    if(args.size() == 1)
     {
-        stop_ = true;       // Prevent this instance of the application from starting up
-        return sendQuitSignal(err);
+        if(args.back() == "stop")
+        {
+            stop_ = true;       // Prevent this instance of the application from starting up
+            return sendQuitSignal(err);
+        }
+        else if(args.back() == "status")
+        {
+            stop_ = true;
+            return isRunning(err);
+        }
     }
 
+    // Parse command-line arguments
     while(!args.empty())
     {
         const string arg = args.front();
@@ -295,10 +305,10 @@ void Application::stop() noexcept
 }
 
 
-// sendQuitSignal() - look up the PID of a running instance of this application from the application's PID file; send a
+// sendSignal() - look up the PID of a running instance of this application from the application's PID file; send a
 // SIGQUIT signal to the process in order to stop it.
 //
-bool Application::sendQuitSignal(Error * const err) noexcept
+bool Application::sendSignal(const int signum, Error * const err) noexcept
 {
     if(!config_.require("application.pid_file"))
         return false;
@@ -317,7 +327,7 @@ bool Application::sendQuitSignal(Error * const err) noexcept
 
     logInfo("Sending SIGQUIT to process %d", pid);
     errno = 0;
-    if(::kill(pid, SIGQUIT) == -1)
+    if(::kill(pid, signum) == -1)
     {
         if(errno == ESRCH)
             formatError(err, NOT_RUNNING);
@@ -328,6 +338,29 @@ bool Application::sendQuitSignal(Error * const err) noexcept
     }
 
     return true;
+}
+
+
+// sendQuitSignal() - look up the PID of a running instance of this application from the application's PID file; send a
+// SIGQUIT signal to the process in order to stop it.
+//
+bool Application::sendQuitSignal(Error * const err) noexcept
+{
+    return sendSignal(SIGQUIT, err);
+}
+
+
+// isRunning() - return boolean indicating whether an instance of this application is currently running.
+//
+bool Application::isRunning(Error * const err) noexcept
+{
+    if(sendSignal(0, err))
+    {
+        formatError(err, ALREADY_RUNNING);
+        return true;
+    }
+
+    return false;
 }
 
 

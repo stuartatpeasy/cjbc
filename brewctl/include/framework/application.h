@@ -40,7 +40,9 @@ public:
 
 private:
     bool                        parseArgs(int argc, char **argv, Error * const err) noexcept;
+    bool                        sendSignal(const int signum, Error * const err = nullptr) noexcept;
     bool                        sendQuitSignal(Error * const err = nullptr) noexcept;
+    bool                        isRunning(Error * const err = nullptr) noexcept;
     bool                        installQuitHandler(Error * const err) noexcept;
     void                        signalHandler(int signum) noexcept;
     uint64_t                    getSystemId() noexcept;
