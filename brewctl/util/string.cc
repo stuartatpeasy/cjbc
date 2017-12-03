@@ -7,6 +7,7 @@
 */
 
 #include "include/util/string.h"
+#include <cstdlib>      // ::strtol()
 #include <limits>
 
 using std::numeric_limits;
@@ -24,10 +25,9 @@ bool isIntStr(const string& str, int* intVal)
 {
     if(str.length())
     {
-        size_t endptr;
-        long longVal = stol(str, &endptr);
-        if((endptr == str.length()) && (longVal >= numeric_limits<int>::min()) &&
-           (longVal <= numeric_limits<int>::max()))
+        char * endptr;
+        long longVal = ::strtol(str.c_str(), &endptr, 10);
+        if((*endptr == '\0') && (longVal >= numeric_limits<int>::min()) && (longVal <= numeric_limits<int>::max()))
         {
             if(intVal != nullptr)
                 *intVal = (int) longVal;

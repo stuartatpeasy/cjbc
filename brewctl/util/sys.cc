@@ -7,8 +7,9 @@
 */
 
 #include "include/util/sys.h"
-#include "include/util/string.h"
+#include "include/framework/log.h"
 #include "include/framework/registry.h"
+#include "include/util/string.h"
 #include <boost/regex.hpp>
 #include <cstdlib>          // NULL
 
@@ -18,6 +19,7 @@ extern "C"
 #include <pthread.h>
 #include <pwd.h>
 #include <signal.h>
+#include <sys/file.h>       // ::flock()
 #include <sys/resource.h>   // ::getrlimit()
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -25,6 +27,7 @@ extern "C"
 }
 
 using boost::regex;
+using std::stol;
 using std::string;
 
 
@@ -158,7 +161,8 @@ uid_t getUid(const string& username, Error * const err) noexcept
         if(intUid >= 0)
             return (uid_t) intUid;
 
-        return false;
+        formatError(err, INVALID_USER_ID, intUid);
+        return (uid_t) -1;
     }
 
     errno = 0;
@@ -168,10 +172,115 @@ uid_t getUid(const string& username, Error * const err) noexcept
         if(errno)
             formatErrorWithErrno(err, SYSCALL_FAILED, "getpwnam()");
 
+        formatError(err, NO_SUCH_USER, username.c_str());
         return (uid_t) -1;
     }
 
     return pw->pw_uid;
+}
+
+
+// setUid() - given a username, or a numeric user ID, in <username>, change the user ID of the current process to the
+// specified user.  Returns true on success; false otherwise.
+//
+bool setUid(const string& username, Error * const err) noexcept
+{
+    const uid_t uid = getUid(username, err);
+    if(uid == (uid_t) -1)
+        return false;           // No such user, or username lookup failed
+
+    const bool ret = checkSyscall(::setuid(uid), "setuid()", err);
+    if(ret)
+        logInfo("Changed to user '%s' (%d)", username.c_str(), uid);
+
+    return ret;
+}
+
+
+// writePidFile() - write the current process ID to the file specified by <filename>, after first verifying that the
+// file does not already contain the PID of a running process.  Returns true on success; false otherwise.
+//
+bool writePidFile(const string& filename, Error * const err) noexcept
+{
+    int fd, nread;
+    char buffer[64];
+
+    // Attempt to open or create the PID file
+    errno = 0;
+    fd = ::open(filename.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if(!checkSyscall(fd, "open()", err))
+        return false;
+
+    // Read the contents of the file; if it is non-empty, it should contain an integer PID.
+    if(!checkSyscall(nread = ::read(fd, buffer, sizeof(buffer) - 1), "read()", err))
+    {
+        ::close(fd);
+        return false;
+    }
+
+    buffer[nread] = '\0';
+    string pidstr = buffer;
+
+    if(nread)
+    {
+        if(Util::String::isIntStr(pidstr))
+        {
+            int pidval = ::stol(pidstr);
+            if(pidval > 0)
+            {
+                // Found a valid PID in the PID file; see whether it represents a running process.
+                errno = 0;
+                if(::kill(pidval, 0) == 0)
+                {
+                    formatError(err, ALREADY_RUNNING);
+                    ::close(fd);
+                    return false;
+                }
+                else if(errno != ESRCH)
+                {
+                    formatErrorWithErrno(err, SYSCALL_FAILED, "kill()");
+                    ::close(fd);
+                    return false;
+                }
+                else
+                    logInfo("Truncating PID file containing stale process ID %d", pidval);
+            }
+        }
+        else
+            logWarning("PID file '%s' seems to be corrupt (contents '%s'); truncating it", filename.c_str(), pidstr);
+
+        // Found data in the PID file, but it does not represent a running process.  Truncate the PID file.
+        if(!checkSyscall(::ftruncate(fd, 0), "ftruncate()", err) ||
+           !checkSyscall(::lseek(fd, 0, SEEK_SET), "lseek()", err))
+        {
+            ::close(fd);
+            return false;
+        }
+    }
+
+    // At this point, we can be confident that the PID file is open and empty, and we are the only running process of
+    // our type.
+    if(!checkSyscall(::sprintf(buffer, "%d", ::getpid()), "sprintf()", err))
+        return false;
+
+    int len = ::strlen(buffer);
+    const int ret = ::write(fd, buffer, len);
+
+    if(ret == -1)
+    {
+        formatErrorWithErrno(err, SYSCALL_FAILED, "write()");
+        ::close(fd);
+        return false;
+    }
+
+    if(ret != len)
+    {
+        formatError(err, INCOMPLETE_WRITE, filename.c_str(), len, ret);
+        ::close(fd);
+        return false;
+    }
+
+    return checkSyscall(::close(fd), "close()", err);
 }
 
 } // namespace Util::Sys

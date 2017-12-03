@@ -43,8 +43,10 @@ using std::thread;
 void appSignalHandler(int signum) noexcept;
 static Application *gApp;
 
-const char * const      DEFAULT_AVAHI_SERVICE_NAME  = "brewctl";
-const unsigned short    DEFAULT_HTTP_SERVICE_PORT   = 1900;
+static const char * const   DEFAULT_AVAHI_SERVICE_NAME  = "brewctl";
+static const char * const   DEFAULT_CONFIG_LOCATION     = "/etc/brewctl.conf";
+static const char * const   DEFAULT_APP_NAME            = "<NoAppName>";
+static const unsigned short DEFAULT_HTTP_SERVICE_PORT   = 1900;
 
 // Default values for configuration keys
 static ConfigData_t defaultConfig =
@@ -52,9 +54,9 @@ static ConfigData_t defaultConfig =
     {"adc.ref_voltage",             StringValue("5.012")},
     {"adc.isource_ua",              StringValue("146")},                    // ADC current-source current in microamps
     {"application.daemonise",       StringValue("0")},
-    {"application.pid_file",        StringValue("/var/run/brewctl.pid")},
+    {"application.pid_file",        StringValue("/home/swallace/cjbc/brewctl/brewctl.pid")},   // FIXME - should be under /var/run/
     {"application.short_name",      StringValue("brewctl")},
-    {"application.user",            StringValue("brewctl")},
+    {"application.user",            StringValue("swallace")},
     {"database",                    StringValue("brewery.db")},             // FIXME - should be under /var/lib/brewctl
     {"log.method",                  StringValue("syslog")},
     {"log.level",                   StringValue("debug")},
@@ -76,44 +78,18 @@ Application::Application(int argc, char **argv, Error * const err) noexcept
     : avahiService_(nullptr), httpService_(nullptr), systemId_(0)
 {
     gApp = this;
-    appName_ = argc ? argv[0] : "<NoAppName>";
+    appName_ = argc ? argv[0] : DEFAULT_APP_NAME;
 
     Util::Random::seed();
 
-    // Check that we're running as root
-
-    // Create pidfile
-
-    // Drop permissions
-
     config_.add(defaultConfig);             // add default values to config
-    config_.add("/etc/brewctl.conf");       // default config file location
+    config_.add(DEFAULT_CONFIG_LOCATION);   // default config file location
 
     if(!parseArgs(argc, argv, err))
         return;
 
-    // FIXME error-checking in these methods
     logInit(config_("log.method"));
     logSetLevel(config_("log.level"));
-
-    if(!Registry::init(config_, err) ||             // Initialise registry
-       !sessionManager_.init(err))                  // Initialise session manager
-        return;
-
-    systemId_ = getSystemId();
-    ostringstream avahiServiceName;
-
-    avahiServiceName << config_.get<string>("system.avahi_service_name", DEFAULT_AVAHI_SERVICE_NAME)
-                     << "-"
-                     << std::hex << std::setw(12) << std::setfill('0') << systemId_;
-
-    const unsigned short port = config_.get("service.port", DEFAULT_HTTP_SERVICE_PORT);
-
-    avahiService_ = new AvahiService(avahiServiceName.str(), port, err);
-    if(err->code())
-        return;
-
-    httpService_ = new HttpService(port);
 }
 
 
@@ -203,6 +179,34 @@ bool Application::run(Error * const err) noexcept
     // Daemonise, if specified in config
     if(config_.strToBool("application.daemonise") && !Util::Sys::daemonise(err))
         return false;
+
+    // Drop privileges, if specified in config
+    if(config_.exists("application.user") && !Util::Sys::setUid(config_.get<string>("application.user"), err))
+        return false;
+
+    // Create pidfile
+    if(config_.exists("application.pid_file") &&
+       !Util::Sys::writePidFile(config_.get<string>("application.pid_file"), err))
+        return false;
+
+    if(!Registry::init(config_, err) ||             // Initialise registry
+       !sessionManager_.init(err))                  // Initialise session manager
+        return false;
+
+    systemId_ = getSystemId();
+    ostringstream avahiServiceName;
+
+    avahiServiceName << config_.get<string>("system.avahi_service_name", DEFAULT_AVAHI_SERVICE_NAME)
+                     << "-"
+                     << std::hex << std::setw(12) << std::setfill('0') << systemId_;
+
+    const unsigned short port = config_.get("service.port", DEFAULT_HTTP_SERVICE_PORT);
+
+    avahiService_ = new AvahiService(avahiServiceName.str(), port, err);
+    if(err->code())
+        return false;
+
+    httpService_ = new HttpService(port);
 
     // Register SIGQUIT handler
     if(!installQuitHandler(err))
