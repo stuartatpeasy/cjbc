@@ -10,11 +10,14 @@
 #include "include/framework/registry.h"
 #include "include/framework/thread.h"
 #include <cstdlib>          // NULL
+#include <string>
 
 extern "C"
 {
 #include <unistd.h>
 }
+
+using std::string;
 
 
 int handleConnection(void *cls, struct MHD_Connection *connection, const char *url, const char *method,
@@ -66,7 +69,18 @@ int HttpService::handleConnection(struct MHD_Connection *connection, const char 
     (void) upload_data_size;
     (void) con_cls;
 
-    return MHD_NO;
+    const string body = "    <html><body>Hello</body></html>";
+
+    struct MHD_Response *response;
+    int ret;
+
+    logDebug("HTTP request: method=%s version=%s url=%s", method, version, url);
+    response = MHD_create_response_from_buffer(body.length(), (void *) body.c_str(), MHD_RESPMEM_PERSISTENT);
+
+    ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+    MHD_destroy_response(response);
+
+    return ret;
 }
 
 

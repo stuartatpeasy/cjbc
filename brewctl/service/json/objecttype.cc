@@ -1,22 +1,25 @@
 /*
-    jsonobjecttype.cc: wrapper around the type-specific libjson-c functions
+    objecttype.cc: wrapper around the type-specific libjson-c functions
 
     Stuart Wallace <stuartw@atom.net>, December 2017.
 
     Part of brewctl
 */
 
-#include "include/service/jsonobjecttype.h"
+#include "include/service/json/objecttype.h"
 #include <cstdint>
 #include <string>
 
 using std::string;
 
 
+namespace JSON
+{
+
 // ctor<int32_t> - construct an int32_t JSON object with the value specified in <val>
 //
 template<>
-JsonObjectType<int32_t>::JsonObjectType(const int32_t& val) noexcept
+ObjectType<int32_t>::ObjectType(const int32_t& val) noexcept
     : val_(val)
 {
     type_ = INT32;
@@ -25,7 +28,7 @@ JsonObjectType<int32_t>::JsonObjectType(const int32_t& val) noexcept
 
 
 template<>
-int32_t JsonObjectType<int32_t>::get() const noexcept
+int32_t ObjectType<int32_t>::get() const noexcept
 {
     return ::json_object_get_int(jobj_);
 }
@@ -34,7 +37,7 @@ int32_t JsonObjectType<int32_t>::get() const noexcept
 // ctor<int64_t> - construct an int64_t JSON object with the value specified in <val>
 //
 template<>
-JsonObjectType<int64_t>::JsonObjectType(const int64_t& val) noexcept
+ObjectType<int64_t>::ObjectType(const int64_t& val) noexcept
     : val_(val)
 {
     type_ = INT64;
@@ -43,7 +46,7 @@ JsonObjectType<int64_t>::JsonObjectType(const int64_t& val) noexcept
 
 
 template<>
-int64_t JsonObjectType<int64_t>::get() const noexcept
+int64_t ObjectType<int64_t>::get() const noexcept
 {
     return ::json_object_get_int64(jobj_);
 }
@@ -52,7 +55,7 @@ int64_t JsonObjectType<int64_t>::get() const noexcept
 // ctor<string> - construct a string JSON object with the value specified in <val>
 //
 template<>
-JsonObjectType<string>::JsonObjectType(const string& val) noexcept
+ObjectType<string>::ObjectType(const string& val) noexcept
     : val_(val)
 {
     type_ = STRING;
@@ -61,7 +64,7 @@ JsonObjectType<string>::JsonObjectType(const string& val) noexcept
 
 
 template<>
-string JsonObjectType<string>::get() const noexcept
+string ObjectType<string>::get() const noexcept
 {
     return ::json_object_get_string(jobj_);
 }
@@ -70,7 +73,7 @@ string JsonObjectType<string>::get() const noexcept
 // ctor<double> - construct a double JSON object with the value specified in <val>
 //
 template<>
-JsonObjectType<double>::JsonObjectType(const double& val) noexcept
+ObjectType<double>::ObjectType(const double& val) noexcept
     : val_(val)
 {
     type_ = DOUBLE;
@@ -79,7 +82,7 @@ JsonObjectType<double>::JsonObjectType(const double& val) noexcept
 
 
 template<>
-double JsonObjectType<double>::get() const noexcept
+double ObjectType<double>::get() const noexcept
 {
     return ::json_object_get_double(jobj_);
 }
@@ -88,7 +91,7 @@ double JsonObjectType<double>::get() const noexcept
 // ctor<bool> - construct a bool JSON object with the value specified in <val>
 //
 template<>
-JsonObjectType<bool>::JsonObjectType(const bool& val) noexcept
+ObjectType<bool>::ObjectType(const bool& val) noexcept
     : val_(val)
 {
     type_ = BOOL;
@@ -97,8 +100,10 @@ JsonObjectType<bool>::JsonObjectType(const bool& val) noexcept
 
 
 template<>
-bool JsonObjectType<bool>::get() const noexcept
+bool ObjectType<bool>::get() const noexcept
 {
     return ::json_object_get_boolean(jobj_);
+}
+
 }
 

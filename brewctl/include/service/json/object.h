@@ -1,7 +1,7 @@
-#ifndef INCLUDE_SERVICE_JSONOBJECT_H_INC
-#define INCLUDE_SERVICE_JSONOBJECT_H_INC
+#ifndef INCLUDE_SERVICE_JSON_OBJECT_H_INC
+#define INCLUDE_SERVICE_JSON_OBJECT_H_INC
 /*
-    jsonobject.h: wrapper around the libjson-c functions
+    object.h: wrapper around the libjson-c functions
 
     Stuart Wallace <stuartw@atom.net>, December 2017.
 
@@ -12,10 +12,13 @@
 #include <string>
 
 
-class JsonObject
+namespace JSON
+{
+
+class Object
 {
 public:
-    typedef enum JsonType
+    typedef enum Type
     {
         OBJECT,
         ARRAY,
@@ -24,23 +27,25 @@ public:
         STRING,
         BOOL,
         DOUBLE
-    } JsonType_t;
+    } Type_t;
 
-                    JsonObject() noexcept;
-    virtual         ~JsonObject() = default;
+                    Object() noexcept;
+    virtual         ~Object() = default;
 
                     operator std::string() const noexcept { return getString(); };
 
     int             length() const noexcept;
     std::string     getString() const noexcept;
     std::string     getStringExt(int flags) const noexcept;
-    JsonType_t      type() const noexcept { return type_; };
+    Type_t          type() const noexcept { return type_; };
 
 protected:
-    JsonType_t      type_;
+    Type_t          type_;
     json_object *   jobj_;
     
 };
 
-#endif // INCLUDE_SERVICE_JSONOBJECT_H_INC
+}
+
+#endif // INCLUDE_SERVICE_JSON_OBJECT_H_INC
 
