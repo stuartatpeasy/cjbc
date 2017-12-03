@@ -2,6 +2,7 @@
 avahi-daemon
 libavahi-client3
 libboost1.62
+libjson-c3
 libmicrohttpd12
 libsnmp-base
 libsqlite3-0
@@ -15,6 +16,7 @@ libboost1.62-dev    # earlier versions are probably OK
 libavahi-common-dev
 libavahi-client-dev
 libdbus-1-dev
+libjson-c-dev
 libmicrohttpd-dev
 make
 sqlite3

@@ -10,13 +10,7 @@ endif
 
 APPNAME := brewctl
 
-SOURCES := \
-    framework/application.cc framework/config.cc framework/error.cc framework/log.cc framework/registry.cc             \
-    framework/thread.cc main.cc peripherals/adc.cc peripherals/defaulteffector.cc peripherals/defaulttempsensor.cc     \
-    peripherals/effector.cc peripherals/gpiopin.cc peripherals/gpioport.cc peripherals/lcd.cc peripherals/shiftreg.cc  \
-    peripherals/spiport.cc peripherals/tempsensor.cc peripherals/thermistor.cc session.cc sessionmanager.cc            \
-    service/avahiservice.cc service/httpservice.cc sqlite/sqlite.cc sqlite/sqlitecolumn.cc sqlite/sqlitestmt.cc        \
-    temperature.cc util/net.cc util/random.cc util/string.cc util/sys.cc util/thread.cc
+SOURCES := $(shell find . -name '*.cc')
 
 CFLAGS := -g -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17 -pthread -I.
 LDFLAGS := -pthread
@@ -28,7 +22,7 @@ OBJDIR := .obj
 
 OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.cc,%.o,$(SOURCES)))
 
-LIBS := -lwiringPi -lsqlite3 -lm -lavahi-common -lavahi-client -lmicrohttpd
+LIBS := -lavahi-client -lavahi-common -ljson-c -lm -lmicrohttpd -lsqlite3 -lwiringPi
 
 $(OBJDIR)/%.o : %.cc $(DEPDIR)/%.d
 	mkdir -p $(dir $@)
