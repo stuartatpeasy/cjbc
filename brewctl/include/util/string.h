@@ -14,9 +14,8 @@
 
 namespace Util::String
 {
-    bool            isIntStr(const std::string& str, int* intVal = nullptr);
-
-    std::string     numberToString(const int& num);
+    bool            isIntStr(const std::string& str, int* intVal = nullptr) noexcept;
+    std::string     numberToString(const int& num) noexcept;
 } // namespace Util::String
 
 #endif // UTIL_STRING_H_INC

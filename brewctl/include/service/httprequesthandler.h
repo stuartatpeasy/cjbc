@@ -8,25 +8,47 @@
     Part of brewctl
 */
 
+#include "include/util/url.h"
+#include <map>
 #include <string>
+#include <vector>
 
 
 class HttpRequestHandler
 {
-public:
-                    HttpRequestHandler(const std::string& method, const std::string& url) noexcept;
-    virtual         ~HttpRequestHandler() = default;
+typedef bool (HttpRequestHandler::*ApiCallHandler_t)(void);
+typedef std::map<std::string, ApiCallHandler_t> ApiHandlerTable_t;
 
-    bool            handleRequest() noexcept;
-    int             statusCode() const noexcept { return statusCode_; };
-    size_t          responseLength() const noexcept { return responseBody_.length(); };
-    std::string     responseBody() const noexcept { return responseBody_; };
+typedef enum
+{
+    HTTP_OK                     = 200,
+    HTTP_BAD_REQUEST            = 400,
+    HTTP_FORBIDDEN              = 403,
+    HTTP_NOT_FOUND              = 401,
+    HTTP_INTERNAL_SERVER_ERROR  = 500
+} HttpStatus_t;
+
+public:
+                                HttpRequestHandler(const std::string& method, const std::string& uri) noexcept;
+    virtual                     ~HttpRequestHandler() = default;
+
+    bool                        handleRequest() noexcept;
+    HttpStatus_t                statusCode() const noexcept { return statusCode_; };
+    size_t                      responseLength() const noexcept { return responseBody_.length(); };
+    std::string                 responseBody() const noexcept { return responseBody_; };
 
 private:
-    std::string     method_;
-    std::string     url_;
-    int             statusCode_;
-    std::string     responseBody_;
+    bool                        missingArg(const std::string& arg) noexcept;
+    bool                        missingArg(const std::vector<std::string>& arg) noexcept;
+    bool                        notFound() noexcept;
+    bool                        callOption() noexcept;
+
+    std::string                 method_;
+    std::string                 uri_;
+    Util::URL                   url_;
+    HttpStatus_t                statusCode_;
+    std::string                 responseBody_;
+    static ApiHandlerTable_t    handlers_;
 };
 
 #endif // INCLUDE_SERVICE_HTTPREQUESTHANDLER_H_INC

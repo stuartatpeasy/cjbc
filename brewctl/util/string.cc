@@ -12,7 +12,6 @@
 #include <limits>
 
 using std::numeric_limits;
-using std::stol;
 using std::string;
 
 
@@ -22,7 +21,7 @@ namespace Util::String
 // isIntStr() - returns bool indicating whether <str> contains an integer represented as a string.  Returns the integer
 // through <intVal> if so, and if <intVal> is not equal to nullptr.
 //
-bool isIntStr(const string& str, int* intVal)
+bool isIntStr(const string& str, int* intVal) noexcept
 {
     if(str.length())
     {
@@ -42,7 +41,7 @@ bool isIntStr(const string& str, int* intVal)
 
 // numberToString() - write the specified int value to a string and return it.
 //
-string numberToString(const int& num)
+string numberToString(const int& num) noexcept
 {
     char buffer[64];
 
