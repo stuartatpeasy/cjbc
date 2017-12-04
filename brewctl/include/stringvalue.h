@@ -86,7 +86,7 @@ public:
                     operator float()                const noexcept  { return ::strtof(value_.c_str(), NULL);        };
                     operator double()               const noexcept  { return ::strtod(value_.c_str(), NULL);        };
                     operator long double()          const noexcept  { return ::strtold(value_.c_str(), NULL);       };
-                    operator std::string()          const noexcept  { return value_;                };
+                    operator std::string()          const noexcept  { return value_;                                };
 
 private:
     std::string     value_;
