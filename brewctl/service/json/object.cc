@@ -24,6 +24,12 @@ Object::Object() noexcept
 }
 
 
+Object::~Object() noexcept
+{
+    ::json_object_put(jobj_);
+}
+
+
 // length() - get the storage size of the object
 //
 int Object::length() const noexcept

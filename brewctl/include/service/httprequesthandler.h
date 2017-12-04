@@ -16,19 +16,32 @@
 
 class HttpRequestHandler
 {
-typedef bool (HttpRequestHandler::*ApiCallHandler_t)(void);
-typedef std::map<std::string, ApiCallHandler_t> ApiHandlerTable_t;
-
-typedef enum
-{
-    HTTP_OK                     = 200,
-    HTTP_BAD_REQUEST            = 400,
-    HTTP_FORBIDDEN              = 403,
-    HTTP_NOT_FOUND              = 401,
-    HTTP_INTERNAL_SERVER_ERROR  = 500
-} HttpStatus_t;
-
 public:
+    typedef enum
+    {
+        HTTP_OK                     = 200,
+        HTTP_BAD_REQUEST            = 400,
+        HTTP_UNAUTHORIZED           = 401,
+        HTTP_FORBIDDEN              = 403,
+        HTTP_NOT_FOUND              = 404,
+        HTTP_METHOD_NOT_ALLOWED     = 405,
+        HTTP_NOT_ACCEPTABLE         = 406,
+        HTTP_INTERNAL_SERVER_ERROR  = 500
+    } HttpStatus_t;
+
+    typedef enum
+    {
+        HTTP_HEAD,
+        HTTP_GET,
+        HTTP_POST,
+        HTTP_PUT,
+        HTTP_DELETE
+    } HttpMethod_t;
+
+    typedef bool (HttpRequestHandler::*ApiCallHandler_t)(void);
+    typedef std::map<std::string, ApiCallHandler_t> ApiHandlerMap_t;
+    typedef std::map<std::string, HttpMethod_t> HttpMethodMap_t;
+
                                 HttpRequestHandler(const std::string& method, const std::string& uri) noexcept;
     virtual                     ~HttpRequestHandler() = default;
 
@@ -48,7 +61,8 @@ private:
     Util::URL                   url_;
     HttpStatus_t                statusCode_;
     std::string                 responseBody_;
-    static ApiHandlerTable_t    handlers_;
+    static ApiHandlerMap_t      handlers_;
+    static HttpMethodMap_t      methods_;
 };
 
 #endif // INCLUDE_SERVICE_HTTPREQUESTHANDLER_H_INC

@@ -18,12 +18,13 @@ template<typename T>
 class ObjectType : public Object
 {
 public:
-            ObjectType<T>() noexcept;
-            ObjectType<T>(const T& val) noexcept;
-    T       get() const noexcept;
+                ObjectType<T>() noexcept;
+                ObjectType<T>(const T& val) noexcept;
+    virtual     ~ObjectType() noexcept;
+    T           get() const noexcept;
 
 private:
-    T       val_;
+    T           val_;
 };
 
 } // namespace JSON

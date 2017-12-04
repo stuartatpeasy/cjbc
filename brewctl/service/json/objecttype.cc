@@ -27,13 +27,6 @@ ObjectType<int32_t>::ObjectType(const int32_t& val) noexcept
 }
 
 
-template<>
-int32_t ObjectType<int32_t>::get() const noexcept
-{
-    return ::json_object_get_int(jobj_);
-}
-
-
 // ctor<int64_t> - construct an int64_t JSON object with the value specified in <val>
 //
 template<>
@@ -42,13 +35,6 @@ ObjectType<int64_t>::ObjectType(const int64_t& val) noexcept
 {
     type_ = INT64;
     jobj_ = ::json_object_new_int64(val);
-}
-
-
-template<>
-int64_t ObjectType<int64_t>::get() const noexcept
-{
-    return ::json_object_get_int64(jobj_);
 }
 
 
@@ -63,13 +49,6 @@ ObjectType<string>::ObjectType(const string& val) noexcept
 }
 
 
-template<>
-string ObjectType<string>::get() const noexcept
-{
-    return ::json_object_get_string(jobj_);
-}
-
-
 // ctor<double> - construct a double JSON object with the value specified in <val>
 //
 template<>
@@ -78,13 +57,6 @@ ObjectType<double>::ObjectType(const double& val) noexcept
 {
     type_ = DOUBLE;
     jobj_ = ::json_object_new_double(val);
-}
-
-
-template<>
-double ObjectType<double>::get() const noexcept
-{
-    return ::json_object_get_double(jobj_);
 }
 
 
@@ -99,6 +71,53 @@ ObjectType<bool>::ObjectType(const bool& val) noexcept
 }
 
 
+// dtor - free JSON object
+//
+template<typename T>
+ObjectType<T>::~ObjectType() noexcept
+{
+    ::json_object_put(jobj_);
+}
+
+
+// get<int32_t> - get the value of the JSON object as an int32_t
+//
+template<>
+int32_t ObjectType<int32_t>::get() const noexcept
+{
+    return ::json_object_get_int(jobj_);
+}
+
+
+// get<int64_t> - get the value of the JSON object as an int64_t
+//
+template<>
+int64_t ObjectType<int64_t>::get() const noexcept
+{
+    return ::json_object_get_int64(jobj_);
+}
+
+
+// get<string> - get the value of the JSON object as a string
+//
+template<>
+string ObjectType<string>::get() const noexcept
+{
+    return ::json_object_get_string(jobj_);
+}
+
+
+// get<double> - get the value of the JSON object as a double
+//
+template<>
+double ObjectType<double>::get() const noexcept
+{
+    return ::json_object_get_double(jobj_);
+}
+
+
+// get<bool> - get the value of the JSON object as a bool
+//
 template<>
 bool ObjectType<bool>::get() const noexcept
 {

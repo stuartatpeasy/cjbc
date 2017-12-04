@@ -18,9 +18,19 @@ using std::vector;
 
 
 // API call-handler table
-HttpRequestHandler::ApiHandlerTable_t HttpRequestHandler::handlers_ =
+HttpRequestHandler::ApiHandlerMap_t HttpRequestHandler::handlers_ =
 {
     {"/option",         &HttpRequestHandler::callOption}
+};
+
+
+HttpRequestHandler::HttpMethodMap_t HttpRequestHandler::methods_ =
+{
+    {"HEAD",    HTTP_HEAD},
+    {"GET",     HTTP_GET},
+    {"POST",    HTTP_POST},
+    {"PUT",     HTTP_PUT},
+    {"DELETE",  HTTP_DELETE}
 };
 
 
@@ -38,10 +48,7 @@ bool HttpRequestHandler::handleRequest() noexcept
 {
     auto handler = handlers_.find(url_.path());
     if(handler == handlers_.end())
-    {
-        // TODO 404
-        return true;
-    }
+        return notFound();
 
     return (this->*handler->second)();
 }

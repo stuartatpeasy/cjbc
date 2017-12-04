@@ -32,7 +32,7 @@ public:
     } Type_t;
 
                     Object() noexcept;
-    virtual         ~Object() = default;
+    virtual         ~Object() noexcept;
 
                     operator std::string() const noexcept { return getString(); };
 
