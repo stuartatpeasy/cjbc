@@ -20,7 +20,7 @@ using std::vector;
 // API call-handler table
 HttpRequestHandler::ApiHandlerTable_t HttpRequestHandler::handlers_ =
 {
-    {"option",      &HttpRequestHandler::callOption}
+    {"/option",         &HttpRequestHandler::callOption}
 };
 
 
@@ -61,7 +61,7 @@ bool HttpRequestHandler::missingArg(const string& arg) noexcept
 
 bool HttpRequestHandler::missingArg(const vector<string>& args) noexcept
 {
-    if(args.count() == 1)
+    if(args.size() == 1)
         return missingArg(args[0]);
 
     statusCode_ = HTTP_BAD_REQUEST;

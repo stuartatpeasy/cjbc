@@ -33,7 +33,7 @@ URL& URL::parseURL(string url) noexcept
     if(delim != url.npos)
     {
         protocol_ = url.substr(0, delim);
-        url.erase(0, delim + 2);
+        url.erase(0, delim + 3);
     }
     else
         protocol_ = "";
@@ -41,12 +41,12 @@ URL& URL::parseURL(string url) noexcept
     // Extract address and port
     delim = url.find_first_of("/?#");
     string addressAndPort = url.substr(0, delim);
-    url.erase(0, delim + 1);
+    url.erase(0, delim);
 
     delim = addressAndPort.find(':');
     address_ = addressAndPort.substr(0, delim);
-
     addressAndPort.erase(0, delim + 1);
+
     if(addressAndPort.length())
         port_ = ::strtoul(addressAndPort.c_str(), NULL, 10);
     else
@@ -70,14 +70,20 @@ URL& URL::parseURL(string url) noexcept
         string query = url.substr(delim + 1);
         url.erase(delim);
 
-        for(; (delim = query.find('&')) != query.npos; query.erase(0, delim + 1))
+        while(query.length())
         {
+            delim = query.find('&');
+
             string var = query.substr(0, delim);
             size_t equals = var.find('=');
+
             if(equals != var.npos)
                 args_[decode(var.substr(0, equals))] = decode(var.substr(equals + 1));
             else
                 args_[decode(var.substr(0, equals))] = "";
+
+            query.erase(0, delim);
+            query.erase(0, 1);
         }
     }
 

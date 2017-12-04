@@ -10,7 +10,7 @@ endif
 
 APPNAME := brewctl
 
-SOURCES := $(shell find . -name '*.cc')
+SOURCES := $(shell find . -path ./test -prune -o -name '*.cc' -print)
 
 CFLAGS := -g -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17 -pthread -I.
 LDFLAGS := -pthread
