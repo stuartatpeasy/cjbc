@@ -9,6 +9,7 @@
     Part of brewctl
 */
 
+#include <cstdlib>
 #include <string>
 
 
@@ -74,17 +75,17 @@ public:
 
                     // Type conversion operators
                     //
-                    operator short()                const noexcept  { return std::stol(value_);     };
-                    operator int()                  const noexcept  { return std::stol(value_);     };
-                    operator long()                 const noexcept  { return std::stol(value_);     };
-                    operator long long()            const noexcept  { return std::stoll(value_);    };
-                    operator unsigned short()       const noexcept  { return std::stoul(value_);    };
-                    operator unsigned int()         const noexcept  { return std::stoul(value_);    };
-                    operator unsigned long()        const noexcept  { return std::stoul(value_);    };
-                    operator unsigned long long()   const noexcept  { return std::stoull(value_);   };
-                    operator float()                const noexcept  { return std::stof(value_);     };
-                    operator double()               const noexcept  { return std::stod(value_);     };
-                    operator long double()          const noexcept  { return std::stold(value_);    };
+                    operator short()                const noexcept  { return ::strtol(value_.c_str(), NULL, 0);     };
+                    operator int()                  const noexcept  { return ::strtol(value_.c_str(), NULL, 0);     };
+                    operator long()                 const noexcept  { return ::strtol(value_.c_str(), NULL, 0);     };
+                    operator long long()            const noexcept  { return ::strtoll(value_.c_str(), NULL, 0);    };
+                    operator unsigned short()       const noexcept  { return ::strtoul(value_.c_str(), NULL, 0);    };
+                    operator unsigned int()         const noexcept  { return ::strtoul(value_.c_str(), NULL, 0);    };
+                    operator unsigned long()        const noexcept  { return ::strtoul(value_.c_str(), NULL, 0);    };
+                    operator unsigned long long()   const noexcept  { return ::strtoull(value_.c_str(), NULL, 0);   };
+                    operator float()                const noexcept  { return ::strtof(value_.c_str(), NULL);        };
+                    operator double()               const noexcept  { return ::strtod(value_.c_str(), NULL);        };
+                    operator long double()          const noexcept  { return ::strtold(value_.c_str(), NULL);       };
                     operator std::string()          const noexcept  { return value_;                };
 
 private:
