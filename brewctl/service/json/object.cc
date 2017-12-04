@@ -50,17 +50,19 @@ string Object::getStringExt(int flags) const noexcept
 
 // addObject() - add an object field to this object
 //
-void Object::addObject(const std::string& key, Object obj) const noexcept
+Object& Object::addObject(const std::string& key, Object obj) noexcept
 {
     ::json_object_object_add(jobj_, key.c_str(), obj.jobj_);
+    return *this;
 }
 
 
 // addArray() - add an array field to this object
 //
-void Object::addArray(Array array) const noexcept
+Object& Object::addArray(Array array) noexcept
 {
     ::json_object_array_add(jobj_, array.jobj_);
+    return *this;
 }
 
 } // namespace JSON

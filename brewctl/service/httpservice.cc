@@ -9,8 +9,11 @@
 #include "include/service/httpservice.h"
 #include "include/framework/registry.h"
 #include "include/framework/thread.h"
+#include "include/service/httprequesthandler.h"
 #include "include/service/json/objecttype.h"
+#include "include/util/string.h"
 #include <cstdlib>          // NULL
+#include <cstring>          // ::memcpy()
 #include <string>
 
 extern "C"
@@ -71,19 +74,18 @@ int HttpService::handleConnection(struct MHD_Connection *connection, const char 
 
     logDebug("HTTP request: method=%s version=%s url=%s", method, version, url);
 
-    JSON::Object j;
+    HttpRequestHandler handler(method, url);
 
-    j.addObject("something", JSON::ObjectType<int32_t>(12345));
+    handler.handleRequest();    // TODO check return value
 
-    // Possible bug in libmicrohttpd: the first four bytes of the response appear to be swallowed.  Prepend four spaces
-    // in order to work around this problem.
-    string body = "    " + (string) j;
+    response = MHD_create_response_from_buffer(handler.responseLength(), (void *) handler.responseBody().c_str(),
+                                               MHD_RESPMEM_MUST_COPY);
 
-    response = MHD_create_response_from_buffer(body.length(), (void *) body.c_str(), MHD_RESPMEM_PERSISTENT);
+    MHD_add_response_header(response, "Content-Length", Util::String::numberToString(handler.responseLength()).c_str());
+    MHD_add_response_header(response, "Content-Type", "text/json");
 
-    ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+    ret = MHD_queue_response(connection, handler.statusCode(), response);
     MHD_destroy_response(response);
-    *con_cls = NULL;
 
     return ret;
 }

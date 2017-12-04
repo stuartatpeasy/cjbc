@@ -7,6 +7,7 @@
 */
 
 #include "include/util/string.h"
+#include <cstdio>       // ::sprintf()
 #include <cstdlib>      // ::strtol()
 #include <limits>
 
@@ -36,6 +37,17 @@ bool isIntStr(const string& str, int* intVal)
     }
 
     return false;
+}
+
+
+// numberToString() - write the specified int value to a string and return it.
+//
+string numberToString(const int& num)
+{
+    char buffer[64];
+
+    ::sprintf(buffer, "%d", num);
+    return (string) buffer;
 }
 
 } // namespace Util::String

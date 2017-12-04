@@ -11,6 +11,7 @@
 #include "include/framework/error.h"
 #include "include/framework/log.h"
 #include "include/framework/thread.h"
+#include "include/service/httprequesthandler.h"
 
 extern "C"
 {
@@ -39,7 +40,6 @@ private:
     const unsigned short    port_;
     MHD_Daemon *            daemon_;
 };
-
 
 #endif // SERVICE_HTTPSERVICE_H_INC
 

@@ -40,8 +40,8 @@ public:
     std::string     getString() const noexcept;
     std::string     getStringExt(int flags) const noexcept;
     Type_t          type() const noexcept { return type_; };
-    void            addObject(const std::string& key, Object obj) const noexcept;
-    void            addArray(Array array) const noexcept;
+    Object&         addObject(const std::string& key, Object obj) noexcept;
+    Object&         addArray(Array array) noexcept;
 
 protected:
     Type_t          type_;
