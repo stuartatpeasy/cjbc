@@ -13,7 +13,7 @@
 #include "include/service/json/objecttype.h"
 #include "include/util/string.h"
 #include <cstdlib>          // NULL
-#include <cstring>          // ::memcpy()
+#include <cstring>          // ::memcpy(), ::strdup()
 #include <string>
 
 extern "C"
@@ -22,10 +22,6 @@ extern "C"
 }
 
 using std::string;
-
-
-int handleConnection(void *cls, struct MHD_Connection *connection, const char *url, const char *method,
-                     const char *version, const char *upload_data, size_t *upload_data_size, void **con_cls) noexcept;
 
 
 // ctor - member initialisation only
@@ -45,7 +41,16 @@ bool HttpService::run() noexcept
 
     while(!stop_)
     {
-        daemon_ = ::MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION, port_, NULL, NULL, ::handleConnection, this);
+        daemon_ = ::MHD_start_daemon(MHD_USE_THREAD_PER_CONNECTION,
+                                     port_,
+                                     NULL,
+                                     NULL,
+                                     HttpService::callbackHandleConnection, this,
+                                     MHD_OPTION_NOTIFY_COMPLETED,
+                                     HttpService::callbackRequestCompleted, this,
+                                     MHD_OPTION_URI_LOG_CALLBACK,
+                                     HttpService::callbackLogUri, this,
+                                     MHD_OPTION_END);
 
         ::usleep(1000 * 1000);
     }
@@ -65,16 +70,19 @@ int HttpService::handleConnection(struct MHD_Connection *connection, const char 
                                   const char *version, const char *upload_data, size_t *upload_data_size,
                                   void **con_cls) noexcept
 {
+    (void) version;
     (void) upload_data;
     (void) upload_data_size;
     (void) con_cls;
 
     struct MHD_Response *response;
     int ret;
+    string fullUrl(url);
 
-    logDebug("HTTP request: method=%s version=%s url=%s", method, version, url);
-
-    HttpRequestHandler handler(method, url);
+    if(*con_cls != NULL)
+        fullUrl += (const char *) *con_cls;
+    
+    HttpRequestHandler handler(method, fullUrl);
 
     handler.handleRequest();    // TODO check return value
 
@@ -83,6 +91,7 @@ int HttpService::handleConnection(struct MHD_Connection *connection, const char 
 
     MHD_add_response_header(response, "Content-Length", Util::String::numberToString(handler.responseLength()).c_str());
     MHD_add_response_header(response, "Content-Type", "text/json");
+    MHD_add_response_header(response, "Connection", "close");
 
     ret = MHD_queue_response(connection, handler.statusCode(), response);
     MHD_destroy_response(response);
@@ -91,13 +100,58 @@ int HttpService::handleConnection(struct MHD_Connection *connection, const char 
 }
 
 
-// handleConnection(): global callback fn, called when a client connects to the server.  Redirects the call to the
-// Server::handleConnection() method.
+// logUri() - called via HttpService::callbackLogUri() to receive the full URI of the connection request, including any
+// query arguments.
 //
-int handleConnection(void *cls, struct MHD_Connection *connection, const char *url, const char *method,
-                     const char *version, const char *upload_data, size_t *upload_data_size, void **con_cls) noexcept
+void *HttpService::logUri(const char *uri) noexcept
+{
+    string s(uri);
+    s.erase(0, s.find('?'));
+
+    return (void *) ::strdup(s.c_str());
+}
+
+
+// requestCompleted() - called via HttpService::callbackRequestCompleted() to indicate that the current request is
+// fully processed.
+//
+void HttpService::requestCompleted(struct MHD_Connection *connection, void **con_cls,
+                                   enum MHD_RequestTerminationCode code) noexcept
+{
+    (void) connection;
+    (void) code;
+
+    if(*con_cls != NULL)
+        ::free(*con_cls);    
+}
+
+
+// handleConnection() - static callback fn, called when a client connects to the server.  Redirects the call to the
+// HttpServer::handleConnection() method.
+//
+int HttpService::callbackHandleConnection(void *cls, struct MHD_Connection *connection, const char *url,
+                                          const char *method, const char *version, const char *upload_data,
+                                          size_t *upload_data_size, void **con_cls) noexcept
 {
     return ((HttpService *) cls)->handleConnection(connection, url, method, version, upload_data, upload_data_size,
                                                    con_cls);
 }
 
+
+// callbackLogUri() - static callback fn, called with a request's full URI (including query parameters).  Redirects the
+// call to the HttpServer::logUri() method.
+//
+void *HttpService::callbackLogUri(void *cls, const char *uri) noexcept
+{
+    return ((HttpService *) cls)->logUri(uri);
+}
+
+
+// callbackRequestCompleted() - static callback fn, called when a request is completed processed.  Redirects the call to
+// the HttpServer::requestCompleted() method.
+//
+void HttpService::callbackRequestCompleted(void *cls, struct MHD_Connection *connection, void **con_cls,
+                                           enum MHD_RequestTerminationCode code) noexcept
+{
+    return ((HttpService *) cls)->requestCompleted(connection, con_cls, code);
+}

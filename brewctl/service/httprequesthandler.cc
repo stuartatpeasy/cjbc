@@ -7,6 +7,7 @@
 */
 
 #include "include/service/httprequesthandler.h"
+#include "include/framework/log.h"
 #include "include/service/json/array.h"
 #include "include/service/json/object.h"
 #include "include/service/json/objecttype.h"
@@ -39,6 +40,7 @@ HttpRequestHandler::HttpMethodMap_t HttpRequestHandler::methods_ =
 HttpRequestHandler::HttpRequestHandler(const string& method, const string& uri) noexcept
     : method_(method), uri_(uri), url_(uri), statusCode_(HTTP_OK)
 {
+    logDebug("HttpRequestHandler: method=%s uri=%s", method.c_str(), uri.c_str());
 }
 
 

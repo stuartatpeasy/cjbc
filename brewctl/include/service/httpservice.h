@@ -21,9 +21,6 @@ extern "C"
 
 class HttpService : public Thread
 {
-friend int handleConnection(void *cls, struct MHD_Connection *connection, const char *url, const char *method,
-                            const char *version, const char *upload_data, size_t *upload_data_size, void **con_cls)
-                            noexcept;
 public:
                             HttpService(const unsigned short port) noexcept;
                             HttpService(const HttpService&) = delete;
@@ -36,6 +33,16 @@ private:
     int                     handleConnection(struct MHD_Connection *connection, const char *url, const char *method,
                                              const char *version, const char *upload_data, size_t *upload_data_size,
                                              void **con_cls) noexcept;
+    void *                  logUri(const char *uri) noexcept;
+    void                    requestCompleted(struct MHD_Connection *connection, void **con_cls,
+                                             enum MHD_RequestTerminationCode code) noexcept;
+
+    static int              callbackHandleConnection(void *cls, struct MHD_Connection *connection, const char *url,
+                                                     const char *method, const char *version, const char *upload_data,
+                                                     size_t *upload_data_size, void **con_cls) noexcept;
+    static void *           callbackLogUri(void *cls, const char *uri) noexcept;
+    static void             callbackRequestCompleted(void *cls, struct MHD_Connection *connection, void **con_cls,
+                                                     enum MHD_RequestTerminationCode code) noexcept;
 
     const unsigned short    port_;
     MHD_Daemon *            daemon_;
