@@ -83,8 +83,12 @@ private:
     int                 code_;
 };
 
-void formatError(Error * const err, const ErrorCode_t code, ...) noexcept;
-void formatErrorWithErrno(Error * const err, const ErrorCode_t code, ...) noexcept;
+#define formatError(err, ...)               ::doFormatError(__FILE__, __LINE__, err, __VA_ARGS__)
+#define formatErrorWithErrno(err, ...)      ::doFormatErrorWithErrno(__FILE__, __LINE__, err, __VA_ARGS__)
+
+void doFormatError(const char * const file, const int line, Error * const err, const ErrorCode_t code, ...) noexcept;
+void doFormatErrorWithErrno(const char * const file, const int line, Error * const err, const ErrorCode_t code, ...)
+    noexcept;
 
 #endif // FRAMEWORK_ERROR_H_INC
 

@@ -28,18 +28,17 @@ typedef enum
     LOG_METHOD_SYSLOG
 } LogMethod_t;
 
-#define logDebug(...)       ::doLog(__FILE__, __LINE__, LOG_LEVEL_DEBUG, __VA_ARGS__)
-#define logInfo(...)        ::doLog(__FILE__, __LINE__, LOG_LEVEL_INFO, __VA_ARGS__)
-#define logNotice(...)      ::doLog(__FILE__, __LINE__, LOG_LEVEL_NOTICE, __VA_ARGS__)
-#define logWarning(...)     ::doLog(__FILE__, __LINE__, LOG_LEVEL_WARNING, __VA_ARGS__)
-#define logError(...)       ::doLog(__FILE__, __LINE__, LOG_LEVEL_ERROR, __VA_ARGS__)
+#define logDebug(...)           ::doLog(__FILE__, __LINE__, LOG_LEVEL_DEBUG, __VA_ARGS__)
+#define logInfo(...)            ::doLog(__FILE__, __LINE__, LOG_LEVEL_INFO, __VA_ARGS__)
+#define logNotice(...)          ::doLog(__FILE__, __LINE__, LOG_LEVEL_NOTICE, __VA_ARGS__)
+#define logWarning(...)         ::doLog(__FILE__, __LINE__, LOG_LEVEL_WARNING, __VA_ARGS__)
+#define logError(...)           ::doLog(__FILE__, __LINE__, LOG_LEVEL_ERROR, __VA_ARGS__)
 
 #define logDebugV(fmt, args)    ::doLogV(__FILE__, __LINE__, LOG_LEVEL_DEBUG, fmt, args)
 #define logInfoV(fmt, args)     ::doLogV(__FILE__, __LINE__, LOG_LEVEL_INFO, fmt, args)
 #define logNoticeV(fmt, args)   ::doLogV(__FILE__, __LINE__, LOG_LEVEL_NOTICE, fmt, args)
 #define logWarningV(fmt, args)  ::doLogV(__FILE__, __LINE__, LOG_LEVEL_WARNING, fmt, args)
 #define logErrorV(fmt, args)    ::doLogV(__FILE__, __LINE__, LOG_LEVEL_ERROR, fmt, args)
-
 
 bool logInit(const std::string& method) noexcept;
 void logClose() noexcept;

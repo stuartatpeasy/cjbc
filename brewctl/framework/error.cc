@@ -210,10 +210,10 @@ void Error::reset() noexcept
 }
 
 
-// formatError() - global error-formatter function.  If <err> is non-null, populate it with an error message according
+// doFormatError() - global error-formatter function.  If <err> is non-null, populate it with an error message according
 // to <code> and <...>. If <err> is null, take no action.
 //
-void formatError(Error * const err, const ErrorCode_t code, ...) noexcept
+void doFormatError(const char * const file, const int line, Error * const err, const ErrorCode_t code, ...) noexcept
 {
     Error tmp;
     va_list args;
@@ -222,14 +222,15 @@ void formatError(Error * const err, const ErrorCode_t code, ...) noexcept
     Error& e = (err != nullptr) ? *err : tmp;
 
     e.formatV(code, args);
-    logError("%s [%d]", e.message(), e.code());
+    doLog(file, line, LOG_LEVEL_ERROR, "%s [%d]", e.message().c_str(), e.code());
 }
 
 
 // formatErrorWithErrno() - like formatError(), but appends a string containing the description of the error represented
 // by the current value of errno, and the value of errno itself.
 //
-void formatErrorWithErrno(Error * const err, const ErrorCode_t code, ...) noexcept
+void doFormatErrorWithErrno(const char * const file, const int line, Error * const err, const ErrorCode_t code, ...)
+    noexcept
 {
     Error tmp;
     va_list args;
@@ -239,6 +240,6 @@ void formatErrorWithErrno(Error * const err, const ErrorCode_t code, ...) noexce
 
     e.formatV(code, args);
     e.append(": %s (%d)", ::strerror(errno), errno);
-    logError("%s [%d]", e.message(), e.code());
+    doLog(file, line, LOG_LEVEL_ERROR, "%s [%d]", e.message().c_str(), e.code());
 }
 

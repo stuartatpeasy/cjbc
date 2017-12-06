@@ -44,7 +44,7 @@ bool SQLite::open(const string& filename, const int flags, Error * const err) no
         return true;
     }
 
-    formatError(err, ret);
+    fmtErr(err, ret);
 
     return false;
 }
@@ -67,7 +67,7 @@ bool SQLite::close(Error * const err) noexcept
         return true;
     }
 
-    formatError(err, ret);
+    fmtErr(err, ret);
     return false;
 }
 
@@ -99,7 +99,7 @@ bool SQLite::prepare(const string& sql, SQLiteStmt& stmt, Error * const err) noe
     }
 
     logWarning("Failed to prepare stmt: %s", sql.c_str());
-    formatError(err, ret);
+    fmtErr(err, ret);
     return false;
 }
 
@@ -118,17 +118,17 @@ bool SQLite::prepareAndStep(const std::string& sql, SQLiteStmt& stmt, Error * co
     if(ret == SQLITE_OK)
         return true;
 
-    formatError(err, ret);
+    fmtErr(err, ret);
     return false;
 }
 
 
-// formatError() - populate Error object err (if non-null) with the supplied error code and an appropriate
+// fmtErr() - populate Error object err (if non-null) with the supplied error code and an appropriate
 // human-readable error message.
 //
-void SQLite::formatError(Error * const err, const int code) noexcept
+void SQLite::fmtErr(Error * const err, const int code) noexcept
 {
     logWarning("SQLite error %d: %s", code, ::sqlite3_errstr(code));
-    ::formatError(err, DB_SQLITE_ERROR, ::sqlite3_errstr(code), code);
+    formatError(err, DB_SQLITE_ERROR, ::sqlite3_errstr(code), code);
 }
 

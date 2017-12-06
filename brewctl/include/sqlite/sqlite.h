@@ -34,7 +34,7 @@ public:
     bool            prepareAndStep(const std::string& sql, SQLiteStmt& stmt, Error * const err = nullptr) noexcept;
 
 private:
-    void            formatError(Error * const err, const int code) noexcept;
+    void            fmtErr(Error * const err, const int code) noexcept;
     sqlite3 *       db_;
     std::string     path_;
     std::mutex      lock_;

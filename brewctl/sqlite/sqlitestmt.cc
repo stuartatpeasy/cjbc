@@ -272,21 +272,21 @@ bool SQLiteStmt::checkError(const int ret, Error * const err, vector<int> succes
         if(ret == code)
             return true;
 
-    formatError(err, ret);
+    fmtErr(err, ret);
     return false;
 }
 
 
-// formatError() - populate Error object err (if non-null) with the supplied error code and an appropriate
+// fmtErr() - populate Error object err (if non-null) with the supplied error code and an appropriate
 // human-readable error message.
 //
-void SQLiteStmt::formatError(Error * const err, const int code) noexcept
+void SQLiteStmt::fmtErr(Error * const err, const int code) noexcept
 {
     // Log any errors.  Exclude return values which do not indicate an error.
     if(code != SQLITE_DONE)
         logWarning("SQLite stmt {%x}: error %d: %s", id(), code, ::sqlite3_errstr(code));
 
-    ::formatError(err, DB_SQLITESTMT_ERROR, ::sqlite3_errstr(code), code);
+    formatError(err, DB_SQLITESTMT_ERROR, ::sqlite3_errstr(code), code);
 }
 
 

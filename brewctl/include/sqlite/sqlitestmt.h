@@ -68,7 +68,7 @@ public:
 private:
 	bool                checkError(const int ret, Error * const err, const int successCode = SQLITE_OK) noexcept;
 	bool                checkError(const int ret, Error * const err, std::vector<int> successCodes) noexcept;
-    void                formatError(Error * const err, const int code) noexcept;
+    void                fmtErr(Error * const err, const int code) noexcept;
     void                getColumnNames() noexcept;
 
     sqlite3_stmt *      stmt_;
