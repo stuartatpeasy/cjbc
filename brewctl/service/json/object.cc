@@ -1,5 +1,5 @@
 /*
-    object.cc: wrapper around the libjson-c functions
+    object.cc: wrapper around libjson-c object functions
 
     Stuart Wallace <stuartw@atom.net>, December 2017.
 
@@ -7,69 +7,91 @@
 */
 
 #include "include/service/json/object.h"
-#include "include/service/json/array.h"
+#include "include/framework/log.h"
+#include <cstdlib>      // NULL
+#include <utility>
 
 using std::string;
 
 
-namespace JSON
-{
-
-// ctor - initialise a new JSON object
+// default ctor
 //
-Object::Object() noexcept
-    : type_(OBJECT)
+JsonObject::JsonObject() noexcept
 {
     jobj_ = ::json_object_new_object();
 }
 
 
-Object::~Object() noexcept
+// move ctor
+//
+JsonObject::JsonObject(JsonObject&& rhs) noexcept
+    : Json(std::move(rhs))
 {
-    ::json_object_put(jobj_);
+    move(rhs);
 }
 
 
-// length() - get the storage size of the object
+// dtor - free contained objects
 //
-int Object::length() const noexcept
+JsonObject::~JsonObject() noexcept
 {
-    return ::json_object_object_length(jobj_);
+    for(auto it = map_.begin(); it != map_.end(); ++it)
+        delete it->second;
 }
 
 
-// getString() - get the object and its descendants as a JSON string
+// move-assignment operator
 //
-string Object::getString() const noexcept
+JsonObject& JsonObject::operator=(JsonObject&& rhs) noexcept
 {
-    return ::json_object_to_json_string(jobj_);
+    Json::operator=(std::move(rhs));
+    return move(rhs);
 }
 
 
-// getStringExt() - get the object and its descendants as a JSON string, with options specified in <flags>
+// add() - add a new field <val>, named <key>, to the current object.  If a field with a matching name already exists in
+// the object, decrement its reference count (possibly freeing it), before replacing it with the new field.
 //
-string Object::getStringExt(int flags) const noexcept
+JsonObject& JsonObject::add(const string& key, Json *val) noexcept
 {
-    return ::json_object_to_json_string_ext(jobj_, flags);
-}
+    auto item = map_.find(key);
+    if(item != map_.end())
+        item->second->decRef();
 
+    val->addRef();
+    map_[key] = val;
+    ::json_object_object_add(jobj_, key.c_str(), val->rawPtr());
 
-// addObject() - add an object field to this object
-//
-Object& Object::addObject(const std::string& key, Object obj) noexcept
-{
-    ::json_object_object_add(jobj_, key.c_str(), obj.jobj_);
     return *this;
 }
 
 
-// addArray() - add an array field to this object
+// get() - get the field named by <key> without incrementing its reference count.  If no such field exists, return NULL.
 //
-Object& Object::addArray(Array array) noexcept
+Json *JsonObject::get(const string& key) noexcept
 {
-    ::json_object_array_add(jobj_, array.jobj_);
-    return *this;
+    auto item = map_.find(key);
+    if(item == map_.end())
+        return NULL;
+
+    return map_[key];
 }
 
-} // namespace JSON
+
+// length() - return the number of fields contained in this JSON object.
+//
+int JsonObject::length() noexcept
+{
+    return (jobj_ != NULL) ? ::json_object_object_length(jobj_) : 0;
+}
+
+
+// move() - helper method for move ctor and move-assignment operator.
+//
+JsonObject& JsonObject::move(JsonObject& rhs) noexcept
+{
+    map_.swap(rhs.map_);
+
+    return *this;
+}
 

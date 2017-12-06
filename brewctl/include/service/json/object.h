@@ -1,55 +1,41 @@
 #ifndef INCLUDE_SERVICE_JSON_OBJECT_H_INC
 #define INCLUDE_SERVICE_JSON_OBJECT_H_INC
 /*
-    object.h: wrapper around the libjson-c functions
+    object.h: wrapper around libjson-c object functions
 
     Stuart Wallace <stuartw@atom.net>, December 2017.
 
     Part of brewctl
 */
 
-#include <json-c/json.h>
+#include "include/service/json/json.h"
+#include <cstdint>
+#include <map>
 #include <string>
 
 
-namespace JSON
+class JsonObject : public Json
 {
+typedef std::map<std::string, Json *> JsonPtrMap_t;
 
-class Array;
-
-class Object
-{
 public:
-    typedef enum Type
-    {
-        OBJECT,
-        ARRAY,
-        INT32,
-        INT64,
-        STRING,
-        BOOL,
-        DOUBLE
-    } Type_t;
+                            JsonObject() noexcept;
+                            JsonObject(const JsonObject& rhs) = delete;
+                            JsonObject(JsonObject&& rhs) noexcept;
+    virtual                 ~JsonObject() noexcept;
 
-                    Object() noexcept;
-    virtual         ~Object() noexcept;
+    virtual JsonObject&     operator=(const JsonObject& rhs) = delete;
+    virtual JsonObject&     operator=(JsonObject&& rhs) noexcept;
 
-                    operator std::string() const noexcept { return getString(); };
-
-    int             length() const noexcept;
-    std::string     getString() const noexcept;
-    std::string     getStringExt(int flags) const noexcept;
-    Type_t          type() const noexcept { return type_; };
-    Object&         addObject(const std::string& key, Object obj) noexcept;
-    Object&         addArray(Array array) noexcept;
+    JsonObject&             add(const std::string& key, Json * val) noexcept;
+    Json *                  get(const std::string& key) noexcept;
+    int                     length() noexcept;
 
 protected:
-    Type_t          type_;
-    json_object *   jobj_;
-    
-};
+    virtual JsonObject&     move(JsonObject& rhs) noexcept;
 
-} // namespace JSON
+    JsonPtrMap_t            map_;
+};
 
 #endif // INCLUDE_SERVICE_JSON_OBJECT_H_INC
 

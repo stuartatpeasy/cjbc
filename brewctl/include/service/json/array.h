@@ -1,26 +1,41 @@
 #ifndef INCLUDE_SERVICE_JSON_ARRAY_H_INC
 #define INCLUDE_SERVICE_JSON_ARRAY_H_INC
 /*
-    array.h: wrapper around the array-specific libjson-c functions
+    array.h: wrapper around libjson-c array functions
 
     Stuart Wallace <stuartw@atom.net>, December 2017.
 
     Part of brewctl
 */
 
-#include "include/service/json/object.h"
+#include "include/service/json/json.h"
+#include <cstdint>
+#include <string>
+#include <vector>
 
 
-namespace JSON
+class JsonArray : public Json
 {
+typedef std::vector<Json *> JsonPtrArray_t;
 
-class Array : public Object
-{
 public:
-            Array() noexcept;
-};
+                            JsonArray() noexcept;
+                            JsonArray(const JsonArray& rhs) = delete;
+                            JsonArray(JsonArray&& rhs) noexcept;
+    virtual                 ~JsonArray() noexcept;
 
-} // namespace JSON
+    virtual JsonArray&      operator=(const JsonArray& rhs) = delete;
+    virtual JsonArray&      operator=(JsonArray&& rhs) noexcept;
+
+    JsonArray&              append(Json * val) noexcept;
+    Json *                  getAt(const int index) noexcept;
+    int                     length() noexcept;
+
+protected:
+    virtual JsonArray&      move(JsonArray& rhs) noexcept;
+
+    JsonPtrArray_t          array_;
+};
 
 #endif // INCLUDE_SERVICE_JSON_ARRAY_H_INC
 

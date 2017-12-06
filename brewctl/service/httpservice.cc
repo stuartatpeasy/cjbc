@@ -10,7 +10,6 @@
 #include "include/framework/registry.h"
 #include "include/framework/thread.h"
 #include "include/service/httprequesthandler.h"
-#include "include/service/json/objecttype.h"
 #include "include/util/string.h"
 #include <cstdlib>          // NULL
 #include <cstring>          // ::memcpy(), ::strdup()

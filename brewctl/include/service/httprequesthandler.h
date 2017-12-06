@@ -35,7 +35,8 @@ public:
         HTTP_GET,
         HTTP_POST,
         HTTP_PUT,
-        HTTP_DELETE
+        HTTP_DELETE,
+        HTTP_INVALID
     } HttpMethod_t;
 
     typedef bool (HttpRequestHandler::*ApiCallHandler_t)(void);
@@ -55,8 +56,10 @@ private:
     bool                        missingArg(const std::vector<std::string>& arg) noexcept;
     bool                        notFound() noexcept;
     bool                        callOption() noexcept;
+    bool                        methodNotAllowed() noexcept;
 
-    std::string                 method_;
+    HttpMethod_t                method_;
+    std::string                 methodStr_;
     std::string                 uri_;
     Util::URL                   url_;
     HttpStatus_t                statusCode_;

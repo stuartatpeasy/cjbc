@@ -10,7 +10,7 @@
 #include "include/framework/log.h"
 #include "include/service/json/array.h"
 #include "include/service/json/object.h"
-#include "include/service/json/objecttype.h"
+#include "include/service/json/element.h"
 #include "include/util/url.h"
 
 using std::map;
@@ -38,9 +38,13 @@ HttpRequestHandler::HttpMethodMap_t HttpRequestHandler::methods_ =
 // ctor - capture request args
 //
 HttpRequestHandler::HttpRequestHandler(const string& method, const string& uri) noexcept
-    : method_(method), uri_(uri), url_(uri), statusCode_(HTTP_OK)
+    : method_(HTTP_INVALID), methodStr_(method), uri_(uri), url_(uri), statusCode_(HTTP_OK)
 {
     logDebug("HttpRequestHandler: method=%s uri=%s", method.c_str(), uri.c_str());
+
+    auto m = methods_.find(methodStr_);
+    if(m != methods_.end())
+        method_ = m->second;
 }
 
 
@@ -48,6 +52,9 @@ HttpRequestHandler::HttpRequestHandler(const string& method, const string& uri) 
 //
 bool HttpRequestHandler::handleRequest() noexcept
 {
+    if(method_ == HTTP_INVALID)
+        return methodNotAllowed();
+
     auto handler = handlers_.find(url_.path());
     if(handler == handlers_.end())
         return notFound();
@@ -62,7 +69,7 @@ bool HttpRequestHandler::handleRequest() noexcept
 bool HttpRequestHandler::missingArg(const string& arg) noexcept
 {
     statusCode_ = HTTP_BAD_REQUEST;
-    responseBody_ = JSON::Object().addObject("missingArg", JSON::ObjectType<string>(arg));
+    responseBody_ = JsonObject().add("missingArg", new JsonElement(arg));
 
     return true;
 }
@@ -75,8 +82,8 @@ bool HttpRequestHandler::missingArg(const vector<string>& args) noexcept
 
     statusCode_ = HTTP_BAD_REQUEST;
 
-    JSON::Object o;
-    JSON::Array a;
+    JsonObject o;
+    JsonArray a;
 //    o.addArray("missingArg"
 
     return false;       // FIXME
@@ -89,7 +96,19 @@ bool HttpRequestHandler::missingArg(const vector<string>& args) noexcept
 bool HttpRequestHandler::notFound() noexcept
 {
     statusCode_ = HTTP_NOT_FOUND;
-    responseBody_ = JSON::Object().addObject("resource", JSON::ObjectType<string>(url_.path()));
+    responseBody_ = JsonObject().add("resource", new JsonElement(url_.path()));
+
+    return true;
+}
+
+
+// methodNotAllowed() - set this object's response status to HTTP405, and set the response body to a JSON payload
+// identifying the HTTP method that is not permitted for the specified endpoint.
+//
+bool HttpRequestHandler::methodNotAllowed() noexcept
+{
+    statusCode_ = HTTP_METHOD_NOT_ALLOWED;
+    responseBody_ = JsonObject().add("method", new JsonElement(methodStr_));
 
     return true;
 }
