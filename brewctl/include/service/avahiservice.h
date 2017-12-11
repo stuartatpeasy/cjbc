@@ -35,7 +35,7 @@ public:
                                          Error * const err = nullptr) noexcept;
     virtual                 ~AvahiService();
 
-    bool                    run() noexcept;
+    bool                    run() noexcept override;
 
 private:
     void                    clientCallback(AvahiClient *client, AvahiClientState state) noexcept;

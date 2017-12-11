@@ -297,6 +297,11 @@ bool Session::run() noexcept
     }
 
     logInfo("Session %d stopping", id_);
+
+    // Switch off effectors before shutdown
+    effectorHeater_->activate(false);
+    effectorCooler_->activate(false);
+
     running_ = false;
 
     return true;

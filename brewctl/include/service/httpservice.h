@@ -27,7 +27,7 @@ public:
 
     HttpService&            operator=(const HttpService&) = delete;
 
-    bool                    run() noexcept;
+    bool                    run() noexcept override;
 
 private:
     int                     handleConnection(struct MHD_Connection *connection, const char *url, const char *method,

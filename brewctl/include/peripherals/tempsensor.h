@@ -32,8 +32,8 @@ public:
     virtual TempSensor&             operator=(const TempSensor& rhs) = delete;
     virtual TempSensor&             operator=(TempSensor&& rhs) noexcept;
 
-    virtual Temperature             sense(Error * const err = nullptr) noexcept;
-    virtual bool                    inRange() noexcept;
+    virtual Temperature             sense(Error * const err = nullptr) noexcept override;
+    virtual bool                    inRange() noexcept override;
 
     static DefaultTempSensor_uptr_t getSessionVesselTempSensor(const int sessionId, Error * const err = nullptr)
                                         noexcept;

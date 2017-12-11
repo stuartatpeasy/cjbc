@@ -28,7 +28,7 @@ public:
     Effector&                       operator=(const Effector& rhs) = delete;
     Effector&                       operator=(Effector&& rhs) noexcept;
 
-    virtual bool                    activate(const bool state, Error * const err = nullptr) noexcept;
+    virtual bool                    activate(const bool state, Error * const err = nullptr) noexcept override;
 
     virtual bool                    state() const noexcept { return state_; };
     virtual double                  powerConsumption() const noexcept { return powerConsumption_; };

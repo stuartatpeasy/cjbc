@@ -1,5 +1,5 @@
-#ifndef TEMPERATURE_H_INC
-#define TEMPERATURE_H_INC
+#ifndef APPLICATION_TEMPERATURE_H_INC
+#define APPLICATION_TEMPERATURE_H_INC
 /*
     temperature.h: declares class Temperature, which provides a unit-agnostic way of working with temperatures.
 
@@ -115,5 +115,5 @@ protected:
     static const double         kelvinPerDegreeFahrenheit;
 };
 
-#endif // TEMPERATURE_H_INC
+#endif // APPLICATION_TEMPERATURE_H_INC
 

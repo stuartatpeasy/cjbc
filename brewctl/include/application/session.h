@@ -1,5 +1,5 @@
-#ifndef SESSION_H_INC
-#define SESSION_H_INC
+#ifndef APPLICATION_SESSION_H_INC
+#define APPLICATION_SESSION_H_INC
 /*
     session.h: manages a single fermentation/conditioning session
 
@@ -53,7 +53,7 @@ public:
     bool                        isNotStartedYet() const noexcept;
     bool                        isActive() const noexcept;
     bool                        isComplete() const noexcept;
-    bool                        run() noexcept;
+    bool                        run() noexcept override;
     int                         gyleId() const noexcept { return gyle_id_; };
     std::string                 gyleName() const noexcept { return gyle_; };
     time_t                      remainingTime() const noexcept;
@@ -80,5 +80,5 @@ private:
     SessionType_t               type_;
 };
 
-#endif // SESSION_H_INC
+#endif // APPLICATION_SESSION_H_INC
 
