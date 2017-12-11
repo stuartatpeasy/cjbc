@@ -8,6 +8,8 @@
 
 #include "include/service/json/array.h"
 #include "include/framework/log.h"
+#include "include/service/json/element.h"
+#include "include/service/json/object.h"
 #include <cstdlib>      // NULL
 #include <utility>
 
@@ -88,5 +90,67 @@ JsonArray& JsonArray::move(JsonArray& rhs) noexcept
     array_.swap(rhs.array_);
 
     return *this;
+}
+
+// static fromPtr() - construct a JSON array from the struct json_object ptr supplied in <jobj>, recursing as required
+// in order to build a full tree of class Json-derived objects.
+//
+JsonArray *JsonArray::fromPtr(struct json_object *jobj) noexcept
+{
+    if(jobj == NULL)
+    {
+        logWarning("JsonArray::fromPtr(): called with NULL ptr");
+        return NULL;
+    }
+
+    if(::json_object_get_type(jobj) != json_type_array)
+    {
+        logWarning("JsonArray::fromPtr(): called with something that is not a JSON array");
+        return NULL;
+    }
+
+    JsonArray *ret = new JsonArray();
+    ret->jobj_ = jobj;
+
+    for(int i = 0; i < ::json_object_array_length(jobj); ++i)
+    {
+        struct json_object *val = ::json_object_array_get_idx(jobj, i);
+        if(val == NULL)
+        {
+            logWarning("JsonArray::fromPtr(): index %d of supplied array is NULL; ignoring");
+            continue;
+        }
+
+        Json *child = NULL;
+        switch(::json_object_get_type(val))
+        {
+            case json_type_object:
+                child = JsonObject::fromPtr(val);
+                break;
+
+            case json_type_array:
+                child = JsonArray::fromPtr(val);
+                break;
+
+            case json_type_boolean:
+            case json_type_int:
+            case json_type_double:
+            case json_type_string:
+                child = JsonElement::fromPtr(val);
+                break;
+
+            default:
+                logWarning("JsonArray::fromPtr(): json_object_object_foreach() returned a val with unknown type for "
+                           "index %d; ignoring", i);
+                continue;
+        }
+
+        if(child != NULL)
+            ret->array_.push_back(child);
+        else
+            logWarning("JsonArray::fromPtr(): failed to construct child object for index %d; ignoring", i);
+    }
+
+    return ret;
 }
 

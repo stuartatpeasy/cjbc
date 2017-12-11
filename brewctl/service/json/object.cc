@@ -8,6 +8,8 @@
 
 #include "include/service/json/object.h"
 #include "include/framework/log.h"
+#include "include/service/json/array.h"
+#include "include/service/json/element.h"
 #include <cstdlib>      // NULL
 #include <utility>
 
@@ -93,5 +95,68 @@ JsonObject& JsonObject::move(JsonObject& rhs) noexcept
     map_.swap(rhs.map_);
 
     return *this;
+}
+
+
+// static fromPtr() - construct a JSON object from the struct json_object ptr supplied in <jobj>, recursing as required
+// in order to build a full tree of class Json-derived objects.
+//
+JsonObject *JsonObject::fromPtr(struct json_object *jobj) noexcept
+{
+    if(jobj == NULL)
+    {
+        logWarning("JsonObject::fromPtr(): called with NULL ptr");
+        return NULL;
+    }
+
+    if(::json_object_get_type(jobj) != json_type_object)
+    {
+        logWarning("JsonObject::fromPtr(): called with something that is not a JSON object");
+        return NULL;
+    }
+
+    JsonObject *ret = new JsonObject();
+    ret->jobj_ = jobj;
+
+    json_object_object_foreach(jobj, key, val)
+    {
+        if(val == NULL)
+        {
+            logWarning("JsonObject::fromPtr(): json_object_object_foreach() returned NULL val for key '%s'; ignoring",
+                        key);
+            continue;
+        }
+
+        Json *child = NULL;
+        switch(::json_object_get_type(val))
+        {
+            case json_type_object:
+                child = JsonObject::fromPtr(val);
+                break;
+
+            case json_type_array:
+                child = JsonArray::fromPtr(val);
+                break;
+
+            case json_type_boolean:
+            case json_type_int:
+            case json_type_double:
+            case json_type_string:
+                child = JsonElement::fromPtr(val);
+                break;
+
+            default:
+                logWarning("JsonObject::fromPtr(): json_object_object_foreach() returned a val with unknown type for "
+                           "key '%s'; ignoring", key);
+                continue;
+        }
+
+        if(child != NULL)
+            ret->map_[key] = child;
+        else
+            logWarning("JsonObject::fromPtr(): failed to construct child object for key '%s'; ignoring", key);
+    }
+
+    return ret;
 }
 

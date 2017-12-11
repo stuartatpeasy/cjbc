@@ -54,6 +54,14 @@ JsonElement::JsonElement(const string& val) noexcept
 }
 
 
+// (private) ctor - construct an object around a pre-existing (and pre-validated) struct json_object.
+//
+JsonElement::JsonElement(struct json_object *jobj) noexcept
+{
+    jobj_ = jobj;
+}
+
+
 // get<int32_t> - coerce the value of this JSON element to int32_t, and return it.
 //
 template<>
@@ -96,5 +104,41 @@ template<>
 string JsonElement::get<string>() noexcept
 {
     return ::json_object_get_string(jobj_);
+}
+
+
+// static fromPtr() - construct and return a JsonElement from the supplied struct json_object ptr.  If the ptr is NULL,
+// or represents a non-scalar JSON type, return NULL.
+//
+JsonElement * JsonElement::fromPtr(struct json_object *jobj) noexcept
+{
+    if(jobj == NULL)
+    {
+        logWarning("JsonElement::fromPtr(): called with NULL ptr");
+        return NULL;
+    }
+
+    switch(::json_object_get_type(jobj))
+    {
+        case json_type_boolean:     //
+        case json_type_int:         // All these types are acceptable, because they're scalar
+        case json_type_double:      //
+        case json_type_string:      //
+            break;
+
+        case json_type_object:
+            logWarning("JsonElement::fromPtr(): argument represents a JSON object; cannot construct");
+            return NULL;
+
+        case json_type_array:
+            logWarning("JsonElement::fromPtr(): argument represents a JSON array; cannot construct");
+            return NULL;
+
+        default:
+            logWarning("JsonElement::fromPtr(): argument represents an unknown JSON type; cannot construct");
+            return NULL;
+    }
+
+    return new JsonElement(jobj);
 }
 

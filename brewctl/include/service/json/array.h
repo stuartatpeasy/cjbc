@@ -31,6 +31,8 @@ public:
     Json *                  getAt(const int index) noexcept;
     int                     length() noexcept;
 
+    static JsonArray *      fromPtr(struct json_object *jobj) noexcept;
+
 protected:
     virtual JsonArray&      move(JsonArray& rhs) noexcept;
 

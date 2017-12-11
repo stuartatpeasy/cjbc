@@ -31,6 +31,8 @@ public:
     Json *                  get(const std::string& key) noexcept;
     int                     length() noexcept;
 
+    static JsonObject *     fromPtr(struct json_object *jobj) noexcept;
+
 protected:
     virtual JsonObject&     move(JsonObject& rhs) noexcept;
 

@@ -28,6 +28,11 @@ public:
     virtual                 ~JsonElement() = default;
 
     template<typename T> T  get() noexcept;
+
+    static JsonElement *    fromPtr(struct json_object *jobj) noexcept;
+
+private:
+                            JsonElement(struct json_object *jobj) noexcept;
 };
 
 #endif // INCLUDE_SERVICE_JSON_ELEMENT_H_INC
