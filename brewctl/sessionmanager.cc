@@ -169,7 +169,7 @@ bool SessionManager::run() noexcept
                                  minutes        = secsRemaining / SECS_PER_MINUTE;
 
                     time_t field1, field2;
-                    const char *fmt;
+                    const char *fmt = nullptr;
 
                     if(days)
                     {
@@ -183,18 +183,21 @@ bool SessionManager::run() noexcept
                         field1 = hours;
                         field2 = minutes % MINS_PER_HOUR;
                     }
-                    else
+                    else if(secsRemaining)
                     {
                         fmt = "%2dm%02ds";
                         field1 = minutes;
                         field2 = secsRemaining % SECS_PER_MINUTE;
                     }
 
-                    lcd.printAt(14, 2, fmt, field1, field2);
+                    if(fmt != nullptr)
+                        lcd.printAt(14, 2, fmt, field1, field2);
+                    else
+                        lcd.printAt(14, 2, "      ");
                 }
                 else
                 {
-                    lcd.printAt(5, 0, session->isComplete() ? "Complete" : "Starts in");
+                    lcd.printAt(5, 2, session->isComplete() ? "Complete" : "Starts in");
                 }
             }
         }
