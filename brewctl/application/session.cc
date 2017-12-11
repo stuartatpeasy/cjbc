@@ -6,7 +6,7 @@
     Part of brewctl
 */
 
-#include "include/session.h"
+#include "include/application/session.h"
 #include "include/framework/log.h"
 #include "include/framework/registry.h"
 #include "include/peripherals/effector.h"

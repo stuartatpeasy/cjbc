@@ -2,15 +2,14 @@
 #
 # Stuart Wallace <stuartw@atom.net>, 2017.
 #
-#
 
 ifndef VERBOSE
 .SILENT:
 endif
 
 APPNAME := brewctl
-
 SOURCES := $(shell find . -path ./test -prune -o -name '*.cc' -print)
+LIBS := avahi-client avahi-common json-c m microhttpd sqlite3 wiringPi
 
 CFLAGS := -g -Wno-psabi -Wall -Wextra -Werror -pedantic -std=c++17 -pthread -I.
 LDFLAGS := -pthread

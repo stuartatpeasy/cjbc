@@ -8,11 +8,11 @@
     Part of brewctl
 */
 
+#include "include/application/sessionmanager.h"
 #include "include/framework/config.h"
 #include "include/framework/error.h"
 #include "include/service/avahiservice.h"
 #include "include/service/httpservice.h"
-#include "include/sessionmanager.h"
 #include <cstdint>
 #include <memory>
 #include <string>

@@ -10,9 +10,9 @@
     Part of brewctl
 */
 
+#include "include/application/temperature.h"
 #include "include/framework/error.h"
 #include "include/framework/log.h"
-#include "include/temperature.h"
 #include <memory>
 #include <string>
 

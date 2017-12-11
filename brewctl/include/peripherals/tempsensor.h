@@ -9,10 +9,10 @@
     Part of brewctl
 */
 
+#include "include/application/temperature.h"
 #include "include/framework/error.h"
 #include "include/peripherals/defaulttempsensor.h"
 #include "include/peripherals/thermistor.h"
-#include "include/temperature.h"
 #include <ctime>
 #include <memory>
 #include <mutex>

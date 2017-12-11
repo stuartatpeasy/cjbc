@@ -9,7 +9,7 @@
 */
 
 #include <cmath>
-#include "include/temperature.h"
+#include "include/application/temperature.h"
 
 
 class Thermistor
