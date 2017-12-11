@@ -48,19 +48,10 @@ extern "C"
 // LCD custom characters
 static const uint8_t charData[] =
 {
-    0x00,   // .....
-    0x00,   // .....
-    0x00,   // .....
-    0x00,   // .....    Char 0: blank
-    0x00,   // .....
-    0x00,   // .....
-    0x00,   // .....
-    0x00,   // -----
-    
     0x04,   // ..1..
     0x04,   // ..1..
     0x0e,   // .111.
-    0x0e,   // .111.    Char 1: Single up-arrow
+    0x0e,   // .111.    Char 0: Single up-arrow
     0x1f,   // 11111
     0x1f,   // 11111
     0x00,   // .....
@@ -69,7 +60,7 @@ static const uint8_t charData[] =
     0x00,   // .....
     0x1f,   // 11111
     0x1f,   // 11111
-    0x0e,   // .111.    Char 2: Single down-arrow
+    0x0e,   // .111.    Char 1: Single down-arrow
     0x0e,   // .111.
     0x04,   // ..1..
     0x04,   // ..1..
@@ -78,7 +69,7 @@ static const uint8_t charData[] =
     0x04,   // ..1..
     0x0e,   // .111.
     0x1f,   // 11111
-    0x00,   // .....    Char 3: Double up-arrow
+    0x00,   // .....    Char 2: Double up-arrow
     0x04,   // ..1..
     0x0e,   // .111.
     0x1f,   // 11111
@@ -87,7 +78,7 @@ static const uint8_t charData[] =
     0x1f,   // 11111
     0x0e,   // .111.
     0x04,   // ..1..
-    0x00,   // .....    Char 4: Double down-arrow
+    0x00,   // .....    Char 3: Double down-arrow
     0x1f,   // 11111
     0x0e,   // .111.
     0x04,   // ..1..
@@ -96,7 +87,7 @@ static const uint8_t charData[] =
     0x02,   // ...1.
     0x06,   // ..11.
     0x0e,   // .111.
-    0x1e,   // 1111.    Char 5: Left-arrow
+    0x1e,   // 1111.    Char 4: Left-arrow
     0x0e,   // .111.
     0x06,   // ..11.
     0x02,   // ...1.
@@ -105,10 +96,19 @@ static const uint8_t charData[] =
     0x08,   // .1...
     0x0c,   // .11..
     0x0e,   // .111.
-    0x0f,   // .1111    Char 6: Right-arrow
+    0x0f,   // .1111    Char 5: Right-arrow
     0x0e,   // .111.
     0x0c,   // .11..
     0x08,   // .1...
+    0x00,   // -----
+
+    0x1f,   // 11111
+    0x00,   // .....
+    0x0e,   // .111.
+    0x00,   // .....    Char 6: Wi-fi symbol (ish)
+    0x04,   // ..1..
+    0x04,   // ..1..
+    0x04,   // ..1..
     0x00    // -----
 };
 

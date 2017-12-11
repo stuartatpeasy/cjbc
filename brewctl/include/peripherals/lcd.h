@@ -18,12 +18,13 @@
 //
 typedef enum LCDCustomSym
 {
-    LCD_CH_ARROW_UP     = 1,
-    LCD_CH_ARROW_DOWN   = 2,
-    LCD_CH_ARROW_2UP    = 3,
-    LCD_CH_ARROW_2DOWN  = 4,
-    LCD_CH_ARROW_LEFT   = 5,
-    LCD_CH_ARROW_RIGHT  = 6
+    LCD_CH_ARROW_UP     = 0,        // Solid arrowhead pointing up
+    LCD_CH_ARROW_DOWN   = 1,        //   "       "        "     down
+    LCD_CH_ARROW_2UP    = 2,        // Double solid arrowhead pointing up
+    LCD_CH_ARROW_2DOWN  = 3,        //   "      "       "        "     down
+    LCD_CH_ARROW_LEFT   = 4,        // Solid arrowhead pointing left
+    LCD_CH_ARROW_RIGHT  = 5,        //   "       "        "     right
+    LCD_CH_WIFI         = 6         // Wi-fi symbol (or a vague approximation thereof)
 } LCDCustomSym_t;
 
 
