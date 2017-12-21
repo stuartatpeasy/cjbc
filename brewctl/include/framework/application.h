@@ -11,6 +11,7 @@
 #include "include/application/sessionmanager.h"
 #include "include/framework/config.h"
 #include "include/framework/error.h"
+#include "include/peripherals/buttonmanager.h"
 #include "include/service/avahiservice.h"
 #include "include/service/httpservice.h"
 #include <cstdint>
@@ -35,6 +36,12 @@ friend void appSignalHandler(int signum) noexcept;
 
 public:
                                 Application(int argc, char **argv, Error * const err) noexcept;
+                                Application(const Application& rhs) = delete;
+                                Application(Application&& rhs) = delete;
+
+    Application&                operator=(const Application& rhs) = delete;
+    Application&                operator=(Application&& rhs) = delete;
+
     bool                        run(Error * const err = nullptr) noexcept;
     void                        stop() noexcept;
 
@@ -52,6 +59,7 @@ private:
     AvahiService *              avahiService_;
     SessionManager              sessionManager_;
     HttpService *               httpService_;
+    ButtonManager *             buttonManager_;
     uint64_t                    systemId_;
     volatile bool               stop_;
 };

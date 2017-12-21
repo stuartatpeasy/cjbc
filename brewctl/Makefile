@@ -21,7 +21,7 @@ OBJDIR := .obj
 
 OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.cc,%.o,$(SOURCES)))
 
-LIBS := -lavahi-client -lavahi-common -ljson-c -lm -lmicrohttpd -lsqlite3 -lwiringPi
+LIBS := -lavahi-client -lavahi-common -liw -ljson-c -lm -lmicrohttpd -lsqlite3 -lwiringPi
 
 $(OBJDIR)/%.o : %.cc $(DEPDIR)/%.d
 	mkdir -p $(dir $@)

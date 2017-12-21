@@ -2,6 +2,7 @@
 avahi-daemon
 libavahi-client3
 libboost1.62
+libiw30
 libjson-c3
 libmicrohttpd12
 libsnmp-base
@@ -16,6 +17,7 @@ libboost1.62-dev    # earlier versions are probably OK
 libavahi-common-dev
 libavahi-client-dev
 libdbus-1-dev
+libiw-dev
 libjson-c-dev
 libmicrohttpd-dev
 make

@@ -73,7 +73,10 @@ static ConfigData_t defaultConfig =
 // ctor - initialise top-level objects; prepare to run application.
 //
 Application::Application(int argc, char **argv, Error * const err) noexcept
-    : avahiService_(nullptr), httpService_(nullptr), systemId_(0), stop_(false)
+    : avahiService_(nullptr),
+      httpService_(nullptr),
+      systemId_(0),
+      stop_(false)
 {
     gApp = this;
     appName_ = argc ? argv[0] : DEFAULT_APP_NAME;
@@ -252,6 +255,7 @@ bool Application::run(Error * const err) noexcept
         return false;
 
     httpService_ = new HttpService(port);
+    buttonManager_ = new ButtonManager();
 
     // Register SIGQUIT handler
     if(!installQuitHandler(err))
@@ -260,6 +264,7 @@ bool Application::run(Error * const err) noexcept
     thread(&HttpService::run, httpService_).detach();
     thread(&AvahiService::run, avahiService_).detach();
     thread(&SessionManager::run, &sessionManager_).detach();
+    thread(&ButtonManager::run, buttonManager_).detach();
 
     Util::Thread::setName(Registry::instance().config()("application.short_name") + ": main");
 
@@ -282,6 +287,12 @@ bool Application::run(Error * const err) noexcept
 
     logInfo("Stopping session manager");
     sessionManager_.stop();
+
+    if(buttonManager_ != nullptr)
+    {
+        logInfo("Stopping button manager");
+        buttonManager_->stop();
+    }
 
     // Wait for child threads to stop
     while(httpService_->isRunning() || avahiService_->isRunning() || sessionManager_.isRunning())
