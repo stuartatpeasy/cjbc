@@ -69,6 +69,8 @@ bool ButtonManager::run() noexcept
 //
 ButtonManager& ButtonManager::registerButton(const ButtonId_t button) noexcept
 {
+    lock_guard<mutex> lock(lock_);
+
     buttons_.emplace(button, button);
 
     return *this;

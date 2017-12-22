@@ -59,6 +59,11 @@ bool Registry::init(Config& config, Error * const err) noexcept
 
         // Initialise objects within the registry
         instance_->buttonManager_ = ButtonManager::instance();       // This is messy
+        if(instance_->buttonManager_ == nullptr)
+        {
+            formatError(err, MALLOC_FAILED);
+            return false;
+        }
 
         thread(&ButtonManager::run, instance_->buttonManager_).detach();
 
