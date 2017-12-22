@@ -56,6 +56,7 @@ public:
 protected:
                                 GPIOPin(const gpio_pin_id_t pin) noexcept;
 public:
+    gpio_pin_id_t               id() const noexcept { return pin_; };
     bool                        read() noexcept;
     void                        write(const bool val) noexcept;
     bool                        setMode(const GPIOPinMode_t mode, Error * const err = nullptr) noexcept;

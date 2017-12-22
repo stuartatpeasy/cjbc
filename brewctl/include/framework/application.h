@@ -59,7 +59,6 @@ private:
     AvahiService *              avahiService_;
     SessionManager              sessionManager_;
     HttpService *               httpService_;
-    ButtonManager *             buttonManager_;
     uint64_t                    systemId_;
     volatile bool               stop_;
 };

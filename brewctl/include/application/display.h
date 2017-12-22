@@ -10,6 +10,7 @@
 
 #include "include/application/session.h"
 #include "include/framework/registry.h"
+#include "include/peripherals/button.h"
 #include "include/peripherals/lcd.h"
 #include <cstddef>
 
@@ -27,6 +28,9 @@ public:
     void                stop() noexcept;
 
 private:
+    static void         buttonCallback(const ButtonId_t buttonId, const ButtonState_t state, void *arg) noexcept;
+    void                buttonEvent(const ButtonId_t buttonId, const ButtonState_t state) noexcept;
+
     char                getTempControlIndicator(const SessionTempControlState_t state) const noexcept;
     char                getSessionTypeIndicator(const SessionType_t type) const noexcept;
 

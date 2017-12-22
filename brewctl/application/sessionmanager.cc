@@ -63,7 +63,6 @@ bool SessionManager::init(Error * const err) noexcept
 
         sessions_.push_back(s);
         vecSessionThreads_.push_back(thread(&Session::run, s));
-//        thread(&Session::run, s).detach();
     }
 
     return true;

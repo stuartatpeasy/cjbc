@@ -8,8 +8,16 @@
 
 #include "include/application/display.h"
 #include "include/application/sessionmanager.h"
+#include "include/framework/log.h"
 #include <ctime>
 
+
+// Front-panel button IDs
+const ButtonId_t BUTTON_BOTTOM  = 2,
+                 BUTTON_TOP     = 3,
+                 ROT_CW         = 4,
+                 ROT_CCW        = 5,
+                 ROT_BUTTON     = 6;
 
 // Time-interval constants
 static const time_t 
@@ -68,6 +76,19 @@ char Display::getSessionTypeIndicator(const SessionType_t type) const noexcept
 //
 void Display::init() noexcept
 {
+    auto& bm = Registry::instance().buttonManager();
+
+    // Register front-panel buttons with the ButtonManager.
+    bm.registerButton(BUTTON_BOTTOM)
+      .registerButton(BUTTON_TOP)
+      .registerButton(ROT_CW)
+      .registerButton(ROT_CCW)
+      .registerButton(ROT_BUTTON);
+
+    // Install button-press handlers
+    bm.button(BUTTON_TOP).registerCallback(BUTTON_ANY_STATE, &Display::buttonCallback, this);
+    bm.button(BUTTON_BOTTOM).registerCallback(BUTTON_ANY_STATE, &Display::buttonCallback, this);
+
     lcd_.backlight(true);
 }
 
@@ -148,6 +169,24 @@ void Display::update() noexcept
             }
         }
     }
+}
+
+
+// buttonCallback() - reflects button-press/-release events into the active display handler object.
+//
+void Display::buttonCallback(const ButtonId_t buttonId, const ButtonState_t state, void *arg) noexcept
+{
+    Display * const disp = reinterpret_cast<Display *> (arg);
+
+    disp->buttonEvent(buttonId, state);
+}
+
+
+// buttonEvent() - handle button-press/-release events.
+//
+void Display::buttonEvent(const ButtonId_t buttonId, const ButtonState_t state) noexcept
+{
+    logDebug("Display::buttonEvent() - button %d %s", buttonId, (state == BUTTON_PRESSED) ? "pressed" : "released");
 }
 
 

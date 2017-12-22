@@ -9,6 +9,9 @@
 #include "include/framework/registry.h"
 #include "include/framework/log.h"
 #include <memory>
+#include <thread>
+
+using std::thread;
 
 
 Registry * Registry::instance_ = nullptr;
@@ -55,6 +58,10 @@ bool Registry::init(Config& config, Error * const err) noexcept
             return false;
 
         // Initialise objects within the registry
+        instance_->buttonManager_ = ButtonManager::instance();       // This is messy
+
+        thread(&ButtonManager::run, instance_->buttonManager_).detach();
+
         auto ret = instance_->sr().init(err);
 
         if(ret)
