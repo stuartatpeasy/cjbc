@@ -94,7 +94,12 @@ void ButtonManager::update() noexcept
 {
     lock_guard<mutex> lock(lock_);
 
+    // Update all button states before triggering any callbacks.  That way, the callbacks see a consistent set of
+    // button states.
     for(auto& button : buttons_)
         button.second.update();
+
+    for(auto& button : buttons_)
+        button.second.triggerCallback();
 }
 

@@ -36,6 +36,8 @@ public:
     Button&                 operator=(Button&& rhs) = delete;
 
     void                    update() noexcept;
+    ButtonState_t           state() const noexcept { return currentState_; };
+    void                    triggerCallback() noexcept;
     void                    registerCallback(const ButtonState_t state, ButtonCallbackFn_t callback, void * const arg)
                                 noexcept;
 
@@ -47,6 +49,7 @@ private:
     ButtonState_t           currentState_;
     ButtonState_t           callbackTriggerState_;
     void *                  callbackArg_;
+    bool                    stateChanged_;
 };
 
 #endif // PERIPHERALS_BUTTON_H_INC

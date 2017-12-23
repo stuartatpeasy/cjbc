@@ -21,13 +21,14 @@ Button::Button(const ButtonId_t button) noexcept
       callback_(nullptr),
       currentState_(BUTTON_RELEASED),
       callbackTriggerState_(BUTTON_ANY_STATE),
-      callbackArg_(nullptr)
+      callbackArg_(nullptr),
+      stateChanged_(false)
 {
     update();
 }
 
 
-// update() - read and record the button's state; trigger a callback if appropriate.
+// update() - read and record the button's state; set stateChanged_ to true if a state change has occurred.
 //
 void Button::update() noexcept
 {
@@ -35,13 +36,22 @@ void Button::update() noexcept
 
     if(state != currentState_)
     {
-        logDebug("Button %d %s", pin_.id(), (state == BUTTON_PRESSED) ? "pressed" : "released");
-
-        // Trigger callback
-        if((callback_ != nullptr) && ((callbackTriggerState_ == BUTTON_ANY_STATE) || (callbackTriggerState_ == state)))
-            callback_(pin_.id(), state, callbackArg_);
-
         currentState_ = state;
+        stateChanged_ = true;
+    }
+}
+
+
+// triggerCallback() - trigger a callback if a state change has occurred, and a callback with appropriate conditions has
+// been registered.
+//
+void Button::triggerCallback() noexcept
+{
+    if((callback_ != nullptr) && (stateChanged_) &&
+       ((callbackTriggerState_ == BUTTON_ANY_STATE) || (callbackTriggerState_ == currentState_)))
+    {
+        stateChanged_ = false;
+        callback_(pin_.id(), currentState_, callbackArg_);
     }
 }
 

@@ -88,6 +88,8 @@ void Display::init() noexcept
     // Install button-press handlers
     bm.button(BUTTON_TOP).registerCallback(BUTTON_ANY_STATE, &Display::buttonCallback, this);
     bm.button(BUTTON_BOTTOM).registerCallback(BUTTON_ANY_STATE, &Display::buttonCallback, this);
+    bm.button(ROT_CW).registerCallback(BUTTON_PRESSED, &Display::buttonCallback, this);
+    bm.button(ROT_BUTTON).registerCallback(BUTTON_ANY_STATE, &Display::buttonCallback, this);
 
     lcd_.backlight(true);
 }
@@ -172,7 +174,8 @@ void Display::update() noexcept
 }
 
 
-// buttonCallback() - reflects button-press/-release events into the active display handler object.
+// buttonCallback() - reflects button-press/-release events into the active display handler object.  Note that this
+// method is called within the context of the button manager thread.
 //
 void Display::buttonCallback(const ButtonId_t buttonId, const ButtonState_t state, void *arg) noexcept
 {
@@ -182,11 +185,20 @@ void Display::buttonCallback(const ButtonId_t buttonId, const ButtonState_t stat
 }
 
 
-// buttonEvent() - handle button-press/-release events.
+// buttonEvent() - handle button-press/-release events.  Note that this method is called within the context of the
+// button manager thread.
 //
 void Display::buttonEvent(const ButtonId_t buttonId, const ButtonState_t state) noexcept
 {
-    logDebug("Display::buttonEvent() - button %d %s", buttonId, (state == BUTTON_PRESSED) ? "pressed" : "released");
+    if(buttonId == ROT_CW)
+    {
+        if(Registry::instance().buttonManager().button(ROT_CCW).state() == BUTTON_PRESSED)
+            logDebug("--- anticlockwise");
+        else
+            logDebug("--- clockwise");
+    }
+    else
+        logDebug("Display::buttonEvent() - button %d %s", buttonId, (state == BUTTON_PRESSED) ? "pressed" : "released");
 }
 
 
