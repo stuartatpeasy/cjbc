@@ -20,14 +20,9 @@ const double Temperature::kelvinPerDegreeCelsius    = 1.0;
 const double Temperature::kelvinPerDegreeFahrenheit = 0.556;
 
 
-// default ctor - construct an object representing the temperature absolute zero.
+// ctor - construct an object representing the specified temperature.  <value> defaults to 0.0 and <unit> defaults to
+// TEMP_UNIT_KELVIN, so invoking this ctor without arguments constructs an object representing absolute zero.
 //
-Temperature::Temperature() noexcept
-    : valKelvin_(0.0)
-{
-}
-
-
 Temperature::Temperature(const double value, const TemperatureUnit_t unit) noexcept
 {
     set(value, unit);

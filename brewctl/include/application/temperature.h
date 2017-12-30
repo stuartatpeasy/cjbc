@@ -24,8 +24,7 @@ typedef enum TemperatureUnit
 class Temperature
 {
 public:
-                                Temperature() noexcept;
-                                Temperature(const double value, const TemperatureUnit_t unit) noexcept;
+                                Temperature(const double value = 0.0l, const TemperatureUnit_t unit = TEMP_UNIT_KELVIN) noexcept;
 
     double                      get(const TemperatureUnit_t unit) const noexcept;
     bool                        set(const double value, const TemperatureUnit_t unit) noexcept;

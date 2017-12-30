@@ -97,8 +97,6 @@ void Display::init() noexcept
 
 void Display::update() noexcept
 {
-    lcd_.printAt(18, 0, "\xdf""C");
-
     const time_t now = ::time(NULL);
 
     if((now - lastDisplayUpdate_) > displayUpdateInterval_)
@@ -114,9 +112,9 @@ void Display::update() noexcept
 
         const Temperature ambientTemp = sm_.ambientTemp();
         if(ambientTemp)
-            lcd_.printAt(16, 0, "%2d", (int) (ambientTemp.C() + 0.5));
+            lcd_.printAt(15, 0, "% 3d\xdf""C", (int) (ambientTemp.C() + 0.5));
         else
-            lcd_.printAt(16, 0, "--");
+            lcd_.printAt(16, 0, "--\xdf""C");
 
         for(auto& session : sm_.sessions())
         {

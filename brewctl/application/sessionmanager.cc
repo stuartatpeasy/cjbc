@@ -74,7 +74,9 @@ bool SessionManager::init(Error * const err) noexcept
 //
 Temperature SessionManager::ambientTemp() noexcept
 {
-    return tempSensorAmbient_->sense();
+    Temperature t = tempSensorAmbient_->sense();        // Always sense, to update the moving average
+
+    return tempSensorAmbient_->inRange() ? t : Temperature();
 }
 
 
