@@ -34,6 +34,7 @@ public:
                     LCD(GPIOPort& gpio, Error * const err = nullptr) noexcept;
 
     void            clear() noexcept;
+    bool            clearLine(const int y, Error * const err = nullptr) noexcept;
     int             printAt(const int x, const int y, const std::string& format, ...) noexcept;
     bool            putAt(const int x, const int y, const char c, Error * const err = nullptr) noexcept;
     bool            setCursorPos(const int x, const int , Error * const err = nullptr) noexcept;

@@ -130,6 +130,7 @@ void Display::update() noexcept
 void Display::displayDefault() noexcept
 {
     const time_t now = ::time(NULL);
+    static size_t currentIdx = -1;
 
     if((now - lastDisplayUpdate_) >= displayUpdateInterval_)
     {
@@ -151,7 +152,17 @@ void Display::displayDefault() noexcept
         const size_t nsessions = sm_.sessions().size();
         if(nsessions)
         {
-            auto& session = sm_.sessions()[(now / sessionDwellTime_) % nsessions];
+            const auto sessionIdx = (now / sessionDwellTime_) % nsessions;
+            auto& session = sm_.sessions()[sessionIdx];
+
+            // If we're about to render a new session, clear the bottom half of the LCD in preparation for writing
+            // session data to it.
+            if(sessionIdx != currentIdx)
+            {
+                currentIdx = sessionIdx;
+                lcd_.clearLine(2);
+                lcd_.clearLine(3);
+            }
 
             lcd_.printAt(0, 2, "G%-3d", session->gyleId());
             lcd_.printAt(0, 3, "%.20s", session->gyleName().c_str());

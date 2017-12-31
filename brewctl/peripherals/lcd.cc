@@ -286,12 +286,30 @@ void LCD::clear() noexcept
 }
 
 
+// clearLine() - clear the line specified by <y> by filling it with space (' ') characters.  Returns true on success,
+// false otherwise.
+//
+bool LCD::clearLine(const int y, Error * const err) noexcept
+{
+    if((y < 0) || (y >= LCD_DISP_HEIGHT))
+    {
+        formatError(err, LCD_INVALID_CURSOR_POS);
+        return false;
+    }
+
+    const string emptyLine(LCD_DISP_WIDTH, ' ');
+    printAt(0, y, emptyLine.c_str());
+
+    return true;
+}
+
+
 // setCursorPos() - set the LCD's cursor position to (<x>, <y>).  Returns true on success, false otherwise (including
 // cases where <x> or <y> are out of range).
 //
 bool LCD::setCursorPos(const int x, const int y, Error * const err) noexcept
 {
-    if((x < 0) || (x >= LCD_DISP_WIDTH) || (y < 0) || (y > LCD_DISP_HEIGHT))
+    if((x < 0) || (x >= LCD_DISP_WIDTH) || (y < 0) || (y >= LCD_DISP_HEIGHT))
     {
         formatError(err, LCD_INVALID_CURSOR_POS);
         return false;
