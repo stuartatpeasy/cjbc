@@ -10,6 +10,11 @@
 #include "include/application/sessionmanager.h"
 #include "include/framework/log.h"
 #include <ctime>
+#include <functional>
+#include <map>
+
+using std::invoke;
+using std::map;
 
 
 // Front-panel button IDs
@@ -26,7 +31,15 @@ static const time_t
     SECS_PER_MINUTE                 = 60,
     SECS_PER_HOUR                   = MINS_PER_HOUR * SECS_PER_MINUTE,
     SECS_PER_DAY                    = HOURS_PER_DAY * SECS_PER_HOUR,
-    DEFAULT_DISPLAY_UPDATE_INTERVAL = 1;
+    DEFAULT_DISPLAY_UPDATE_INTERVAL = 1,
+    DEFAULT_SESSION_DWELL_TIME      = 5;
+
+// Handlers for each display mode
+Display::DispHandlerMap_t Display::handlers_ =
+{
+    {DM_DEFAULT, &Display::displayDefault},
+    {DM_TOPMENU, &Display::displayTopMenu}
+};
 
 
 // ctor
@@ -35,8 +48,11 @@ Display::Display(SessionManager& sm) noexcept
     : sm_(sm),
       lcd_(Registry::instance().lcd()),
       lastDisplayUpdate_(0),
-      displayUpdateInterval_(DEFAULT_DISPLAY_UPDATE_INTERVAL)
+      displayUpdateInterval_(DEFAULT_DISPLAY_UPDATE_INTERVAL),
+      currentMode_(DM_DEFAULT)
 {
+    sessionDwellTime_ = Registry::instance().config().get<int>("display.session_dwell_time", DEFAULT_SESSION_DWELL_TIME,
+                                                               [](const int& val) -> bool { return val > 0; });
 }
 
 
@@ -97,9 +113,23 @@ void Display::init() noexcept
 
 void Display::update() noexcept
 {
+    auto h = handlers_.find(currentMode_);
+
+    if(h != handlers_.end())
+        invoke(h->second, *this);
+    else
+        displayDefault();
+}
+
+
+// displayDefault() - display the default screen, which comprises a fermentation/conditioning progress indicator and
+// some other information.
+//
+void Display::displayDefault() noexcept
+{
     const time_t now = ::time(NULL);
 
-    if((now - lastDisplayUpdate_) > displayUpdateInterval_)
+    if((now - lastDisplayUpdate_) >= displayUpdateInterval_)
     {
         char buffer[16];
         time_t tm;
@@ -116,8 +146,11 @@ void Display::update() noexcept
         else
             lcd_.printAt(16, 0, "--\xdf""C");
 
-        for(auto& session : sm_.sessions())
+        const size_t nsessions = sm_.sessions().size();
+        if(nsessions)
         {
+            auto& session = sm_.sessions()[(now / sessionDwellTime_) % nsessions];
+
             lcd_.printAt(0, 2, "G%-3d", session->gyleId());
             lcd_.printAt(0, 3, "%.20s", session->gyleName().c_str());
             
@@ -168,7 +201,14 @@ void Display::update() noexcept
                 lcd_.printAt(5, 2, session->isComplete() ? "Complete" : "Starts in");
             }
         }
+        else
+            lcd_.printAt(5, 2, "No sessions");
     }
+}
+
+
+void Display::displayTopMenu() noexcept
+{
 }
 
 
