@@ -9,6 +9,7 @@
 */
 
 #include "include/framework/error.h"
+#include "include/framework/log.h"
 #include "include/stringvalue.h"
 #include <map>
 #include <memory>
@@ -33,10 +34,23 @@ public:
     bool                    exists(const std::string& key) const noexcept;
     bool                    require(const std::string& key, Error * const err = nullptr) const noexcept;
     std::string             operator()(const std::string& key) noexcept;
-    
-    template<typename T> T  get(const std::string& key, const T& defaultVal = T()) noexcept
+
+    template<typename T> T  get(const std::string& key, const T& defaultVal = T(),
+                                bool (*validator)(const T& val) = nullptr) noexcept
                             {
-                                return exists(key) ? (T) data_[key] : defaultVal;
+                                if(exists(key))
+                                {
+                                    T ret = data_[key];
+                                    if((validator == nullptr) || validator(ret))
+                                        return ret;
+
+                                    logWarning("Config key '%s' has invalid value '%s'; using default value '%s'",
+                                                key.c_str(),
+                                                StringValue(ret).str().c_str(),
+                                                StringValue(defaultVal).str().c_str());
+                                }
+
+                                return defaultVal;
                             }
 
     bool                    strToBool(const std::string& key) noexcept;
