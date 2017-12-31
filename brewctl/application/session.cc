@@ -11,12 +11,14 @@
 #include "include/framework/registry.h"
 #include "include/peripherals/effector.h"
 #include "include/peripherals/tempsensor.h"
+#include "include/util/validator.h"
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>      // NULL
 #include <ctime>        // ::time()
 
 using boost::iequals;
 using std::string;
+namespace Validator = Util::Validator;
 
 
 static const double
@@ -130,8 +132,8 @@ Session::Session(const int id, Error * const err) noexcept
 
     end_ts_ = offset;
 
-    deadZone_ = cfg.get("session.dead_zone", DEFAULT_TEMP_DEADZONE);
-    effectorUpdateInterval_ = cfg.get("session.switch_interval_s", DEFAULT_SWITCH_INTERVAL_S);
+    deadZone_ = cfg.get("session.dead_zone", DEFAULT_TEMP_DEADZONE, Validator::gt0);
+    effectorUpdateInterval_ = cfg.get("session.switch_interval_s", DEFAULT_SWITCH_INTERVAL_S, Validator::gt0);
 
     effectorHeater_->activate(false);
     effectorCooler_->activate(false);

@@ -8,9 +8,11 @@
 
 #include "include/peripherals/adc.h"
 #include "include/framework/registry.h"
+#include "include/util/validator.h"
 
 using std::lock_guard;
 using std::mutex;
+namespace Validator = Util::Validator;
 
 
 static const ADCChannel_t ADC_MAX_CHANNEL   = 7;        // This ADC has channels numbered 0-7
@@ -40,8 +42,8 @@ typedef enum ADCPin
 ADC::ADC(GPIOPort& gpio, Config& config, Error * const err) noexcept
     : ready_(false)
 {
-    vref_ = config.get<double>("adc.ref_voltage", ADC_DEFAULT_REF_VOLTAGE);
-    isource_ = config.get<double>("adc.isource_ua", ADC_DEFAULT_ISOURCE_UA) / 1000000.0;    // isource_ is in amps
+    vref_ = config.get("adc.ref_voltage", ADC_DEFAULT_REF_VOLTAGE, Validator::gt0);
+    isource_ = config.get("adc.isource_ua", ADC_DEFAULT_ISOURCE_UA, Validator::gt0) / 1000000.0;
 
     // Set ADC_nCS as an output, and de-assert it
     auto& nCS = gpio.pin(GPIO_ADC_nCS);

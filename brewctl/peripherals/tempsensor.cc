@@ -11,11 +11,13 @@
 #include "include/framework/registry.h"
 #include "include/peripherals/tempsensor.h"
 #include "include/sqlite/sqlitestmt.h"
+#include "include/util/validator.h"
 #include <string>
 
 using std::lock_guard;
 using std::mutex;
 using std::string;
+namespace Validator = Util::Validator;
 
 
 static const int 
@@ -74,20 +76,8 @@ TempSensor::TempSensor(const int thermistor_id, const int channel, Error * const
 
     auto& config = Registry::instance().config();
 
-    avglen_ = config.get("sensor.average_len", DEFAULT_MOVING_AVERAGE_LEN);
-    if(avglen_ < 1)
-    {
-        logWarning("Invalid value (%d) for sensor.average_len; using sensor.average_len=1 instead", avglen_);
-        avglen_ = 1;
-    }
-
-    logInterval_ = config.get("sensor.log_interval_s", DEFAULT_LOG_INTERVAL_S);
-    if(logInterval_ < 0)
-    {
-        logWarning("Invalid value (%d) for sensor.log_interval_s; disabling temperature logging for channel %d",
-                    logInterval_, channel_);
-        logInterval_ = 0;
-    }
+    avglen_ = config.get("sensor.average_len", DEFAULT_MOVING_AVERAGE_LEN, Validator::gt0);
+    logInterval_ = config.get("sensor.log_interval_s", DEFAULT_LOG_INTERVAL_S, Validator::gt0);
 }
 
 

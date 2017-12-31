@@ -9,12 +9,14 @@
 #include "include/application/display.h"
 #include "include/application/sessionmanager.h"
 #include "include/framework/log.h"
+#include "include/util/validator.h"
 #include <ctime>
 #include <functional>
 #include <map>
 
 using std::invoke;
 using std::map;
+namespace Validator = Util::Validator;
 
 
 // Front-panel button IDs
@@ -51,8 +53,8 @@ Display::Display(SessionManager& sm) noexcept
       displayUpdateInterval_(DEFAULT_DISPLAY_UPDATE_INTERVAL),
       currentMode_(DM_DEFAULT)
 {
-    sessionDwellTime_ = Registry::instance().config().get<int>("display.session_dwell_time", DEFAULT_SESSION_DWELL_TIME,
-                                                               [](const int& val) -> bool { return val > 0; });
+    sessionDwellTime_ = Registry::instance().config()
+                            .get("display.session_dwell_time", DEFAULT_SESSION_DWELL_TIME, Validator::gt0);
 }
 
 

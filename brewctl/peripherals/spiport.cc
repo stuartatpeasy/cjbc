@@ -21,6 +21,7 @@
 
 #include "include/framework/error.h"
 #include "include/peripherals/spiport.h"
+#include "include/util/validator.h"
 #include <cstring>
 #include <initializer_list>
 
@@ -33,6 +34,8 @@ extern "C"
 }
 
 using std::string;
+namespace Validator = Util::Validator;
+
 
 static const int
     SPI_DEFAULT_BPW     = 8,                    // Default SPI word length = 8 bits
@@ -68,7 +71,7 @@ SPIPort::SPIPort(GPIOPort& gpio, Config& config, Error * const err) noexcept
         if(!gpio.pin(pin).setMode(PIN_ALT0, err))
             return;
 
-    fd_ = ::open(config.get<string>("spi.dev", SPI_DEFAULT_DEVICE).c_str(), O_RDWR);
+    fd_ = ::open(config.get<string>("spi.dev", SPI_DEFAULT_DEVICE, Validator::notEmpty).c_str(), O_RDWR);
 
     ::bzero(&xfer_, sizeof(xfer_));
 
@@ -80,8 +83,8 @@ SPIPort::SPIPort(GPIOPort& gpio, Config& config, Error * const err) noexcept
 
     // Attempt to set port defaults
     if(!setBitsPerWord(SPI_DEFAULT_BPW, err) ||
-       !setMaxSpeed(config.get("spi.max_clock", SPI_DEFAULT_CLOCK), err) ||
-       !setMode(config.get("spi.mode", SPI_DEFAULT_MODE), err))
+       !setMaxSpeed(config.get("spi.max_clock", SPI_DEFAULT_CLOCK, Validator::gt0), err) ||
+       !setMode(config.get("spi.mode", SPI_DEFAULT_MODE, Validator::ge0), err))
     {
         formatError(err, SPI_PARAM_SET_FAILED);
         return;

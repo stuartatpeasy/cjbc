@@ -13,6 +13,7 @@
 #include "include/util/random.h"
 #include "include/util/sys.h"
 #include "include/util/thread.h"
+#include "include/util/validator.h"
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
@@ -36,6 +37,7 @@ using std::ostringstream;
 using std::queue;
 using std::string;
 using std::thread;
+namespace Validator = Util::Validator;
 
 
 void appSignalHandler(int signum) noexcept;
@@ -244,7 +246,8 @@ bool Application::run(Error * const err) noexcept
     systemId_ = getSystemId();
     ostringstream avahiServiceName;
 
-    avahiServiceName << config_.get<string>("system.avahi_service_name", DEFAULT_AVAHI_SERVICE_NAME)
+    avahiServiceName << config_.get<string>("system.avahi_service_name", DEFAULT_AVAHI_SERVICE_NAME,
+                                            Validator::notEmpty)
                      << "-"
                      << std::hex << std::setw(12) << std::setfill('0') << systemId_;
 
