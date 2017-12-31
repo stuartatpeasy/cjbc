@@ -24,7 +24,7 @@ using std::thread;
 //
 SessionManager::SessionManager() noexcept
     : Thread(),
-      display_(*this)
+      display_(nullptr)
 {
 }
 
@@ -35,6 +35,9 @@ SessionManager::~SessionManager() noexcept
 {
     for(auto it : sessions_)
         delete it;
+
+    if(display_ != nullptr)
+        delete display_;
 }
 
 
@@ -44,6 +47,8 @@ bool SessionManager::init(Error * const err) noexcept
 {
     SQLite& db = Registry::instance().db();
     SQLiteStmt sessions;
+
+    display_ = new Display(*this);
 
     tempSensorAmbient_ = TempSensor::getAmbientTempSensor(err);
     if(err->code())
@@ -95,13 +100,13 @@ bool SessionManager::run() noexcept
     running_ = true;
     setName("smgr");
 
-    display_.init();
+    display_->init();
 
     while(!stop_)
     {
         ambientTemp();      // Force an update of the ambient temperature moving average
 
-        display_.update();
+        display_->update();
         ::usleep(10 * 1000);
     }
 
@@ -110,13 +115,13 @@ bool SessionManager::run() noexcept
     for(auto session : sessions_)
         session->stop();
 
-    display_.notifyShutdown();
+    display_->notifyShutdown();
 
     // Wait for session threads to terminate
     for(auto& sessionThread : vecSessionThreads_)
         sessionThread.join();
 
-    display_.stop();
+    display_->stop();
     running_ = false;
 
     return true;

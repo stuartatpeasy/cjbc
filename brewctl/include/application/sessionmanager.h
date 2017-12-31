@@ -41,7 +41,7 @@ private:
     vecSessionPtr_t             sessions_;
     std::vector<std::thread>    vecSessionThreads_;
     DefaultTempSensor_uptr_t    tempSensorAmbient_;
-    Display                     display_;
+    Display *                   display_;
 };
 
 #endif // APPLICATION_SESSIONMANAGER_H_INC
