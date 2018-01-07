@@ -67,7 +67,6 @@ bool SessionManager::init(Error * const err) noexcept
             return false;
 
         sessions_.push_back(s);
-        vecSessionThreads_.push_back(thread(&Session::run, s));
     }
 
     return true;
@@ -106,6 +105,9 @@ bool SessionManager::run() noexcept
     {
         ambientTemp();      // Force an update of the ambient temperature moving average
 
+        for(auto session : sessions_)
+            session->iterate();
+
         display_->update();
         ::usleep(10 * 1000);
     }
@@ -116,10 +118,6 @@ bool SessionManager::run() noexcept
         session->stop();
 
     display_->notifyShutdown();
-
-    // Wait for session threads to terminate
-    for(auto& sessionThread : vecSessionThreads_)
-        sessionThread.join();
 
     display_->stop();
     running_ = false;

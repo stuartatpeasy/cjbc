@@ -191,7 +191,7 @@ bool Session::updateEffectors(Error * const err) noexcept
 
     Temperature t = tempSensorVessel_->sense(err);
 
-    if(!t || !tempSensorVessel_->inRange())
+    if(!((bool) t) || !tempSensorVessel_->inRange())
     {
         // Failed to sense temperature, or no sensor attached, or sensed temperature is out of the probe's range.
         // Deactivate effectors and return failure.
@@ -277,35 +277,28 @@ time_t Session::remainingTime() const noexcept
 }
 
 
-// run() - entry-point for session management.  This method will be called in a loop by SessionManager::run()
+// iterate() - entry-point for session management.  This method will be called in a loop by SessionManager::run()
 //
-bool Session::run() noexcept
+void Session::iterate() noexcept
 {
-    running_ = true;
-    setName("sess");
+    const time_t now = ::time(NULL);
+    currentTemp();      // Always sense the current temperature: oversampling maintains the moving average
 
-    while(!stop_)
+    if((now - lastEffectorUpdate_) >= effectorUpdateInterval_)
     {
-        const time_t now = ::time(NULL);
-        currentTemp();      // Always sense the current temperature: oversampling maintains the moving average
-
-        if((now - lastEffectorUpdate_) >= effectorUpdateInterval_)
-        {
-            updateEffectors();
-            lastEffectorUpdate_ = now;
-        }
-        
-        ::usleep(10 * 1000);
+        updateEffectors();
+        lastEffectorUpdate_ = now;
     }
+}
 
+
+// stop() - called when the session manager shuts down.
+//
+void Session::stop() noexcept
+{
     logInfo("Session %d stopping", id_);
 
     // Switch off effectors before shutdown
     effectorHeater_->activate(false);
     effectorCooler_->activate(false);
-
-    running_ = false;
-
-    return true;
 }
-

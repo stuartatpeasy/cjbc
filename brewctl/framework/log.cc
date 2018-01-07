@@ -12,7 +12,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <sstream>
 
 extern "C"
 {
@@ -20,7 +19,7 @@ extern "C"
 }
 
 using std::string;
-using std::ostringstream;
+
 
 static const size_t LOG_BUF_SIZE = 16384;
 
@@ -188,9 +187,10 @@ static int logLevelToSyslogLevel(const LogLevel_t level) noexcept
 }
 
 
-// doLog() - called by the log*() macros, this function does the actual logging.
+// doLog() - called by the log*() macros, this function converts its varargs to a va_list and calls
+// doLogV(..., va_list).
 //
-bool doLog(const char * const file, const int line, const LogLevel_t level, const std::string& fmt, ...) noexcept
+bool doLog(const char * const file, const int line, const LogLevel_t level, const string& fmt, ...) noexcept
 {
     if(level < logLevel)
         return true;
@@ -204,17 +204,18 @@ bool doLog(const char * const file, const int line, const LogLevel_t level, cons
 
 // doLogV() - called by the log*V() macros, this function does the actual logging.
 //
-bool doLogV(const char * const file, const int line, const LogLevel_t level, const std::string& fmt, va_list args)
-        noexcept
+bool doLogV(const char * const file, const int line, const LogLevel_t level, const string& fmt, va_list args) noexcept
 {
-    char logBuf[LOG_BUF_SIZE];
-    ostringstream msg;
+    char prefixBuf[LOG_BUF_SIZE], msgBuf[LOG_BUF_SIZE];
+    string message;
 
-    if(::vsnprintf(logBuf, LOG_BUF_SIZE, fmt.c_str(), args) < 0)
+    if((::snprintf(prefixBuf, LOG_BUF_SIZE, "<%s:%d> [%s] ", file, line, logLevelStr(level).c_str()) < 0)
+       || (::vsnprintf(msgBuf, LOG_BUF_SIZE, fmt.c_str(), args) < 0))
         return false;
 
-    msg << "<" << file << " +" << line << "> [" << logLevelStr(level) << "] " << logBuf;
+    message = prefixBuf;
+    message += msgBuf;
 
-    return logWrite(level, msg.str());
+    return logWrite(level, message);
 }
 

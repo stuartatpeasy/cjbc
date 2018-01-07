@@ -10,7 +10,6 @@
 
 #include "include/application/temperature.h"
 #include "include/framework/error.h"
-#include "include/framework/thread.h"
 #include "include/peripherals/defaulteffector.h"
 #include "include/peripherals/defaulttempsensor.h"
 #include <ctime>        // ::time()
@@ -41,7 +40,7 @@ typedef enum SessionType
 } SessionType_t;
 
 
-class Session : public Thread
+class Session
 {
 public:
                                 Session(const int id, Error * const err = nullptr) noexcept;
@@ -53,7 +52,8 @@ public:
     bool                        isNotStartedYet() const noexcept;
     bool                        isActive() const noexcept;
     bool                        isComplete() const noexcept;
-    bool                        run() noexcept override;
+    void                        iterate() noexcept;
+    void                        stop() noexcept;
     int                         gyleId() const noexcept { return gyle_id_; };
     std::string                 gyleName() const noexcept { return gyle_; };
     time_t                      remainingTime() const noexcept;

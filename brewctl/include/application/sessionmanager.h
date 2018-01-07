@@ -39,7 +39,6 @@ public:
 
 private:
     vecSessionPtr_t             sessions_;
-    std::vector<std::thread>    vecSessionThreads_;
     DefaultTempSensor_uptr_t    tempSensorAmbient_;
     Display *                   display_;
 };
