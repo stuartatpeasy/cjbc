@@ -241,7 +241,6 @@ void SQLiteStmt::finalise() noexcept
 {
     if(stmt_ != NULL)
     {
-        logDebug("SQLiteStmt: stmt {%x}: finalizing", id());
         ::sqlite3_finalize(stmt_);
         stmt_ = NULL;
         columnNames_.clear();
