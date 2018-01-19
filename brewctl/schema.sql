@@ -172,13 +172,13 @@ INSERT INTO thermistor(id, name, type, Tref_C, Rref, beta, range_min, range_max)
 -- remove this
 DELETE FROM gyle;
 INSERT INTO gyle(id, name, date_create) VALUES
-    (107, "Nelson Sauvin lager", CURRENT_TIMESTAMP),
-    (108, "Imperial Stout", CURRENT_TIMESTAMP);
+    (112, "Nelson Sauvin lager", '2018-01-13 15:00:00'),
+    (113, "Rye lager", '2018-01-13 20:00:00');
 
 DELETE FROM session;
 INSERT INTO session(id, gyle_id, profile_id, date_create, date_start, date_finish) VALUES
-    (1, 107, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL),
-    (2, 108, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
+    (1, 112, 1, '2018-01-13 15:00:00', '2018-01-13 15:00:00', NULL),
+    (2, 113, 1, '2018-01-13 18:00:00', '2018-01-13 18:00:00', NULL);
 
 DELETE FROM sessioneffector;
 INSERT INTO sessioneffector(session_id, effectortype_id, channel) VALUES
@@ -192,4 +192,7 @@ INSERT INTO temperaturesensor(role, session_id, channel, thermistor_id) VALUES
     ("vessel",  1, 0, 1),
     ("ambient", 0, 7, 1),
     ("vessel", 2, 1, 1);
+
+DELETE FROM temperature;
+VACUUM;
 

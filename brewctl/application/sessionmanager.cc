@@ -4,6 +4,8 @@
     Stuart Wallace <stuartw@atom.net>, October 2017.
 
     Part of brewctl
+
+    TODO: periodically reload sessions
 */
 
 #include "include/application/sessionmanager.h"

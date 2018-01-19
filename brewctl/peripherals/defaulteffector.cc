@@ -12,9 +12,11 @@
 #include "include/framework/log.h"
 
 
-DefaultEffector::DefaultEffector(const int channel, const std::string& name) noexcept
+DefaultEffector::DefaultEffector(const int channel, const std::string& name, const double powerConsumption) noexcept
     : channel_(channel),
-      name_(name)
+      name_(name),
+      state_(false),
+      powerConsumption_(powerConsumption)
 {
 }
 

@@ -17,17 +17,22 @@
 class DefaultEffector
 {
 public:
-                                DefaultEffector(const int channel = -1, const std::string& name = "DefaultEffector")
+                                DefaultEffector(const int channel = -1, const std::string& name = "DefaultEffector",
+                                                const double powerConsumption = 0.0)
                                     noexcept;
     virtual                     ~DefaultEffector() noexcept;
 
     virtual bool                activate(const bool state, Error * const err = nullptr) noexcept;
     virtual const std::string&  name() const noexcept { return name_; };
     int                         channel() const noexcept { return channel_; };
+    virtual bool                state() const noexcept { return state_; };
+    virtual double              powerConsumption() const noexcept { return powerConsumption_; };
 
 protected:
     int                         channel_;
     std::string                 name_;
+    bool                        state_;
+    double                      powerConsumption_;
 };
 
 

@@ -51,8 +51,8 @@ public:
     bool                        vesselTempSensorInRange() const noexcept;
     bool                        isNotStartedYet() const noexcept;
     bool                        isActive() const noexcept;
-    bool                        isComplete() const noexcept;
-    void                        iterate() noexcept;
+    bool                        isComplete() const noexcept { return complete_; };
+    bool                        iterate(Error * const err = nullptr) noexcept;
     void                        stop() noexcept;
     int                         gyleId() const noexcept { return gyle_id_; };
     std::string                 gyleName() const noexcept { return gyle_; };
@@ -78,6 +78,7 @@ private:
     DefaultEffector_uptr_t      effectorCooler_;
     SessionTempControlState_t   tempControlState_;
     SessionType_t               type_;
+    bool                        complete_;
 };
 
 #endif // APPLICATION_SESSION_H_INC

@@ -30,9 +30,6 @@ public:
 
     virtual bool                    activate(const bool state, Error * const err = nullptr) noexcept override;
 
-    virtual bool                    state() const noexcept { return state_; };
-    virtual double                  powerConsumption() const noexcept { return powerConsumption_; };
-
     static DefaultEffector_uptr_t   getSessionHeater(const int sessionId, Error * const err = nullptr) noexcept;
     static DefaultEffector_uptr_t   getSessionCooler(const int sessionId, Error * const err = nullptr) noexcept;
 
@@ -40,9 +37,6 @@ protected:
     static DefaultEffector_uptr_t   getSessionEffectorByType(const int sessionId, const std::string& type,
                                                              Error * const err = nullptr) noexcept;
     void                            move(Effector& rhs) noexcept;
-
-    double                          powerConsumption_;
-    bool                            state_;
 };
 
 #endif // PERIPHERALS_EFFECTOR_H_INC

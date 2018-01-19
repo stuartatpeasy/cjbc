@@ -4,6 +4,8 @@
     Stuart Wallace <stuartw@atom.net>, October 2017.
 
     Part of brewctl
+
+    TODO: mark session as complete at termination
 */
 
 #include "include/application/session.h"
@@ -41,7 +43,8 @@ Session::Session(const int id, Error * const err) noexcept
       effectorHeater_(Effector::getSessionHeater(id, err)),
       effectorCooler_(Effector::getSessionCooler(id, err)),
       tempControlState_(HOLD),
-      type_(NONE)
+      type_(NONE),
+      complete_(false)
 {
     if(err->code())
         return;         // Stop if initialisation of any member variable failed
@@ -54,7 +57,7 @@ Session::Session(const int id, Error * const err) noexcept
     if(!db.prepare("SELECT gyle_id, profile_id, CAST((JULIANDAY(date_start) - 2440587.5) * 86400.0 AS INT) AS start_ts "
                    "FROM session "
                    "WHERE id=:id", session, err) ||
-       !session.bind(":id", id, err))
+       !session.bind(":id", id_, err))
         return;
 
     if(!session.step(err))
@@ -132,6 +135,12 @@ Session::Session(const int id, Error * const err) noexcept
 
     end_ts_ = offset;
 
+    if(::time(NULL) >= end_ts_)
+    {
+        logWarning("Session %d is already complete", id_);
+        complete_ = true;
+    }
+
     deadZone_ = cfg.get("session.dead_zone", DEFAULT_TEMP_DEADZONE, Validator::gt0);
     effectorUpdateInterval_ = cfg.get("session.switch_interval_s", DEFAULT_SWITCH_INTERVAL_S, Validator::gt0);
 
@@ -202,34 +211,47 @@ bool Session::updateEffectors(Error * const err) noexcept
         return false;
     }
 
-    const double diff = t.diff(targetTemp(), TEMP_UNIT_CELSIUS);
+    const Temperature upperLimit = targetTemp() + Temperature(deadZone_, TEMP_UNIT_KELVIN),
+                      lowerLimit = targetTemp() - Temperature(deadZone_, TEMP_UNIT_KELVIN);
 
-    if(::fabs(diff) < deadZone_)
-    {
-        // Temperature is within dead zone - deactivate all effectors
-        logDebug("Session %d: temperature is within range", id_);
-        tempControlState_ = HOLD;
+    logDebug("Session %d: heater=%s, cooler=%s",
+             id_, effectorHeater_->state() ? "on" : "off", effectorCooler_->state() ? "on" : "off");
 
-        effectorHeater_->activate(false);   // Not ideal: error code not captured
-        return effectorCooler_->activate(false, err);
-    }
-    else if(diff > 0.0)
+    if(t > upperLimit)
     {
-        // Temperature is too high - activate cooling effectors
-        logDebug("Session %d: temperature is too high; cooling", id_);
+        // Temperature is above the dead zone surrounding the target temperature - activate cooling effectors.
+        logDebug("Session %d: temp %.2fC is above dead zone (%.2fC); cooling", id_, t.C(), lowerLimit.C());
         tempControlState_ = COOL;
 
         effectorHeater_->activate(false);   // Not ideal: error code not captured
-        return effectorCooler_->activate(true, err);
+        return effectorCooler_->activate(true);
     }
-    else if(diff < 0.0)
+    else if(t < lowerLimit)
     {
-        // Temperature is too low - activate heating effectors
-        logDebug("Session %d: temperature is too low; heating", id_);
-        tempControlState_ = HEAT;
+        // Temperature is below the dead zone surrounding the target temperature - activate heating effectors.
+        logDebug("Session %d: temp %.2fC is below dead zone (%.2fC); heating", id_, t.C(), lowerLimit.C());
 
         effectorCooler_->activate(false);   // Not ideal: error code not captured
-        return effectorHeater_->activate(true, err);
+        return effectorHeater_->activate(true);
+    }
+    else if((t >= targetTemp()) && effectorCooler_->state())
+    {
+        logDebug("Session %d: temp %.2fC is above target (%.2fC); cooling", id_, t.C(), targetTemp().C());
+
+        return true;                        // No need to change effector state
+    }
+    else if((t <= targetTemp()) && effectorHeater_->state())
+    {
+        logDebug("Session %d: temp %.2fC is below target (%.2fC); heating", id_, t.C(), targetTemp().C());
+
+        return true;                        // No need to change effector state
+    }
+    else
+    {
+        logDebug("Session %d: temp %.2fC is within target %.2fC +/-%.2fC", id_, t.C(), targetTemp().C(), deadZone_);
+
+        effectorCooler_->activate(false);   // Not ideal: error code not captured
+        return effectorHeater_->activate(false);
     }
 
     return true;
@@ -256,14 +278,6 @@ bool Session::isActive() const noexcept
 }
 
 
-// isComplete() - return bool indicating whether the current session has finished.
-//
-bool Session::isComplete() const noexcept
-{
-    return ::time(NULL) >= end_ts_;
-}
-
-
 // remainingTime() - return the number of seconds remaining in the session, or 0 if the session is inactive.
 //
 time_t Session::remainingTime() const noexcept
@@ -279,16 +293,42 @@ time_t Session::remainingTime() const noexcept
 
 // iterate() - entry-point for session management.  This method will be called in a loop by SessionManager::run()
 //
-void Session::iterate() noexcept
+bool Session::iterate(Error * const err) noexcept
 {
     const time_t now = ::time(NULL);
     currentTemp();      // Always sense the current temperature: oversampling maintains the moving average
 
-    if((now - lastEffectorUpdate_) >= effectorUpdateInterval_)
+    if(now >= start_ts_)
     {
-        updateEffectors();
-        lastEffectorUpdate_ = now;
+        if(now < end_ts_)
+        {
+            if((now - lastEffectorUpdate_) >= effectorUpdateInterval_)
+            {
+                updateEffectors();
+                lastEffectorUpdate_ = now;
+            }
+        }
+        else if(!complete_)
+        {
+            // Session has finished and needs to be finalised
+            auto& db = Registry::instance().db();
+            SQLiteStmt session;
+
+            // Ensure that effectors are deactivated
+            effectorCooler_->activate(false);
+            effectorHeater_->activate(false);
+
+            // Mark session as complete in database
+            if(!db.prepare("UPDATE session SET date_finish=NOW() WHERE id=:id", session, err) ||
+               !session.bind(":id", id_, err) ||
+               !session.step(err))
+                return false;
+
+            complete_ = true;
+        }
     }
+
+    return true;
 }
 
 
