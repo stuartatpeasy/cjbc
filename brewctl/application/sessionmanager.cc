@@ -107,8 +107,15 @@ bool SessionManager::run() noexcept
     {
         ambientTemp();      // Force an update of the ambient temperature moving average
 
-        for(auto session : sessions_)
-            session->iterate();
+        for(auto it = sessions_.begin(); it != sessions_.end(); ++it)
+        {
+            Session * const session = *it;
+
+            if(session->isComplete())
+                sessions_.erase(it);
+            else
+                session->iterate();
+        }
 
         display_->update();
         ::usleep(10 * 1000);
