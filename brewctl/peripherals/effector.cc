@@ -22,7 +22,7 @@ static const int EFFECTOR_BIT_OFFSET    = 8;    // Offset of effector bit 0 from
 Effector::Effector(const int channel, const double powerConsumption, const string& name) noexcept
     : DefaultEffector(channel, name, powerConsumption)
 {
-    logDebug("instantiating effector on channel %d with power consumption %f", channel, powerConsumption);
+    logDebug("instantiating effector on channel %d with power consumption %.3fW", channel, powerConsumption);
 }
 
 
