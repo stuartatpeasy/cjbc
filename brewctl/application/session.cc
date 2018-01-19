@@ -214,13 +214,11 @@ bool Session::updateEffectors(Error * const err) noexcept
     const Temperature upperLimit = targetTemp() + Temperature(deadZone_, TEMP_UNIT_KELVIN),
                       lowerLimit = targetTemp() - Temperature(deadZone_, TEMP_UNIT_KELVIN);
 
-    logDebug("Session %d: heater=%s, cooler=%s",
-             id_, effectorHeater_->state() ? "on" : "off", effectorCooler_->state() ? "on" : "off");
-
     if(t > upperLimit)
     {
         // Temperature is above the dead zone surrounding the target temperature - activate cooling effectors.
-        logDebug("Session %d: temp %.2fC is above dead zone (%.2fC); cooling", id_, t.C(), lowerLimit.C());
+        logDebug("Session %d (G%d): temp %.2fC is above dead zone (%.2fC); cooling",
+                 id_, gyle_id_, t.C(), lowerLimit.C());
         tempControlState_ = COOL;
 
         effectorHeater_->activate(false);   // Not ideal: error code not captured
@@ -229,26 +227,30 @@ bool Session::updateEffectors(Error * const err) noexcept
     else if(t < lowerLimit)
     {
         // Temperature is below the dead zone surrounding the target temperature - activate heating effectors.
-        logDebug("Session %d: temp %.2fC is below dead zone (%.2fC); heating", id_, t.C(), lowerLimit.C());
+        logDebug("Session %d (G%d): temp %.2fC is below dead zone (%.2fC); heating",
+                 id_, gyle_id_, t.C(), lowerLimit.C());
 
         effectorCooler_->activate(false);   // Not ideal: error code not captured
         return effectorHeater_->activate(true);
     }
     else if((t >= targetTemp()) && effectorCooler_->state())
     {
-        logDebug("Session %d: temp %.2fC is above target (%.2fC); cooling", id_, t.C(), targetTemp().C());
+        logDebug("Session %d (G%d): temp %.2fC is above target (%.2fC); cooling",
+                 id_, gyle_id_, t.C(), targetTemp().C());
 
         return true;                        // No need to change effector state
     }
     else if((t <= targetTemp()) && effectorHeater_->state())
     {
-        logDebug("Session %d: temp %.2fC is below target (%.2fC); heating", id_, t.C(), targetTemp().C());
+        logDebug("Session %d (G%d): temp %.2fC is below target (%.2fC); heating",
+                 id_, gyle_id_, t.C(), targetTemp().C());
 
         return true;                        // No need to change effector state
     }
     else
     {
-        logDebug("Session %d: temp %.2fC is within target %.2fC +/-%.2fC", id_, t.C(), targetTemp().C(), deadZone_);
+        logDebug("Session %d (G%d): temp %.2fC is within target range %.2fC +/-%.2fC",
+                 id_, gyle_id_, t.C(), targetTemp().C(), deadZone_);
 
         effectorCooler_->activate(false);   // Not ideal: error code not captured
         return effectorHeater_->activate(false);
