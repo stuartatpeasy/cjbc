@@ -163,7 +163,6 @@ Temperature TempSensor::sense(Error * const err) noexcept
 //
 bool TempSensor::inRange() noexcept
 {
-    lock_guard<mutex> lock(lock_);
     return (currentTemp_ >= rangeMin_) && (currentTemp_ <= rangeMax_);
 }
 
@@ -234,7 +233,7 @@ void TempSensor::writeTempLog()
 {
     const time_t now = ::time(NULL);
 
-    if(logInterval_ && ((now - lastLogWriteTime_) > logInterval_))
+    if(logInterval_ && inRange() && ((now - lastLogWriteTime_) > logInterval_))
     {
         SQLiteStmt logStmt;
 
