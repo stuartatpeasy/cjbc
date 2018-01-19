@@ -72,7 +72,8 @@ bool Effector::activate(const bool state, Error * const err) noexcept
     auto& sr = Registry::instance().sr();
     const int bit = EFFECTOR_BIT_OFFSET + channel_;
 
-    logDebug("activate(): channel %d -> %s", channel_, state ? "on" : "off");
+    if(state != state_)
+        logDebug("activate(): channel %d -> %s", channel_, state ? "on" : "off");
 
     if(!(state ? sr.set(bit, err) : sr.clear(bit, err)))
         return false;
