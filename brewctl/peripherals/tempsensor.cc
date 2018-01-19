@@ -233,7 +233,7 @@ void TempSensor::writeTempLog()
 {
     const time_t now = ::time(NULL);
 
-    if(logInterval_ && inRange() && ((now - lastLogWriteTime_) > logInterval_))
+    if(logInterval_ && inRange() && ((now - lastLogWriteTime_) >= logInterval_))
     {
         SQLiteStmt logStmt;
 
