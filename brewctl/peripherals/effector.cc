@@ -104,10 +104,7 @@ DefaultEffector_uptr_t Effector::getSessionEffectorByType(const int sessionId, c
         ret = new DefaultEffector();
     }
     else
-    {
-        logDebug("Session %d: returning Effector for type '%s'", sessionId, type.c_str());
         ret = new Effector(eff["channel"].get<int>(), eff["powerconsumption"].get<double>(), eff["name"].get<string>());
-    }
 
     if(ret == nullptr)
         formatError(err, MALLOC_FAILED);
