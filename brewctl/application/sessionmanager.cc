@@ -36,7 +36,7 @@ SessionManager::SessionManager() noexcept
 SessionManager::~SessionManager() noexcept
 {
     for(auto it : sessions_)
-        delete it;
+        delete it.second;
 
     if(display_ != nullptr)
         delete display_;
@@ -47,14 +47,23 @@ SessionManager::~SessionManager() noexcept
 //
 bool SessionManager::init(Error * const err) noexcept
 {
-    SQLite& db = Registry::instance().db();
-    SQLiteStmt sessions;
-
     display_ = new Display(*this);
 
     tempSensorAmbient_ = TempSensor::getAmbientTempSensor(err);
     if(err->code())
         return false;
+
+    return updateSessionList(err);
+}
+
+
+// updateSessionList() - look up active sessions in the database and add into <sessions_> any that are not already
+// present.
+//
+bool SessionManager::updateSessionList(Error * const err) noexcept
+{
+    SQLite& db = Registry::instance().db();
+    SQLiteStmt sessions;
 
     if(!db.prepare("SELECT id "
                    "FROM session "
@@ -64,11 +73,16 @@ bool SessionManager::init(Error * const err) noexcept
 
     while(sessions.step(err))
     {
-        Session * const s = new Session(sessions["id"].get<int>(), err);
-        if(err->code())
-            return false;
+        const session_id_t sid = sessions["id"].get<int>();
 
-        sessions_.push_back(s);
+        if(sessions_.find(sid) == sessions_.end())
+        {
+            Session * const s = new Session(sid, err);
+            if(err->code())
+                return false;
+
+            sessions_[sid] = s;
+        }
     }
 
     return true;
@@ -88,7 +102,7 @@ Temperature SessionManager::ambientTemp() noexcept
 
 // sessions() - return a vector of ptrs to the currently-active sessions
 //
-const vecSessionPtr_t& SessionManager::sessions() noexcept
+const SessionMap_t& SessionManager::sessions() noexcept
 {
     return sessions_;
 }
@@ -109,7 +123,7 @@ bool SessionManager::run() noexcept
 
         for(auto it = sessions_.begin(); it != sessions_.end(); ++it)
         {
-            Session * const session = *it;
+            Session * const session = it->second;
 
             if(session->isComplete())
                 sessions_.erase(it);
@@ -124,7 +138,7 @@ bool SessionManager::run() noexcept
     logInfo("SessionManager stopping");
 
     for(auto session : sessions_)
-        session->stop();
+        session.second->stop();
 
     display_->notifyShutdown();
 

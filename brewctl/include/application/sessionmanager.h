@@ -15,10 +15,10 @@
 #include "include/framework/thread.h"
 #include "include/peripherals/defaulttempsensor.h"
 #include <memory>
-#include <vector>
+#include <map>
 
 
-typedef std::vector<Session *> vecSessionPtr_t;
+typedef std::map<session_id_t, Session *> SessionMap_t;
 
 class SessionManager : public Thread
 {
@@ -32,13 +32,15 @@ public:
     SessionManager&             operator=(SessionManager&& rhs) = delete;
 
     Temperature                 ambientTemp() noexcept;
-    const vecSessionPtr_t&      sessions() noexcept;
+    const SessionMap_t&         sessions() noexcept;
 
     bool                        init(Error * const err = nullptr) noexcept;
     bool                        run() noexcept override;
 
 private:
-    vecSessionPtr_t             sessions_;
+    bool                        updateSessionList(Error * const err = nullptr) noexcept;
+
+    SessionMap_t                sessions_;
     DefaultTempSensor_uptr_t    tempSensorAmbient_;
     Display *                   display_;
 };

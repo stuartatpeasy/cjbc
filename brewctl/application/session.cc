@@ -30,7 +30,7 @@ static const time_t
     DEFAULT_SWITCH_INTERVAL_S   = 10;   // Default interval between effector updates, in seconds
 
 
-Session::Session(const int id, Error * const err) noexcept
+Session::Session(const session_id_t id, Error * const err) noexcept
     : id_(id),
       gyle_id_(0),
       profile_(0),
@@ -218,7 +218,7 @@ bool Session::updateEffectors(Error * const err) noexcept
     {
         // Temperature is above the dead zone surrounding the target temperature - activate cooling effectors.
         logDebug("Session %d (G%d): temp %.2fC is above dead zone (%.2fC); cooling",
-                 id_, gyle_id_, t.C(), lowerLimit.C());
+                 id_, gyle_id_, t.C(), upperLimit.C());
         tempControlState_ = COOL;
 
         effectorHeater_->activate(false);   // Not ideal: error code not captured
@@ -317,8 +317,7 @@ bool Session::iterate(Error * const err) noexcept
             SQLiteStmt session;
 
             // Ensure that effectors are deactivated
-            effectorCooler_->activate(false);
-            effectorHeater_->activate(false);
+            stop();
 
             // Mark session as complete in database
             if(!db.prepare("UPDATE session SET date_finish=NOW() WHERE id=:id", session, err) ||

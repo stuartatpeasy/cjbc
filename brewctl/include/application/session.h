@@ -21,6 +21,7 @@
 
 typedef std::pair<time_t, double> SessionStage_t;
 typedef std::vector<SessionStage_t> SessionStages_t;
+typedef int session_id_t;
 
 typedef enum SessionTempControlState
 {
@@ -43,7 +44,7 @@ typedef enum SessionType
 class Session
 {
 public:
-                                Session(const int id, Error * const err = nullptr) noexcept;
+                                Session(const session_id_t id, Error * const err = nullptr) noexcept;
     virtual                     ~Session() = default;
 
     Temperature                 targetTemp() noexcept;
@@ -63,7 +64,7 @@ public:
 private:
     bool                        updateEffectors(Error * const err = nullptr) noexcept;
 
-    const int                   id_;
+    const session_id_t          id_;
     int                         gyle_id_;
     std::string                 gyle_;
     int                         profile_;

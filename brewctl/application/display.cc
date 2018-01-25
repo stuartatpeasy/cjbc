@@ -152,8 +152,12 @@ void Display::displayDefault() noexcept
         const size_t nsessions = sm_.sessions().size();
         if(nsessions)
         {
-            const auto sessionIdx = (now / sessionDwellTime_) % nsessions;
-            auto& session = sm_.sessions()[sessionIdx];
+            const size_t sessionIdx = (now / sessionDwellTime_) % nsessions;
+            auto itSession = sm_.sessions().begin();
+            for(size_t i = 0; (i < sessionIdx) && (itSession != sm_.sessions().end()); ++i)
+                ++itSession;
+
+            const auto& session = itSession->second;
 
             // If we're about to render a new session, clear the bottom half of the LCD in preparation for writing
             // session data to it.
