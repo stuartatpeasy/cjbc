@@ -72,11 +72,19 @@ bool Effector::activate(const bool state, Error * const err) noexcept
     auto& sr = Registry::instance().sr();
     const int bit = EFFECTOR_BIT_OFFSET + channel_;
 
+    // If this is a change of state, log it
     if(state != state_)
         logDebug("activate(): channel %d -> %s", channel_, state ? "on" : "off");
 
+    // Attempt to flip the shift register bit corresponding to this effector
     if(!(state ? sr.set(bit, err) : sr.clear(bit, err)))
         return false;
+
+    // Record activation / deactivation time
+    if(state)
+        lastActivationTime_ = ::time(NULL);
+    else
+        lastDeactivationTime_ = ::time(NULL);
 
     state_ = state;
     return true;
@@ -84,8 +92,9 @@ bool Effector::activate(const bool state, Error * const err) noexcept
 
 
 // getSessionEffectorByType() - factory for Effector objects.  Instantiates an Effector of the given type, for the
-// given session.  If there is no matching effector in the database, return a new NullEffector.  If the database lookup
-// fails, a nullptr is returned.
+// given session.  If there is no matching effector in the database, return a new DefaultEffector.  If the database
+// lookup fails, a nullptr is returned.  All values a returned through a DefaultEffector_uptr_t type (a
+// std::unique_ptr<DefaultEffector *>).
 //
 DefaultEffector_uptr_t Effector::getSessionEffectorByType(const int sessionId, const std::string& type,
                                                           Error * const err) noexcept

@@ -10,6 +10,7 @@
 */
 
 #include "include/framework/error.h"
+#include <ctime>
 #include <memory>
 #include <string>
 
@@ -20,19 +21,24 @@ public:
                                 DefaultEffector(const int channel = -1, const std::string& name = "DefaultEffector",
                                                 const double powerConsumption = 0.0)
                                     noexcept;
-    virtual                     ~DefaultEffector() noexcept;
+    virtual                     ~DefaultEffector() noexcept = default;
 
     virtual bool                activate(const bool state, Error * const err = nullptr) noexcept;
     virtual const std::string&  name() const noexcept { return name_; };
     int                         channel() const noexcept { return channel_; };
     virtual bool                state() const noexcept { return state_; };
     virtual double              powerConsumption() const noexcept { return powerConsumption_; };
+    virtual time_t              lastActivationTime() const noexcept { return lastActivationTime_; };
+    virtual time_t              lastDeactivationTime() const noexcept { return lastDeactivationTime_; };
+    virtual time_t              lastActiveDuration() const noexcept;
 
 protected:
     int                         channel_;
     std::string                 name_;
     bool                        state_;
     double                      powerConsumption_;
+    time_t                      lastActivationTime_;
+    time_t                      lastDeactivationTime_;
 };
 
 
