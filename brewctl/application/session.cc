@@ -114,7 +114,7 @@ Session::Session(const session_id_t id, Error * const err) noexcept
 
     // Read session temperature-stage information
     if(!db.prepare("SELECT stage, duration_hours, temperature FROM profilestage "
-                   "WHERE profile_id=:id", session, err) ||
+                   "WHERE profile_id=:id ORDER BY stage", session, err) ||
        !session.bind(":id", profile_, err))
         return;
 
@@ -154,13 +154,19 @@ Session::Session(const session_id_t id, Error * const err) noexcept
 Temperature Session::targetTemp() noexcept
 {
     const time_t now = ::time(NULL);
-    time_t offset = start_ts_;
 
-    for(auto it : stages_)
-        if((offset + it.first) > now)
-            return Temperature(it.second, TEMP_UNIT_CELSIUS);
+    if(now >= start_ts_)
+    {
+        time_t offset = start_ts_;
+        for(auto it : stages_)
+        {
+            if((offset + it.first) > now)
+                return Temperature(it.second, TEMP_UNIT_CELSIUS);
 
-    // Session is not active; return absolute zero.
+            offset += it.first;
+        }
+    }
+
     return Temperature();
 }
 
@@ -198,7 +204,7 @@ bool Session::updateEffectors(Error * const err) noexcept
         return true;
     }
 
-    Temperature t = tempSensorVessel_->sense(err);
+    const Temperature t = tempSensorVessel_->sense(err);
 
     if(!((bool) t) || !tempSensorVessel_->inRange())
     {
@@ -211,8 +217,9 @@ bool Session::updateEffectors(Error * const err) noexcept
         return false;
     }
 
-    const Temperature upperLimit = targetTemp() + Temperature(deadZone_, TEMP_UNIT_KELVIN),
-                      lowerLimit = targetTemp() - Temperature(deadZone_, TEMP_UNIT_KELVIN);
+    const Temperature target = targetTemp(),
+                      upperLimit = target + Temperature(deadZone_, TEMP_UNIT_KELVIN),
+                      lowerLimit = target - Temperature(deadZone_, TEMP_UNIT_KELVIN);
 
     if(t > upperLimit)
     {
@@ -233,24 +240,24 @@ bool Session::updateEffectors(Error * const err) noexcept
         effectorCooler_->activate(false);   // Not ideal: error code not captured
         return effectorHeater_->activate(true);
     }
-    else if((t >= targetTemp()) && effectorCooler_->state())
+    else if((t >= target) && effectorCooler_->state())
     {
         logDebug("Session %d (G%d): temp %.2fC is above target (%.2fC); cooling",
-                 id_, gyle_id_, t.C(), targetTemp().C());
+                 id_, gyle_id_, t.C(), target.C());
 
         return true;                        // No need to change effector state
     }
-    else if((t <= targetTemp()) && effectorHeater_->state())
+    else if((t <= target) && effectorHeater_->state())
     {
         logDebug("Session %d (G%d): temp %.2fC is below target (%.2fC); heating",
-                 id_, gyle_id_, t.C(), targetTemp().C());
+                 id_, gyle_id_, t.C(), target.C());
 
         return true;                        // No need to change effector state
     }
     else
     {
         logDebug("Session %d (G%d): temp %.2fC is within target range %.2fC +/-%.2fC",
-                 id_, gyle_id_, t.C(), targetTemp().C(), deadZone_);
+                 id_, gyle_id_, t.C(), target.C(), deadZone_);
 
         effectorCooler_->activate(false);   // Not ideal: error code not captured
         return effectorHeater_->activate(false);

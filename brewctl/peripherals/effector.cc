@@ -74,10 +74,11 @@ bool Effector::activate(const bool state, Error * const err) noexcept
 
     // If this is a change of state, log it
     if(state != state_)
-        logDebug("activate(): channel %d -> %s", channel_, state ? "on" : "off");
+        logDebug("activate(): channel %d -> %s%s", channel_, state ? "on" : "off",
+                 enabled_ ? "" : " (effectors disabled)");
 
     // Attempt to flip the shift register bit corresponding to this effector
-    if(!(state ? sr.set(bit, err) : sr.clear(bit, err)))
+    if(enabled_ && !(state ? sr.set(bit, err) : sr.clear(bit, err)))
         return false;
 
     // Record activation / deactivation time

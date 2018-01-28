@@ -179,6 +179,8 @@ bool Application::parseArgs(int argc, char **argv, Error * const err) noexcept
 
             config_.add(fileName.c_str());
         }
+        else if(arg == "--disable-effectors")
+            config_.addLine("application.disable_effectors=1");
         else if(arg.substr(0, 2) == "-C")
         {
             if(!config_.addLine(arg.substr(2)))

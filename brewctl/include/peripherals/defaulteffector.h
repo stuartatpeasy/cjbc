@@ -39,6 +39,7 @@ protected:
     double                      powerConsumption_;
     time_t                      lastActivationTime_;
     time_t                      lastDeactivationTime_;
+    bool                        enabled_;
 };
 
 

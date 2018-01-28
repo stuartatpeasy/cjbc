@@ -10,6 +10,10 @@
 
 #include "include/peripherals/defaulteffector.h"
 #include "include/framework/log.h"
+#include "include/framework/registry.h"
+#include "include/util/validator.h"
+
+namespace Validator = Util::Validator;
 
 
 DefaultEffector::DefaultEffector(const int channel, const std::string& name, const double powerConsumption) noexcept
@@ -20,6 +24,7 @@ DefaultEffector::DefaultEffector(const int channel, const std::string& name, con
       lastActivationTime_(0),
       lastDeactivationTime_(0)
 {
+    enabled_ = !Registry::instance().config().get("application.disable_effectors", 0, Validator::ge0);
 }
 
 
