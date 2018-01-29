@@ -1,4 +1,17 @@
 --
+-- effectorlog
+--
+DROP TABLE IF EXISTS "effectorlog";
+CREATE TABLE "effectorlog"(
+    date_create         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    effector_id         INT UNSIGNED NOT NULL,
+    newstate            TINYINT NOT NULL);
+
+DROP INDEX IF EXISTS effectorlog_date_create_effector_id;
+CREATE INDEX effectorlog_date_create_effector_id
+    ON "effectorlog"(date_create, effector_id);
+
+--
 -- effectortype
 --
 DROP TABLE IF EXISTS "effectortype";
@@ -93,7 +106,7 @@ CREATE UNIQUE INDEX sessioneffector_session_id_effectortype_id_channel
 DROP TABLE IF EXISTS "temperature";
 CREATE TABLE "temperature"(
     date_create         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    sensor_id           INT UNSIGNED NOT NULL,
+    sensor_id           TINYINT UNSIGNED NOT NULL,
     temperature         DECIMAL(4, 6) NOT NULL);
 
 DROP INDEX IF EXISTS temperature_date_create_sensor_id;
