@@ -50,3 +50,24 @@ time_t DefaultEffector::lastActiveDuration() const noexcept
     return (lastActivationTime_ && lastDeactivationTime_) ? lastDeactivationTime_ - lastActivationTime_ : 0;
 }
 
+
+// logState() - log the effector's current state in the "effectorlog" database table.  Returns true on success, false
+// otherwise.
+//
+bool DefaultEffector::logState(Error * const err) const noexcept
+{
+    SQLiteStmt effectorLog;
+
+    if(!Registry::instance().db().prepare("INSERT INTO effectorlog(effector_id, newstate) "
+                                          "VALUES(:effectorId, :newState)", effectorLog, err) ||
+       !effectorLog.bind(":effectorId", channel_, err) ||
+       !effectorLog.bind(":newState", state_, err) ||
+       (!effectorLog.step(err) && err->code()))
+    {
+        logWarning("Failed to log effector %d transition to state '%s'", channel_, state_ ? "on" : "off");
+        return false;
+    }
+
+    return true;
+}
+

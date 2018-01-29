@@ -4,8 +4,6 @@
     Stuart Wallace <stuartw@atom.net>, October 2017.
 
     Part of brewctl
-
-    TODO: mark session as complete at termination
 */
 
 #include "include/application/session.h"

@@ -71,9 +71,10 @@ bool Effector::activate(const bool state, Error * const err) noexcept
 {
     auto& sr = Registry::instance().sr();
     const int bit = EFFECTOR_BIT_OFFSET + channel_;
+    const bool stateChanged = (state != state_);
 
     // If this is a change of state, log it
-    if(state != state_)
+    if(stateChanged)
         logDebug("activate(): channel %d -> %s%s", channel_, state ? "on" : "off",
                  enabled_ ? "" : " (effectors disabled)");
 
@@ -81,13 +82,17 @@ bool Effector::activate(const bool state, Error * const err) noexcept
     if(enabled_ && !(state ? sr.set(bit, err) : sr.clear(bit, err)))
         return false;
 
-    // Record activation / deactivation time
+    // Update local record of activation / deactivation time
     if(state)
         lastActivationTime_ = ::time(NULL);
     else
         lastDeactivationTime_ = ::time(NULL);
 
     state_ = state;
+
+    if(stateChanged)
+        logState();
+
     return true;
 }
 
@@ -105,10 +110,10 @@ DefaultEffector_uptr_t Effector::getSessionEffectorByType(const int sessionId, c
 
     if(!Registry::instance().db().prepare("SELECT channel, name, powerconsumption FROM sessioneffector "
                                           "LEFT JOIN effectortype ON sessioneffector.effectortype_id=effectortype.id "
-                                          "WHERE session_id=:sessionId AND type=:type", eff, err)
-       || !eff.bind(":sessionId", sessionId, err)
-       || !eff.bind(":type", type, err)
-       || !eff.step(err))
+                                          "WHERE session_id=:sessionId AND type=:type", eff, err) ||
+       !eff.bind(":sessionId", sessionId, err) ||
+       !eff.bind(":type", type, err) ||
+       !eff.step(err))
     {
         logInfo("Session %d: no effector of type '%s' found", sessionId, type.c_str());
         ret = new DefaultEffector();

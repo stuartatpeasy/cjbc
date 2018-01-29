@@ -31,6 +31,7 @@ public:
     virtual time_t              lastActivationTime() const noexcept { return lastActivationTime_; };
     virtual time_t              lastDeactivationTime() const noexcept { return lastDeactivationTime_; };
     virtual time_t              lastActiveDuration() const noexcept;
+    virtual bool                logState(Error * const err = nullptr) const noexcept;
 
 protected:
     int                         channel_;
