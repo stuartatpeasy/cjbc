@@ -62,7 +62,7 @@ bool DefaultEffector::logState(Error * const err) const noexcept
                                           "VALUES(:effectorId, :newState)", effectorLog, err) ||
        !effectorLog.bind(":effectorId", channel_, err) ||
        !effectorLog.bind(":newState", state_, err) ||
-       (!effectorLog.step(err) && err->code()))
+       !effectorLog.execute(err))
     {
         logWarning("Failed to log effector %d transition to state '%s'", channel_, state_ ? "on" : "off");
         return false;

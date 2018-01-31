@@ -241,7 +241,7 @@ void TempSensor::writeTempLog()
                                           "VALUES(CURRENT_TIMESTAMP, :sensor_id, :temperature)", logStmt)
         && logStmt.bind(":sensor_id", channel_)
         && logStmt.bind(":temperature", currentTemp_.C())
-        && logStmt.step();
+        && logStmt.execute();
 
         lastLogWriteTime_ = now;
     }

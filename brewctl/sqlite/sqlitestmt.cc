@@ -161,30 +161,50 @@ int SQLiteStmt::numCols() noexcept
 }
 
 
+// stepWrapper() - wrapper for the sqlite3_step() function.  Attempt to advance the current prepared statement
+// result-set to the next record, if any.  If there are no more records (i.e. sqlite3_step() returns SQLITE_DONE),
+// return true if <failIfNoRowReturned> is false; return false otherwise.  If records are returned, update the column-
+// name list if required and return true.  If anything else foes wrong, return false.
+//
+bool SQLiteStmt::stepWrapper(const bool failIfNoRowReturned, Error * const err) noexcept
+{
+    const int ret = ::sqlite3_step(stmt_);
+    if(ret == SQLITE_DONE)
+        return !failIfNoRowReturned;        // No more records, and we have been asked to fail in this case
+
+    // If anything other than SQLITE_ROW was returned by ::sqlite3_step(), set <err> and return false.
+    if(!checkError(ret, err, SQLITE_ROW))
+        return false;
+
+    if(!firstStepDone_)
+    {
+        // This is the first call to step() on the current statement, or the first call since a call to finalise() or
+        // reset().  Build a list of column names in the result set.
+        getColumnNames();
+        firstStepDone_ = true;
+    }
+
+    return true;
+}
+
+
 // step() - advance the current prepared statement result-set to the next record, if any.  Return true if another record
 // was found.  Return false and do not set <err> if there are no more records.  Return false and set <err> if anything
 // else went wrong.
 //
 bool SQLiteStmt::step(Error * const err) noexcept
 {
-    const int ret = ::sqlite3_step(stmt_);
-    if(ret == SQLITE_DONE)
-        return false;       // No more records; do not set err.
+    return stepWrapper(true, err);
+}
 
-    if(checkError(ret, err, SQLITE_ROW))
-    {
-        if(!firstStepDone_)
-        {
-            // This is the first call to step() on the current statement, or the first call since a call to finalise()
-            // or reset().  Build a list of column names in the result set.
-            getColumnNames();
-            firstStepDone_ = true;
-        }
 
-        return true;
-    }
-
-    return false;
+// execute() - "execute" the statement.  This method works very much like step(), but returns boolean true if execution
+// of the statement was successful, and false (and sets <err>, if it is not a nullptr) otherwise.  This method is useful
+// when executing data-modifying queries.
+//
+bool SQLiteStmt::execute(Error * const err) noexcept
+{
+    return stepWrapper(false, err);
 }
 
 

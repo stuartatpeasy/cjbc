@@ -52,6 +52,7 @@ public:
     int                 numCols() noexcept;
 
 	bool                step(Error * const err = nullptr) noexcept;
+	bool                execute(Error * const err = nullptr) noexcept;
 	bool                reset(Error * const err = nullptr) noexcept;
     SQLiteColumn        column(const int index) noexcept;
     SQLiteColumn        column(const std::string& name) noexcept;
@@ -70,6 +71,7 @@ private:
 	bool                checkError(const int ret, Error * const err, std::vector<int> successCodes) noexcept;
     void                fmtErr(Error * const err, const int code) noexcept;
     void                getColumnNames() noexcept;
+    bool                stepWrapper(const bool failIfNoRowReturned, Error * const err = nullptr) noexcept;
 
     sqlite3_stmt *      stmt_;
     bool                firstStepDone_;
