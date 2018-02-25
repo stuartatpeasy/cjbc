@@ -22,10 +22,10 @@ namespace Validator = Util::Validator;
 
 
 static const double
-    DEFAULT_TEMP_DEADZONE       = 0.5;  // Temperature "dead zone", in deg C/K, within which effectors will not be
-                                        // activated to modify the session temperature
+    DEFAULT_TEMP_DEADZONE           = 0.5;  // Temperature "dead zone", in deg C/K, within which effectors will not be
+                                            // activated to modify the session temperature
 static const time_t
-    DEFAULT_SWITCH_INTERVAL_S   = 10;   // Default interval between effector updates, in seconds
+    DEFAULT_EFF_UPDATE_INTERVAL_S   = 1;    // Default interval between effector updates, in seconds
 
 
 Session::Session(const session_id_t id, Error * const err) noexcept
@@ -140,7 +140,8 @@ Session::Session(const session_id_t id, Error * const err) noexcept
     }
 
     deadZone_ = cfg.get("session.dead_zone", DEFAULT_TEMP_DEADZONE, Validator::gt0);
-    effectorUpdateInterval_ = cfg.get("session.switch_interval_s", DEFAULT_SWITCH_INTERVAL_S, Validator::gt0);
+    effectorUpdateInterval_ = cfg.get("session.effector_update_interval_s", DEFAULT_EFF_UPDATE_INTERVAL_S,
+                                        Validator::gt0);
 
     effectorHeater_->activate(false);
     effectorCooler_->activate(false);
@@ -234,6 +235,7 @@ bool Session::updateEffectors(Error * const err) noexcept
         // Temperature is below the dead zone surrounding the target temperature - activate heating effectors.
         logDebug("Session %d (G%d): temp %.2fC is below dead zone (%.2fC); heating",
                  id_, gyle_id_, t.C(), lowerLimit.C());
+        tempControlState_ = HEAT;
 
         effectorCooler_->activate(false);   // Not ideal: error code not captured
         return effectorHeater_->activate(true);
@@ -242,6 +244,7 @@ bool Session::updateEffectors(Error * const err) noexcept
     {
         logDebug("Session %d (G%d): temp %.2fC is above target (%.2fC); cooling",
                  id_, gyle_id_, t.C(), target.C());
+        tempControlState_ = COOL;
 
         return true;                        // No need to change effector state
     }
@@ -249,6 +252,7 @@ bool Session::updateEffectors(Error * const err) noexcept
     {
         logDebug("Session %d (G%d): temp %.2fC is below target (%.2fC); heating",
                  id_, gyle_id_, t.C(), target.C());
+        tempControlState_ = HEAT;
 
         return true;                        // No need to change effector state
     }
@@ -256,6 +260,7 @@ bool Session::updateEffectors(Error * const err) noexcept
     {
         logDebug("Session %d (G%d): temp %.2fC is within target range %.2fC +/-%.2fC",
                  id_, gyle_id_, t.C(), target.C(), deadZone_);
+        tempControlState_ = HOLD;
 
         effectorCooler_->activate(false);   // Not ideal: error code not captured
         return effectorHeater_->activate(false);
