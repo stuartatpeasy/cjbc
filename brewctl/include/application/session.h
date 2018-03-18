@@ -37,7 +37,8 @@ typedef enum SessionType
 {
     NONE = 0,
     FERMENT,
-    CONDITION
+    CONDITION,
+    SERVE
 } SessionType_t;
 
 

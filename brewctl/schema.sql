@@ -54,7 +54,7 @@ DROP TABLE IF EXISTS "profilestage";
 CREATE TABLE "profilestage"(
     profile_id          INT UNSIGNED NOT NULL,
     stage               INT UNSIGNED NOT NULL,
-    duration_hours      INT UNSIGNED NOT NULL,
+    duration_hours      INT UNSIGNED,
     temperature         DECIMAL(4, 4));
 
 DROP INDEX IF EXISTS profilestage_profile_id_stage;
@@ -145,38 +145,72 @@ INSERT INTO effectortype(id, name, type, powerconsumption) VALUES
 
 DELETE FROM profile;
 INSERT INTO profile(id, name, type) VALUES
-    (1, "Lager, three-stage", "ferment"),
-    (2, "Lager",              "condition"),
-    (3, "Ale, two-stage",     "ferment"),
-    (4, "Ale, two-stage",     "condition");
-
+    (   1, "Lager, three-stage",    "ferment"),
+    (   2, "Lager",                 "condition"),
+    (   3, "Ale, two-stage",        "ferment"),
+    (   4, "Ale, two-stage",        "condition"),
+    (1000, "Light lager",           "serve"),
+    (1001, "Pilsner",               "serve"),
+    (1002, "Munich Helles",         "serve"),
+    (1003, "Weissbier",             "serve"),
+    (1004, "Kölsch",                "serve"),
+    (1005, "IPA",                   "serve"),
+    (1006, "American pale ale",     "serve"),
+    (1007, "Porter",                "serve"),
+    (1008, "Stout",                 "serve"),
+    (1009, "Belgian ale",           "serve"),
+    (1010, "Sour ale",              "serve"),
+    (1011, "Bock",                  "serve"),
+    (1012, "English bitter",        "serve"),
+    (1013, "Scottish ale",          "serve"),
+    (1014, "Imperial stout",        "serve"),
+    (1015, "Belgian strong ale",    "serve"),
+    (1016, "Doppelbock",            "serve");
+    
 DELETE FROM profilestage;
 INSERT INTO profilestage(profile_id, stage, duration_hours, temperature) VALUES
-    (1,  1, 15 * 24, 12.0),
-    (1,  2,  3 * 24, 17.0),
-    (2,  1,      24, 15.0),
-    (2,  2,      24, 14.5),
-    (2,  3,      24, 14.0),
-    (2,  4,      24, 13.5),
-    (2,  5,      24, 13.0),
-    (2,  6,      24, 12.5),
-    (2,  7,      24, 12.0),
-    (2,  8,      24, 11.5),
-    (2,  9,      24, 11.0),
-    (2, 10,      24, 10.5),
-    (2, 11,      24, 10.0),
-    (2, 12,      24,  9.5),
-    (2, 13,      24,  9.0),
-    (2, 14,      24,  8.5),
-    (2, 15,      24,  8.0),
-    (2, 16,      24,  7.5),
-    (2, 17,      24,  7.0),
-    (2, 18,      24,  6.5),
-    (2, 19,      24,  6.0),
-    (2, 20,      24,  5.5),
-    (2, 21, 10 * 24,  5.0),
-    (3,  1, 14 * 24, 19.0),
-    (4,  1, 30 * 24, 18.0);
+    (   1,  1, 15 * 24, 12.0),      -- Lager, three-stage, ferment
+    (   1,  2,  3 * 24, 17.0),
+    (   2,  1,      24, 15.0),      -- Lager, condition
+    (   2,  2,      24, 14.5),
+    (   2,  3,      24, 14.0),
+    (   2,  4,      24, 13.5),
+    (   2,  5,      24, 13.0),
+    (   2,  6,      24, 12.5),
+    (   2,  7,      24, 12.0),
+    (   2,  8,      24, 11.5),
+    (   2,  9,      24, 11.0),
+    (   2, 10,      24, 10.5),
+    (   2, 11,      24, 10.0),
+    (   2, 12,      24,  9.5),
+    (   2, 13,      24,  9.0),
+    (   2, 14,      24,  8.5),
+    (   2, 15,      24,  8.0),
+    (   2, 16,      24,  7.5),
+    (   2, 17,      24,  7.0),
+    (   2, 18,      24,  6.5),
+    (   2, 19,      24,  6.0),
+    (   2, 20,      24,  5.5),
+    (   2, 21, 10 * 24,  5.0),
+    (   3,  1, 14 * 24, 19.0),      -- Ale, two-stage, ferment
+    (   4,  1, 30 * 24, 18.0),      -- Ale, two-stage, condition
+    (1000,  1,    NULL,  4.0),      -- Light lager
+    (1001,  1,    NULL,  6.0),      -- Pilsner
+    (1002,  1,    NULL,  6.0),      -- Munich Helles
+    (1003,  1,    NULL,  6.0),      -- Weissbier
+    (1004,  1,    NULL,  6.0),      -- Kölsch
+    (1005,  1,    NULL,  9.0),      -- IPA
+    (1006,  1,    NULL,  9.0),      -- American pale ale
+    (1007,  1,    NULL,  9.0),      -- Porter
+    (1008,  1,    NULL,  9.0),      -- Stout
+    (1009,  1,    NULL, 12.0),      -- Belgian ale
+    (1010,  1,    NULL, 12.0),      -- Sour ale
+    (1011,  1,    NULL, 12.0),      -- Bock
+    (1012,  1,    NULL, 12.0),      -- English bitter
+    (1013,  1,    NULL, 12.0),      -- Scottish ale
+    (1014,  1,    NULL, 15.0),      -- Imperial stout
+    (1015,  1,    NULL, 15.0),      -- Belgian strong ale
+    (1016,  1,    NULL, 15.0);      -- Doppelbock
 
 DELETE FROM thermistor;
 INSERT INTO thermistor(id, name, type, Tref_C, Rref, beta, range_min, range_max) VALUES

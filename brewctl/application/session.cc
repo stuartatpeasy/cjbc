@@ -47,6 +47,10 @@ Session::Session(const session_id_t id, Error * const err) noexcept
     if(err->code())
         return;         // Stop if initialisation of any member variable failed
 
+    // As a precaution, deactivate effectors
+    effectorHeater_->activate(false);
+    effectorCooler_->activate(false);
+
     // Read basic session information
     auto& cfg = Registry::instance().config();
     auto& db = Registry::instance().db();
@@ -104,6 +108,8 @@ Session::Session(const session_id_t id, Error * const err) noexcept
         type_ = FERMENT;
     else if(iequals(typeStr, "condition"))
         type_ = CONDITION;
+    else if(iequals(typeStr, "serve"))
+        type_ = SERVE;
     else
     {
         formatError(err, BAD_PROFILE_TYPE, profile_, typeStr.c_str());
@@ -119,10 +125,20 @@ Session::Session(const session_id_t id, Error * const err) noexcept
     time_t offset = start_ts_;
     while(session.step(err))
     {
+        const double stageTemperature = session["temperature"].get<double>();
         const time_t duration = session["duration_hours"].get<int>() * 3600;
 
+        if(type_ == SERVE)
+        {
+            // For "serving" sessions, the profile has exactly one stage and the stage lasts forever.
+            stages_.push_back(SessionStage_t(0, stageTemperature));
+            break;
+        }
+
+        // For fermentation and conditioning sessions, append each temperature step, and corresponding duration, into
+        // stages_.
         offset += duration;
-        stages_.push_back(SessionStage_t(duration, session["temperature"].get<double>()));
+        stages_.push_back(SessionStage_t(duration, stageTemperature));
     }
     
     if(stages_.empty())
@@ -133,7 +149,9 @@ Session::Session(const session_id_t id, Error * const err) noexcept
 
     end_ts_ = offset;
 
-    if(::time(NULL) >= end_ts_)
+    // Ensure that we're not already past the finish-time of the profile specified for this session.  "Serve"-type
+    // profiles have no finish time.
+    if((type_ != SERVE) && (::time(NULL) >= end_ts_))
     {
         logWarning("Session %d is already complete", id_);
         complete_ = true;
@@ -142,9 +160,6 @@ Session::Session(const session_id_t id, Error * const err) noexcept
     deadZone_ = cfg.get("session.dead_zone", DEFAULT_TEMP_DEADZONE, Validator::gt0);
     effectorUpdateInterval_ = cfg.get("session.effector_update_interval_s", DEFAULT_EFF_UPDATE_INTERVAL_S,
                                         Validator::gt0);
-
-    effectorHeater_->activate(false);
-    effectorCooler_->activate(false);
 }
 
 
@@ -152,6 +167,9 @@ Session::Session(const session_id_t id, Error * const err) noexcept
 //
 Temperature Session::targetTemp() noexcept
 {
+    if(type_ == SERVE)
+        return Temperature(stages_[0].second, TEMP_UNIT_CELSIUS);
+
     const time_t now = ::time(NULL);
 
     if(now >= start_ts_)
@@ -286,7 +304,7 @@ bool Session::isActive() const noexcept
 {
     const time_t now = ::time(NULL);
 
-    return (now >= start_ts_) && (now < end_ts_);
+    return (now >= start_ts_) && ((type_ != SERVE) || (now < end_ts_));
 }
 
 

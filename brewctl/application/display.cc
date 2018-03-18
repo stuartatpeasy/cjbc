@@ -84,6 +84,7 @@ char Display::getSessionTypeIndicator(const SessionType_t type) const noexcept
     {
         case FERMENT:       return 'F';
         case CONDITION:     return 'C';
+        case SERVE:         return 'S';
         default:            return '?';
     }
 }
@@ -181,31 +182,34 @@ void Display::displayDefault() noexcept
                 else
                     lcd_.printAt(8, 2, "--.-\xdf");
 
-                const time_t secsRemaining  = session->remainingTime(),
-                             days           = secsRemaining / SECS_PER_DAY,
-                             hours          = secsRemaining / SECS_PER_HOUR,
-                             minutes        = secsRemaining / SECS_PER_MINUTE;
-
-                time_t field1, field2;
                 const char *fmt = nullptr;
+                time_t field1 = 0, field2 = 0;
 
-                if(days)
+                if(session->type() != SERVE)
                 {
-                    fmt = "%2dd%02dh";
-                    field1 = days;
-                    field2 = hours % HOURS_PER_DAY;
-                }
-                else if(hours)
-                {
-                    fmt = "%2dh%02dm";
-                    field1 = hours;
-                    field2 = minutes % MINS_PER_HOUR;
-                }
-                else if(secsRemaining)
-                {
-                    fmt = "%2dm%02ds";
-                    field1 = minutes;
-                    field2 = secsRemaining % SECS_PER_MINUTE;
+                    const time_t secsRemaining  = session->remainingTime(),
+                                 days           = secsRemaining / SECS_PER_DAY,
+                                 hours          = secsRemaining / SECS_PER_HOUR,
+                                 minutes        = secsRemaining / SECS_PER_MINUTE;
+
+                    if(days)
+                    {
+                        fmt = "%2dd%02dh";
+                        field1 = days;
+                        field2 = hours % HOURS_PER_DAY;
+                    }
+                    else if(hours)
+                    {
+                        fmt = "%2dh%02dm";
+                        field1 = hours;
+                        field2 = minutes % MINS_PER_HOUR;
+                    }
+                    else if(secsRemaining)
+                    {
+                        fmt = "%2dm%02ds";
+                        field1 = minutes;
+                        field2 = secsRemaining % SECS_PER_MINUTE;
+                    }
                 }
 
                 if(fmt != nullptr)
