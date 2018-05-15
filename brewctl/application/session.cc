@@ -1,5 +1,5 @@
 /*
-    session.cc: manages a single fermentation/conditioning session
+    session.cc: manages a single fermentation/conditioning/serving session
 
     Stuart Wallace <stuartw@atom.net>, October 2017.
 
@@ -56,6 +56,8 @@ Session::Session(const session_id_t id, Error * const err) noexcept
     auto& db = Registry::instance().db();
     SQLiteStmt session;
 
+    // FIXME: if a value is set for date_finish, and that value is <=CURRENT_TIMESTAMP, log a message and set
+    // complete_ = true.
     if(!db.prepare("SELECT gyle_id, profile_id, CAST((JULIANDAY(date_start) - 2440587.5) * 86400.0 AS INT) AS start_ts "
                    "FROM session "
                    "WHERE id=:id", session, err) ||
@@ -125,20 +127,32 @@ Session::Session(const session_id_t id, Error * const err) noexcept
     time_t offset = start_ts_;
     while(session.step(err))
     {
-        const double stageTemperature = session["temperature"].get<double>();
-        const time_t duration = session["duration_hours"].get<int>() * 3600;
+        SessionStage_t stage;
+        stage.temperature = session["temperature"].get<double>();
 
-        if(type_ == SERVE)
+        if(session["duration_hours"].isNull())
         {
-            // For "serving" sessions, the profile has exactly one stage and the stage lasts forever.
-            stages_.push_back(SessionStage_t(0, stageTemperature));
-            break;
-        }
+            // A NULL value in the "duration_hours" field indicates that the record contains a temperature at which
+            // the session should be held indefinitely following completion of the profile, i.e. the temperature-
+            // maintenance stage.  This temperature will be held "forever", i.e. until the operator intervenes to tell
+            // the control system that the stage should be terminated.  "Serving" sessions typically have only a single
+            // stage, with a "forever" temperature.
+            stage.duration = 0;
+            stage.forever = true;
+            stages_.push_back(stage);
 
-        // For fermentation and conditioning sessions, append each temperature step, and corresponding duration, into
-        // stages_.
-        offset += duration;
-        stages_.push_back(SessionStage_t(duration, stageTemperature));
+            break;      // This must be the last stage in the profile - ignore any subsequent stages.
+        }
+        else
+        {
+            stage.duration = session["duration_hours"].get<int>() * 3600;
+            stage.forever = false;
+
+            // For fermentation and conditioning sessions, append each temperature step, and corresponding duration, into
+            // stages_.
+            offset += stage.duration;
+            stages_.push_back(stage);
+        }
     }
     
     if(stages_.empty())
@@ -148,14 +162,6 @@ Session::Session(const session_id_t id, Error * const err) noexcept
     }
 
     end_ts_ = offset;
-
-    // Ensure that we're not already past the finish-time of the profile specified for this session.  "Serve"-type
-    // profiles have no finish time.
-    if((type_ != SERVE) && (::time(NULL) >= end_ts_))
-    {
-        logWarning("Session %d is already complete", id_);
-        complete_ = true;
-    }
 
     deadZone_ = cfg.get("session.dead_zone", DEFAULT_TEMP_DEADZONE, Validator::gt0);
     effectorUpdateInterval_ = cfg.get("session.effector_update_interval_s", DEFAULT_EFF_UPDATE_INTERVAL_S,
@@ -167,20 +173,17 @@ Session::Session(const session_id_t id, Error * const err) noexcept
 //
 Temperature Session::targetTemp() noexcept
 {
-    if(type_ == SERVE)
-        return Temperature(stages_[0].second, TEMP_UNIT_CELSIUS);
-
     const time_t now = ::time(NULL);
 
     if(now >= start_ts_)
     {
         time_t offset = start_ts_;
-        for(auto it : stages_)
+        for(auto stage : stages_)
         {
-            if((offset + it.first) > now)
-                return Temperature(it.second, TEMP_UNIT_CELSIUS);
+            if(stage.forever || ((offset + stage.duration) > now))
+                return Temperature(stage.temperature, TEMP_UNIT_CELSIUS);
 
-            offset += it.first;
+            offset += stage.duration;
         }
     }
 
@@ -302,9 +305,7 @@ bool Session::isNotStartedYet() const noexcept
 //
 bool Session::isActive() const noexcept
 {
-    const time_t now = ::time(NULL);
-
-    return (now >= start_ts_) && ((type_ != SERVE) || (now < end_ts_));
+    return !complete_ && (::time(NULL) >= start_ts_);
 }
 
 
@@ -325,39 +326,56 @@ time_t Session::remainingTime() const noexcept
 //
 bool Session::iterate(Error * const err) noexcept
 {
+    (void) err;         // Suppress arg-not-used warning; arg is likely to be used in future.
+
     const time_t now = ::time(NULL);
+
     currentTemp();      // Always sense the current temperature: oversampling maintains the moving average
 
-    if(now >= start_ts_)
+    if((now - lastEffectorUpdate_) >= effectorUpdateInterval_)
     {
-        if(now < end_ts_)
+        if(now >= start_ts_)
         {
-            if((now - lastEffectorUpdate_) >= effectorUpdateInterval_)
-            {
-                updateEffectors();
-                lastEffectorUpdate_ = now;
-            }
+            updateEffectors();
+            lastEffectorUpdate_ = now;
         }
-        else if(!complete_)
-        {
-            // Session has finished and needs to be finalised
-            auto& db = Registry::instance().db();
-            SQLiteStmt session;
-
-            // Ensure that effectors are deactivated
-            stop();
-
-            // Mark session as complete in database
-            if(!db.prepare("UPDATE session SET date_finish=NOW() WHERE id=:id", session, err) ||
-               !session.bind(":id", id_, err) ||
-               !session.step(err))
-                return false;
-
-            complete_ = true;
-        }
+        else
+            deactivateEffectors();
     }
 
     return true;
+}
+
+
+// markComplete() - update the session's database entry, setting its completion timestamp (session.date_finish) equal to
+// the current timestamp, and set the "complete_" member var to true.  Returns true on success, false otherwise.
+//
+bool Session::markComplete(Error * const err) noexcept
+{
+    auto& db = Registry::instance().db();
+    SQLiteStmt session;
+
+    if(!deactivateEffectors())
+        logWarning("Session %d: markComplete(): failed to deactivate effectors; marking session complete anyway.", id_);
+
+    // Mark session as complete in database
+    if(!db.prepare("UPDATE session SET date_finish=NOW() WHERE id=:id", session, err) ||
+       !session.bind(":id", id_, err) ||
+       !session.step(err))
+        return false;
+
+    complete_ = true;
+
+    return true;
+}
+
+
+// deactivateEffectors() - switch off heating/cooling effectors.  Returns true if both operations were successful;
+// false otherwise.
+//
+bool Session::deactivateEffectors() noexcept
+{
+    return effectorHeater_->activate(false) && effectorCooler_->activate(false);
 }
 
 
@@ -367,7 +385,6 @@ void Session::stop() noexcept
 {
     logInfo("Session %d stopping", id_);
 
-    // Switch off effectors before shutdown
-    effectorHeater_->activate(false);
-    effectorCooler_->activate(false);
+    deactivateEffectors();
 }
+

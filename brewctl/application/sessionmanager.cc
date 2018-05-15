@@ -125,9 +125,9 @@ bool SessionManager::run() noexcept
         {
             Session * const session = it->second;
 
-            if(session->isComplete())
-                sessions_.erase(it);
-            else
+//            if(session->isComplete())
+//                sessions_.erase(it);
+//            else
                 session->iterate();
         }
 

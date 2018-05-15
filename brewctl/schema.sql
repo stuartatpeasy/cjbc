@@ -165,7 +165,8 @@ INSERT INTO profile(id, name, type) VALUES
     (1013, "Scottish ale",          "serve"),
     (1014, "Imperial stout",        "serve"),
     (1015, "Belgian strong ale",    "serve"),
-    (1016, "Doppelbock",            "serve");
+    (1016, "Doppelbock",            "serve"),
+    (2000, "Bottling",              "serve");       -- Profile used to chill beer in preparation for bottling
     
 DELETE FROM profilestage;
 INSERT INTO profilestage(profile_id, stage, duration_hours, temperature) VALUES
@@ -210,7 +211,8 @@ INSERT INTO profilestage(profile_id, stage, duration_hours, temperature) VALUES
     (1013,  1,    NULL, 12.0),      -- Scottish ale
     (1014,  1,    NULL, 15.0),      -- Imperial stout
     (1015,  1,    NULL, 15.0),      -- Belgian strong ale
-    (1016,  1,    NULL, 15.0);      -- Doppelbock
+    (1016,  1,    NULL, 15.0),      -- Doppelbock
+    (2000,  1,    NULL,  2.0);      -- Profile used to chill beer in preparation for bottling
 
 DELETE FROM thermistor;
 INSERT INTO thermistor(id, name, type, Tref_C, Rref, beta, range_min, range_max) VALUES

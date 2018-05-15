@@ -18,8 +18,13 @@
 #include <string>
 #include <vector>
 
+typedef struct SessionStage
+{
+    time_t          duration;
+    double          temperature;
+    bool            forever;
+} SessionStage_t;
 
-typedef std::pair<time_t, double> SessionStage_t;
 typedef std::vector<SessionStage_t> SessionStages_t;
 typedef int session_id_t;
 
@@ -61,9 +66,11 @@ public:
     time_t                      remainingTime() const noexcept;
     SessionTempControlState_t   tempControlState() const noexcept { return tempControlState_; };
     SessionType_t               type() const noexcept { return type_; };
+    bool                        markComplete(Error * const err) noexcept;
 
 private:
     bool                        updateEffectors(Error * const err = nullptr) noexcept;
+    bool                        deactivateEffectors() noexcept;
 
     const session_id_t          id_;
     int                         gyle_id_;
